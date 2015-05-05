@@ -1,0 +1,19 @@
+release date=11:37 11.11.2014,version=1.0~SNAPSHOT,urgency=low,by=Emmanuel Keller <ekeller@open-search-server.com>,distribution=unknown
+ * -----------
+ * VERSION 1.1
+ * #34 Automatic notice generation based on notice-maven-plugin
+ * -----------
+ * VERSION 1.0
+ * #29 Add test unit
+ * #20 Add hyperlinks in results (be RESTFul)
+ * #19 Initial VISIO parser
+ * #17 Initial AUDIO parser
+ * #13 Initial TEXT parser (useful for language detection)
+ * #10 Initial image parser
+ * #8 Initial ODT, ODP and ODS parser
+ * #7 Initial RTF parser
+ * #6 Initial PPT and PPTX parser
+ * #5 Initial XLS and XLSX parser
+ * #4 Implements language detection
+ * #3 .rpm package (centos, redhat, fedora)
+ * #2 .deb package (Ubuntu, Debian)
