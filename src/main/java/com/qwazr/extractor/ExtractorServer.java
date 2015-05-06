@@ -70,7 +70,7 @@ public class ExtractorServer extends AbstractServer {
 	@Override
 	public void load() throws IOException {
 		ClusterServer.load(getWebServicePublicAddress(), getCurrentDataDir(),
-				null, null);
+				null);
 		load(null);
 	}
 
