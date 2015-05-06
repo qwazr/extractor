@@ -15,7 +15,6 @@
  */
 package com.qwazr.extractor;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 
@@ -58,8 +57,7 @@ public class ExtractorServer extends AbstractServer {
 		}
 	}
 
-	public static void load(AbstractServer server, File data_directory,
-			Set<Class<?>> restClasses) throws IOException {
+	public static void load(Set<Class<?>> restClasses) throws IOException {
 		ParserManager.load();
 		if (restClasses != null)
 			restClasses.add(TextExtractorApplication.class);
@@ -71,8 +69,9 @@ public class ExtractorServer extends AbstractServer {
 
 	@Override
 	public void load() throws IOException {
-		ClusterServer.load(this, getCurrentDataDir(), null, null);
-		load(this, getCurrentDataDir(), null);
+		ClusterServer.load(getWebServicePublicAddress(), getCurrentDataDir(),
+				null, null);
+		load(null);
 	}
 
 	@Override
