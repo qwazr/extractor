@@ -33,12 +33,13 @@ import com.qwazr.utils.server.ServletApplication;
 
 public class ExtractorServer extends AbstractServer {
 
-	public final static String SERVICE_NAME = "extractor";
+	public final static String SERVICE_NAME_EXTRACTOR = "extractor";
 
 	private final static ServerDefinition serverDefinition = new ServerDefinition();
 	static {
 		serverDefinition.defaultWebApplicationTcpPort = 9091;
 		serverDefinition.mainJarPath = "qwazr-extractor.jar";
+		serverDefinition.defaultDataDirName = "qwazr";
 	}
 
 	private ExtractorServer() {
@@ -57,10 +58,8 @@ public class ExtractorServer extends AbstractServer {
 		}
 	}
 
-	public static void load(Set<Class<?>> restClasses) throws IOException {
+	public static void loadParserManager() throws IOException {
 		ParserManager.load();
-		if (restClasses != null)
-			restClasses.add(TextExtractorApplication.class);
 	}
 
 	@Override
@@ -71,7 +70,7 @@ public class ExtractorServer extends AbstractServer {
 	public void load() throws IOException {
 		ClusterServer.load(getWebServicePublicAddress(), getCurrentDataDir(),
 				null);
-		load(null);
+		load();
 	}
 
 	@Override
@@ -87,7 +86,7 @@ public class ExtractorServer extends AbstractServer {
 	public static void main(String[] args) throws IOException, ParseException,
 			ServletException {
 		new ExtractorServer().start(args);
-		ClusterManager.INSTANCE.registerMe(SERVICE_NAME);
+		ClusterManager.INSTANCE.registerMe(SERVICE_NAME_EXTRACTOR);
 	}
 
 }
