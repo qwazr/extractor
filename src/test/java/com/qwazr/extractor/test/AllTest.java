@@ -28,6 +28,7 @@ import javax.ws.rs.core.MultivaluedMap;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.junit.Test;
 
 import com.qwazr.extractor.ExtractorServiceImpl;
 import com.qwazr.extractor.ParserAbstract;
@@ -187,54 +188,67 @@ public class AllTest {
 
 	final String AUDIO_TEST_STRING = "opensearchserver";
 
+	@Test
 	public void testAudioFlag() throws Exception {
 		doTest(Audio.class, "file.flac", AUDIO_TEST_STRING, "format", "flac");
 	}
 
+	@Test
 	public void testAudioM4a() throws Exception {
 		doTest(Audio.class, "file.m4a", DEFAULT_TEST_STRING, "format", "m4a");
 	}
 
+	@Test
 	public void testAudioMp3() throws Exception {
 		doTest(Audio.class, "file.mp3", DEFAULT_TEST_STRING, "format", "mp3");
 	}
 
+	@Test
 	public void testAudioOgg() throws Exception {
 		doTest(Audio.class, "file.ogg", AUDIO_TEST_STRING, "format", "ogg");
 	}
 
+	@Test
 	public void testAudioWav() throws Exception {
 		doTest(Audio.class, "file.wav", null, "format", "wav");
 	}
 
+	@Test
 	public void testAudioWma() throws Exception {
 		doTest(Audio.class, "file.wma", AUDIO_TEST_STRING, "format", "wma");
 	}
 
+	@Test
 	public void testDoc() throws Exception {
 		doTest(Doc.class, "file.doc", DEFAULT_TEST_STRING);
 	}
 
+	@Test
 	public void testDocx() throws Exception {
 		doTest(Docx.class, "file.docx", DEFAULT_TEST_STRING);
 	}
 
+	@Test
 	public void testEml() throws Exception {
 		doTest(Eml.class, "file.eml", "Maximum actions in one visit");
 	}
 
+	@Test
 	public void testHtml() throws Exception {
 		doTest(Html.class, "file.html", "search engine software");
 	}
 
+	@Test
 	public void testImageGif() throws Exception {
 		doTest(Image.class, "file.gif", DEFAULT_TEST_STRING);
 	}
 
+	@Test
 	public void testImageJpg() throws Exception {
 		doTest(Image.class, "file.jpg", DEFAULT_TEST_STRING);
 	}
 
+	@Test
 	public void testImagePng() throws Exception {
 		doTest(Image.class, "file.png", DEFAULT_TEST_STRING);
 	}
@@ -243,50 +257,62 @@ public class AllTest {
 	// doTest(Image.class, "file.tiff", null);
 	// }
 
+	@Test
 	public void testMarkdown() throws Exception {
 		doTest(Markdown.class, "file.md", "extract data to be indexed");
 	}
 
+	@Test
 	public void testPdf() throws Exception {
 		doTest(PdfBox.class, "file.pdf", DEFAULT_TEST_STRING);
 	}
 
+	@Test
 	public void testOdt() throws Exception {
 		doTest(Odf.class, "file.odt", DEFAULT_TEST_STRING);
 	}
 
+	@Test
 	public void testOds() throws Exception {
 		doTest(Odf.class, "file.ods", DEFAULT_TEST_STRING);
 	}
 
+	@Test
 	public void testOdp() throws Exception {
 		doTest(Odf.class, "file.odp", DEFAULT_TEST_STRING);
 	}
 
+	@Test
 	public void testPpt() throws Exception {
 		doTest(Ppt.class, "file.ppt", DEFAULT_TEST_STRING);
 	}
 
+	@Test
 	public void testPptx() throws Exception {
 		doTest(Pptx.class, "file.pptx", DEFAULT_TEST_STRING);
 	}
 
+	@Test
 	public void testRss() throws Exception {
 		doTest(Rss.class, "file.rss", "oss-text-extractor");
 	}
 
+	@Test
 	public void testRtf() throws Exception {
 		doTest(Rtf.class, "file.rtf", DEFAULT_TEST_STRING);
 	}
 
+	@Test
 	public void testText() throws Exception {
 		doTest(Text.class, "file.txt", DEFAULT_TEST_STRING);
 	}
 
+	@Test
 	public void testXls() throws Exception {
 		doTest(Xls.class, "file.xls", DEFAULT_TEST_STRING);
 	}
 
+	@Test
 	public void testXlsx() throws Exception {
 		doTest(Xlsx.class, "file.xlsx", DEFAULT_TEST_STRING);
 	}
