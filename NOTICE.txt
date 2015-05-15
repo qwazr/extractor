@@ -1,4 +1,4 @@
-  Copyright 2014 OpenSearchServer Inc.
+  Copyright 2014 Emmanuel Keller / QWAZR
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ This project includes:
   language-detection-lib under Apache 2
   ODF Custom Javadoc Taglets under Apache 2
   ODFDOM under Apache 2
-  OpenSearchServer Text Extractor under Apache License, Version 2.0
+  QWAZR Text Extractor under Apache License, Version 2.0
   parboiled-core under Apache 2
   parboiled-java under Apache 2
   pegdown under Apache 2

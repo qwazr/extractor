@@ -99,7 +99,7 @@ Issues and milestones are tracked on GitHub:
 License
 -------
 
-Copyright 2014-2015 [OpenSearchServer Inc.](http://www.opensearchserver.com)
+Copyright 2014-2015 [Emmanuel Keller](http://www.opensearchserver.com)
 
 
 Licensed under the Apache License, Version 2.0 (the "License");
