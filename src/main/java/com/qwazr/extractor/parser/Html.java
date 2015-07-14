@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,29 +15,26 @@
  */
 package com.qwazr.extractor.parser;
 
-import java.io.File;
-import java.io.InputStream;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebClientOptions;
-import com.gargoylesoftware.htmlunit.html.DomElement;
-import com.gargoylesoftware.htmlunit.html.DomNodeList;
-import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
-import com.gargoylesoftware.htmlunit.html.HtmlElement;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.gargoylesoftware.htmlunit.html.*;
 import com.qwazr.extractor.ParserAbstract;
 import com.qwazr.extractor.ParserDocument;
 import com.qwazr.extractor.ParserField;
 import com.qwazr.utils.StringUtils;
 
+import java.io.File;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 public class Html extends ParserAbstract {
 
-	public static final String[] DEFAULT_MIMETYPES = { "text/html" };
+	public static final String[] DEFAULT_MIMETYPES = {"text/html"};
 
-	public static final String[] DEFAULT_EXTENSIONS = { "htm", "html" };
+	public static final String[] DEFAULT_EXTENSIONS = {"htm", "html"};
 
 	final protected static ParserField TITLE = ParserField.newString("title",
 			"The title of the document");
@@ -76,8 +73,8 @@ public class Html extends ParserAbstract {
 	final protected static ParserField LANG_DETECTION = ParserField.newString(
 			"lang_detection", "Detection of the language");
 
-	final protected static ParserField[] FIELDS = { TITLE, CONTENT, H1, H2, H3,
-			H4, H5, H6, ANCHORS, IMAGES, METAS, LANG_DETECTION };
+	final protected static ParserField[] FIELDS = {TITLE, CONTENT, H1, H2, H3,
+			H4, H5, H6, ANCHORS, IMAGES, METAS, LANG_DETECTION};
 
 	final protected static ParserField[] PARAMETERS = {};
 
@@ -142,7 +139,8 @@ public class Html extends ParserAbstract {
 			// Get the text content
 			String text = page.asText();
 			if (text != null) {
-				String[] lines = StringUtils.splitLines(text);
+				ArrayList<String> lines = new ArrayList<String>();
+				StringUtils.linesCollector(text, false, lines);
 				for (String line : lines) {
 					line = line.trim();
 					if (!StringUtils.isEmpty(line))
@@ -184,7 +182,7 @@ public class Html extends ParserAbstract {
 	}
 
 	private void addToField(ParserDocument document, ParserField parserField,
-			DomNodeList<HtmlElement> elements) {
+							DomNodeList<HtmlElement> elements) {
 		if (elements == null)
 			return;
 		for (HtmlElement element : elements)
@@ -193,7 +191,7 @@ public class Html extends ParserAbstract {
 
 	@Override
 	protected void parseContent(InputStream inputStream, String extension,
-			String mimeType) throws Exception {
+								String mimeType) throws Exception {
 		File tempFile = ParserAbstract.createTempFile(inputStream,
 				extension == null ? "page.html" : "." + extension);
 		try {
