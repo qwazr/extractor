@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,28 +15,21 @@
  */
 package com.qwazr.extractor;
 
+import com.qwazr.cluster.manager.ClusterManager;
+import com.qwazr.utils.IOUtils;
+import com.qwazr.utils.StringUtils;
+import com.qwazr.utils.server.ServerException;
+import net.sf.jmimemagic.*;
+import org.apache.commons.io.FilenameUtils;
+
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 import java.io.File;
 import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriInfo;
-
-import net.sf.jmimemagic.Magic;
-import net.sf.jmimemagic.MagicException;
-import net.sf.jmimemagic.MagicMatch;
-import net.sf.jmimemagic.MagicMatchNotFoundException;
-import net.sf.jmimemagic.MagicParseException;
-
-import org.apache.commons.io.FilenameUtils;
-
-import com.qwazr.cluster.manager.ClusterManager;
-import com.qwazr.utils.IOUtils;
-import com.qwazr.utils.StringUtils;
-import com.qwazr.utils.server.ServerException;
 
 public class ExtractorServiceImpl implements ExtractorServiceInterface {
 
@@ -113,8 +106,8 @@ public class ExtractorServiceImpl implements ExtractorServiceInterface {
 
 	@Override
 	public ParserResult extract(String parserName,
-			MultivaluedMap<String, String> parameters, String filePath,
-			InputStream inputStream) {
+								MultivaluedMap<String, String> parameters, String filePath,
+								InputStream inputStream) {
 		try {
 			ParserAbstract parser = getParser(parserName);
 
@@ -130,7 +123,7 @@ public class ExtractorServiceImpl implements ExtractorServiceInterface {
 
 	@Override
 	public ParserResult put(UriInfo uriInfo, String parserName,
-			String filePath, InputStream inputStream) {
+							String filePath, InputStream inputStream) {
 		return extract(parserName, getQueryParameters(uriInfo), filePath,
 				inputStream);
 	}
@@ -163,7 +156,7 @@ public class ExtractorServiceImpl implements ExtractorServiceInterface {
 	}
 
 	private ParserResult putMagicPath(UriInfo uriInfo, String filePath,
-			String mimeType) throws Exception {
+									  String mimeType) throws Exception {
 
 		MultivaluedMap<String, String> queryParameters = getQueryParameters(uriInfo);
 		File file = getFilePath(filePath);
@@ -186,7 +179,7 @@ public class ExtractorServiceImpl implements ExtractorServiceInterface {
 	}
 
 	private ParserResult putMagicStream(UriInfo uriInfo, String fileName,
-			String mimeType, InputStream inputStream) throws Exception {
+										String mimeType, InputStream inputStream) throws Exception {
 
 		File tempFile = null;
 		try {
@@ -205,7 +198,11 @@ public class ExtractorServiceImpl implements ExtractorServiceInterface {
 					tempFile = File.createTempFile("textextractor",
 							extension == null ? StringUtils.EMPTY : "."
 									+ extension);
-					IOUtils.copy(inputStream, tempFile, true);
+					try {
+						IOUtils.copy(inputStream, tempFile);
+					} finally {
+						IOUtils.closeQuietly(inputStream);
+					}
 					mimeType = getMimeMagic(tempFile);
 				}
 				if (!StringUtils.isEmpty(mimeType))
@@ -231,7 +228,7 @@ public class ExtractorServiceImpl implements ExtractorServiceInterface {
 
 	@Override
 	public ParserResult putMagic(UriInfo uriInfo, String fileName,
-			String filePath, String mimeType, InputStream inputStream) {
+								 String filePath, String mimeType, InputStream inputStream) {
 		try {
 			if (checkIsPath(filePath, inputStream))
 				return putMagicPath(uriInfo, filePath, mimeType);
