@@ -1,12 +1,12 @@
 /**
  * Copyright 2014-2015 Emmanuel Keller / QWAZR
- *
+ * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,27 +15,27 @@
  */
 package com.qwazr.extractor;
 
-import java.io.IOException;
-import java.util.Set;
-
-import javax.servlet.ServletException;
-import javax.ws.rs.ApplicationPath;
-
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.ParseException;
-
 import com.qwazr.cluster.ClusterServer;
 import com.qwazr.cluster.manager.ClusterManager;
 import com.qwazr.cluster.service.ClusterServiceImpl;
 import com.qwazr.utils.server.AbstractServer;
 import com.qwazr.utils.server.RestApplication;
 import com.qwazr.utils.server.ServletApplication;
+import io.undertow.security.idm.IdentityManager;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.ParseException;
+
+import javax.servlet.ServletException;
+import javax.ws.rs.ApplicationPath;
+import java.io.IOException;
+import java.util.Set;
 
 public class ExtractorServer extends AbstractServer {
 
 	public final static String SERVICE_NAME_EXTRACTOR = "extractor";
 
 	private final static ServerDefinition serverDefinition = new ServerDefinition();
+
 	static {
 		serverDefinition.defaultWebApplicationTcpPort = 9091;
 		serverDefinition.mainJarPath = "qwazr-extractor.jar";
@@ -73,17 +73,22 @@ public class ExtractorServer extends AbstractServer {
 	}
 
 	@Override
-	public RestApplication getRestApplication() {
-		return new TextExtractorApplication();
+	public Class<TextExtractorApplication> getRestApplication() {
+		return TextExtractorApplication.class;
 	}
 
 	@Override
-	protected ServletApplication getServletApplication() {
+	protected Class<ServletApplication> getServletApplication() {
 		return null;
 	}
 
-	public static void main(String[] args) throws IOException, ParseException,
-			ServletException {
+	@Override
+	protected IdentityManager getIdentityManager(String realm) {
+		return null;
+	}
+
+	public static void main(String[] args) throws IOException, ParseException, ServletException, InstantiationException,
+					IllegalAccessException {
 		new ExtractorServer().start(args);
 		ClusterManager.INSTANCE.registerMe(SERVICE_NAME_EXTRACTOR);
 	}
