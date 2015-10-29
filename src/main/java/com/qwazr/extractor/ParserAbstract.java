@@ -1,12 +1,12 @@
 /**
  * Copyright 2014-2015 Emmanuel Keller / QWAZR
- *
+ * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,26 +15,20 @@
  */
 package com.qwazr.extractor;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.ws.rs.core.MultivaluedMap;
-
+import com.qwazr.utils.Language;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 
-import com.qwazr.utils.Language;
+import javax.ws.rs.core.MultivaluedMap;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class ParserAbstract {
 
 	private final String name;
 	protected final ParserDocument metas;
-	private final List<ParserDocument> documents;
+	private final ArrayList<ParserDocument> documents;
 	protected MultivaluedMap<String, String> parameters;
 
 	protected ParserAbstract() {
@@ -73,7 +67,7 @@ public abstract class ParserAbstract {
 
 	/**
 	 * Read a document and fill the ParserDocument list.
-	 * 
+	 *
 	 * @param inputStream
 	 *            a stream of the content to analyze
 	 * @param extension
@@ -83,8 +77,7 @@ public abstract class ParserAbstract {
 	 * @throws Exception
 	 *             if any error occurs
 	 */
-	protected abstract void parseContent(InputStream inputStream,
-			String extension, String mimeType) throws Exception;
+	protected abstract void parseContent(InputStream inputStream, String extension, String mimeType) throws Exception;
 
 	/**
 	 * @return the list of supported extensions
@@ -98,7 +91,7 @@ public abstract class ParserAbstract {
 
 	/**
 	 * Read a document and fill the ParserDocument list.
-	 * 
+	 *
 	 * @param file
 	 *            the file instance of the document to parse
 	 * @param extension
@@ -108,8 +101,7 @@ public abstract class ParserAbstract {
 	 * @throws Exception
 	 *             if any error occurs
 	 */
-	protected void parseContent(File file, String extension, String mimeType)
-			throws Exception {
+	protected void parseContent(File file, String extension, String mimeType) throws Exception {
 		InputStream is = null;
 		try {
 			is = new FileInputStream(file);
@@ -120,8 +112,7 @@ public abstract class ParserAbstract {
 		}
 	}
 
-	protected final static File createTempFile(InputStream inputStream,
-			String extension) throws IOException {
+	protected final static File createTempFile(InputStream inputStream, String extension) throws IOException {
 		File tempFile = File.createTempFile("oss-extractor", extension);
 		FileOutputStream fos = null;
 		try {
@@ -136,17 +127,15 @@ public abstract class ParserAbstract {
 		}
 	}
 
-	public final ParserResult doParsing(
-			MultivaluedMap<String, String> parameters, InputStream inputStream,
-			String extension, String mimeType) throws Exception {
+	public final ParserResult doParsing(MultivaluedMap<String, String> parameters, InputStream inputStream,
+					String extension, String mimeType) throws Exception {
 		this.parameters = parameters;
 		parseContent(inputStream, extension, mimeType);
 		return new ParserResult(name, metas, documents);
 	}
 
-	public final ParserResult doParsing(
-			MultivaluedMap<String, String> parameters, File file,
-			String extension, String mimeType) throws Exception {
+	public final ParserResult doParsing(MultivaluedMap<String, String> parameters, File file, String extension,
+					String mimeType) throws Exception {
 		this.parameters = parameters;
 		if (extension == null)
 			extension = FilenameUtils.getExtension(file.getName());
@@ -157,7 +146,7 @@ public abstract class ParserAbstract {
 	/**
 	 * Submit the content of a field to language detection. It checks all the
 	 * document.
-	 * 
+	 *
 	 * @param source
 	 *            The field to submit
 	 * @param maxLength
@@ -184,7 +173,7 @@ public abstract class ParserAbstract {
 
 	/**
 	 * Submit the content if of a field to language detection.
-	 * 
+	 *
 	 * @param document
 	 *            the document to check
 	 * @param source
@@ -193,8 +182,7 @@ public abstract class ParserAbstract {
 	 *            the maximum number of characters to test
 	 * @return the detected language
 	 */
-	protected final String languageDetection(ParserDocument document,
-			ParserField source, int maxLength) {
+	protected final String languageDetection(ParserDocument document, ParserField source, int maxLength) {
 		StringBuilder sb = new StringBuilder();
 		List<Object> objectList = document.fields.get(source.name);
 		if (objectList == null)

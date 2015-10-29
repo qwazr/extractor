@@ -1,12 +1,12 @@
 /**
  * Copyright 2014 Emmanuel Keller
- *
+ * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,41 +15,25 @@
  */
 package com.qwazr.extractor.test;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
-
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
-
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
-import org.junit.Test;
-
 import com.qwazr.extractor.ExtractorServiceImpl;
 import com.qwazr.extractor.ParserAbstract;
 import com.qwazr.extractor.ParserManager;
 import com.qwazr.extractor.ParserResult;
-import com.qwazr.extractor.parser.Audio;
-import com.qwazr.extractor.parser.Doc;
-import com.qwazr.extractor.parser.Docx;
-import com.qwazr.extractor.parser.Eml;
-import com.qwazr.extractor.parser.Html;
-import com.qwazr.extractor.parser.Image;
-import com.qwazr.extractor.parser.Markdown;
-import com.qwazr.extractor.parser.Odf;
-import com.qwazr.extractor.parser.PdfBox;
-import com.qwazr.extractor.parser.Ppt;
-import com.qwazr.extractor.parser.Pptx;
-import com.qwazr.extractor.parser.Rss;
-import com.qwazr.extractor.parser.Rtf;
-import com.qwazr.extractor.parser.Text;
-import com.qwazr.extractor.parser.Xls;
-import com.qwazr.extractor.parser.Xlsx;
+import com.qwazr.extractor.parser.*;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
+import org.junit.Test;
+
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.logging.Logger;
 
 public class AllTest {
 
@@ -59,20 +43,19 @@ public class AllTest {
 
 	/**
 	 * Check if the parser has been registered, and create the an instance.
-	 * 
+	 *
 	 * @param className
 	 * @return An instance
 	 * @throws IllegalAccessException
 	 * @throws InstantiationException
 	 * @throws IOException
 	 */
-	protected ParserAbstract createRegisterInstance(
-			Class<? extends ParserAbstract> className)
-			throws InstantiationException, IllegalAccessException, IOException {
+	protected ParserAbstract createRegisterInstance(Class<? extends ParserAbstract> className)
+					throws InstantiationException, IllegalAccessException, IOException {
 		if (ParserManager.INSTANCE == null)
 			ParserManager.load();
 		Class<? extends ParserAbstract> parserClass = ParserManager.INSTANCE
-				.findParserClassByName(className.getSimpleName().toLowerCase());
+						.findParserClassByName(className.getSimpleName().toLowerCase());
 		assert (parserClass != null);
 		return parserClass.newInstance();
 	}
@@ -84,8 +67,7 @@ public class AllTest {
 	}
 
 	protected File getTempFile(String fileName) throws IOException {
-		File tempFile = File.createTempFile("oss_extractor", "."
-				+ FilenameUtils.getExtension(fileName));
+		File tempFile = File.createTempFile("oss_extractor", "." + FilenameUtils.getExtension(fileName));
 		FileOutputStream fos = new FileOutputStream(tempFile);
 		InputStream inputStream = getStream(fileName);
 		IOUtils.copy(inputStream, fos);
@@ -94,15 +76,15 @@ public class AllTest {
 
 	/**
 	 * Check if the given string is present in a multivalued map
-	 * 
+	 *
 	 * @param map
 	 * @param text
 	 * @return
 	 */
-	protected boolean checkText(Map<String, List<Object>> map, String text) {
+	protected boolean checkText(LinkedHashMap<String, ArrayList<Object>> map, String text) {
 		if (map == null)
 			return false;
-		for (Map.Entry<String, List<Object>> entry : map.entrySet())
+		for (Map.Entry<String, ArrayList<Object>> entry : map.entrySet())
 			for (Object object : entry.getValue())
 				if (object.toString().contains(text))
 					return true;
@@ -111,14 +93,14 @@ public class AllTest {
 
 	/**
 	 * Check if the given string is present in the result
-	 * 
+	 *
 	 * @param result
 	 * @param text
 	 */
 	protected void checkText(ParserResult result, String text) {
 		if (text == null)
 			return;
-		for (Map<String, List<Object>> map : result.documents)
+		for (LinkedHashMap<String, ArrayList<Object>> map : result.documents)
 			if (checkText(map, text))
 				return;
 		if (checkText(result.metas, text))
@@ -129,12 +111,11 @@ public class AllTest {
 
 	/**
 	 * Build a map of parameters using key/value pairs
-	 * 
+	 *
 	 * @param keyValueParams
 	 * @return
 	 */
-	protected MultivaluedMap<String, String> getParameters(
-			String... keyValueParams) {
+	protected MultivaluedMap<String, String> getParameters(String... keyValueParams) {
 		if (keyValueParams == null)
 			return null;
 		MultivaluedHashMap<String, String> parameters = null;
@@ -146,15 +127,14 @@ public class AllTest {
 
 	/**
 	 * Test inputstream and file parsing
-	 * 
+	 *
 	 * @param className
 	 * @param fileName
-	 * @param parameters
+	 * @param keyValueParams
 	 * @throws Exception
 	 */
-	protected void doTest(Class<? extends ParserAbstract> className,
-			String fileName, String testString, String... keyValueParams)
-			throws Exception {
+	protected void doTest(Class<? extends ParserAbstract> className, String fileName, String testString,
+					String... keyValueParams) throws Exception {
 		logger.info("Testing " + className);
 		MultivaluedMap<String, String> parameters = getParameters(keyValueParams);
 
@@ -162,8 +142,7 @@ public class AllTest {
 
 		// Test stream
 		ParserAbstract parser = createRegisterInstance(className);
-		ParserResult parserResult = parser.doParsing(parameters,
-				getStream(fileName), null, null);
+		ParserResult parserResult = parser.doParsing(parameters, getStream(fileName), null, null);
 		assert (parserResult != null);
 		checkText(parserResult, testString);
 
@@ -174,14 +153,12 @@ public class AllTest {
 		checkText(parserResult, testString);
 
 		// Test stream with magic mime service
-		parserResult = new ExtractorServiceImpl().putMagic(null, fileName,
-				null, null, getStream(fileName));
+		parserResult = new ExtractorServiceImpl().putMagic(null, fileName, null, null, getStream(fileName));
 		assert (parserResult != null);
 		checkText(parserResult, testString);
 
 		// Test path with magic mime service
-		parserResult = new ExtractorServiceImpl().putMagic(null, fileName,
-				tempFile.getAbsolutePath(), null, null);
+		parserResult = new ExtractorServiceImpl().putMagic(null, fileName, tempFile.getAbsolutePath(), null, null);
 		assert (parserResult != null);
 		checkText(parserResult, testString);
 	}
