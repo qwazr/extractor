@@ -33,25 +33,25 @@ public interface ExtractorServiceInterface {
 	@GET
 	@Path("/")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Map<String, ResourceLink> list();
+	Map<String, ResourceLink> list();
 
 	@GET
 	@Path("/{name}")
 	@Produces(RestApplication.APPLICATION_JSON_UTF8)
-	public Object get(@Context UriInfo uriInfo, @PathParam("name") String parserName, @QueryParam("path") String path);
+	Object get(@Context UriInfo uriInfo, @PathParam("name") String parserName, @QueryParam("path") String path);
 
 	@PUT
 	@Path("/{name}")
 	@Produces(RestApplication.APPLICATION_JSON_UTF8)
-	public ParserResult put(@Context UriInfo uriInfo, @PathParam("name") String parserName,
+	ParserResult put(@Context UriInfo uriInfo, @PathParam("name") String parserName,
 					@QueryParam("path") String filePath, InputStream inputStream);
 
-	public ParserResult extract(String parserName, MultivaluedMap<String, String> parameters, String filePath,
+	ParserResult extract(String parserName, MultivaluedMap<String, String> parameters, String filePath,
 					InputStream inputStream);
 
 	@PUT
 	@Path("/")
 	@Produces(MediaType.APPLICATION_JSON)
-	public ParserResult putMagic(@Context UriInfo uriInfo, @QueryParam("name") String fileName,
+	ParserResult putMagic(@Context UriInfo uriInfo, @QueryParam("name") String fileName,
 					@QueryParam("path") String filePath, @QueryParam("type") String mimeType, InputStream inputStream);
 }

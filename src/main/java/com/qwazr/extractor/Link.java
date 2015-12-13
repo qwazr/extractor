@@ -35,7 +35,7 @@ public class Link {
 	}
 
 	public enum Method {
-		GET, POST, PUT, DELETE, PATCH, OPTIONS;
+		GET, POST, PUT, DELETE, PATCH, OPTIONS
 	}
 
 }

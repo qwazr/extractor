@@ -60,8 +60,8 @@ public class ParserField {
 		return new ParserField(name, Type.MAP, description);
 	}
 
-	public static enum Type {
-		STRING, INTEGER, DATE, MAP;
+	public enum Type {
+		STRING, INTEGER, DATE, MAP
 	}
 
 	private static class ParserFieldComparator implements
