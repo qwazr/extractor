@@ -1,12 +1,12 @@
 /**
  * Copyright 2014-2016 Emmanuel Keller / QWAZR
- * <p/>
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p/>
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,7 +16,6 @@
 package com.qwazr.extractor;
 
 import com.qwazr.cluster.ClusterServer;
-import com.qwazr.cluster.manager.ClusterManager;
 import com.qwazr.cluster.service.ClusterServiceImpl;
 import com.qwazr.utils.server.AbstractServer;
 import com.qwazr.utils.server.RestApplication;
@@ -87,10 +86,9 @@ public class ExtractorServer extends AbstractServer {
 		return null;
 	}
 
-	public static void main(String[] args) throws IOException, ParseException, ServletException, InstantiationException,
-					IllegalAccessException {
+	public static void main(String[] args)
+			throws IOException, ParseException, ServletException, InstantiationException, IllegalAccessException {
 		new ExtractorServer().start(args);
-		ClusterManager.INSTANCE.registerMe(SERVICE_NAME_EXTRACTOR);
 	}
 
 }
