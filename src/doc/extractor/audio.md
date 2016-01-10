@@ -198,7 +198,7 @@ Get the parser properties
     "name" : "remixer",
     "type" : "STRING"
   }, {
-    "name" : "script",
+    "name" : scripts,
     "type" : "STRING"
   }, {
     "name" : "tags",
