@@ -1,12 +1,12 @@
 /**
  * Copyright 2014-2016 Emmanuel Keller / QWAZR
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,6 +15,9 @@
  */
 package com.qwazr.extractor;
 
+import com.qwazr.extractor.parser.*;
+
+import javax.ws.rs.core.MultivaluedHashMap;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -23,29 +26,9 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import javax.ws.rs.core.MultivaluedHashMap;
-
-import com.qwazr.extractor.parser.Audio;
-import com.qwazr.extractor.parser.Doc;
-import com.qwazr.extractor.parser.Docx;
-import com.qwazr.extractor.parser.Eml;
-import com.qwazr.extractor.parser.Html;
-import com.qwazr.extractor.parser.Image;
-import com.qwazr.extractor.parser.MapiMsg;
-import com.qwazr.extractor.parser.Markdown;
-import com.qwazr.extractor.parser.Odf;
-import com.qwazr.extractor.parser.PdfBox;
-import com.qwazr.extractor.parser.Ppt;
-import com.qwazr.extractor.parser.Pptx;
-import com.qwazr.extractor.parser.Publisher;
-import com.qwazr.extractor.parser.Rss;
-import com.qwazr.extractor.parser.Rtf;
-import com.qwazr.extractor.parser.Text;
-import com.qwazr.extractor.parser.Visio;
-import com.qwazr.extractor.parser.Xls;
-import com.qwazr.extractor.parser.Xlsx;
-
 public class ParserManager {
+
+	public final static String SERVICE_NAME_EXTRACTOR = "extractor";
 
 	private final ReadWriteLock rwl = new ReentrantReadWriteLock();
 
@@ -55,12 +38,19 @@ public class ParserManager {
 
 	private final MultivaluedHashMap<String, Class<? extends ParserAbstract>> extensionsMap;
 
-	public static ParserManager INSTANCE = null;
+	static ParserManager INSTANCE = null;
 
-	public static void load() throws IOException {
+	public synchronized static Class<? extends ExtractorServiceImpl> load() throws IOException {
 		if (INSTANCE != null)
 			throw new IOException("Already loaded");
 		INSTANCE = new ParserManager();
+		return ExtractorServiceImpl.class;
+	}
+
+	public static ParserManager getInstance() {
+		if (ParserManager.INSTANCE == null)
+			throw new RuntimeException("The extractor service is not enabled");
+		return ParserManager.INSTANCE;
 	}
 
 	private ParserManager() {
@@ -112,8 +102,7 @@ public class ParserManager {
 		}
 	}
 
-	public final Class<? extends ParserAbstract> findParserClassByName(
-			String parserName) {
+	public final Class<? extends ParserAbstract> findParserClassByName(String parserName) {
 		Lock l = rwl.readLock();
 		l.lock();
 		try {
@@ -123,8 +112,7 @@ public class ParserManager {
 		}
 	}
 
-	public final Class<? extends ParserAbstract> findParserClassByMimeTypeFirst(
-			String mimeType) {
+	public final Class<? extends ParserAbstract> findParserClassByMimeTypeFirst(String mimeType) {
 		Lock l = rwl.readLock();
 		l.lock();
 		try {
@@ -134,8 +122,7 @@ public class ParserManager {
 		}
 	}
 
-	public final Class<? extends ParserAbstract> findParserClassByExtensionFirst(
-			String extension) {
+	public final Class<? extends ParserAbstract> findParserClassByExtensionFirst(String extension) {
 		Lock l = rwl.readLock();
 		l.lock();
 		try {

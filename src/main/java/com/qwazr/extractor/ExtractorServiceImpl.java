@@ -1,12 +1,12 @@
 /**
  * Copyright 2014-2016 Emmanuel Keller / QWAZR
- * <p/>
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p/>
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,7 +38,7 @@ public class ExtractorServiceImpl implements ExtractorServiceInterface {
 		Set<String> parserList = ParserManager.INSTANCE.getList();
 		Map<String, ResourceLink> map = new LinkedHashMap<String, ResourceLink>(parserList.size());
 		for (String parserName : parserList)
-			map.put(parserName, new ResourceLink(ClusterManager.INSTANCE.myAddress + "/extractor/" + parserName));
+			map.put(parserName, new ResourceLink(ClusterManager.getInstance().myAddress + "/extractor/" + parserName));
 		return map;
 	}
 
@@ -48,7 +48,7 @@ public class ExtractorServiceImpl implements ExtractorServiceInterface {
 				throw new ServerException(Status.NOT_FOUND, "No parser found.");
 			return parserClass.newInstance();
 		} catch (InstantiationException | IllegalAccessException
-						| IllegalArgumentException | SecurityException e) {
+				| IllegalArgumentException | SecurityException e) {
 			throw new ServerException(e);
 		}
 	}
@@ -95,7 +95,7 @@ public class ExtractorServiceImpl implements ExtractorServiceInterface {
 
 	@Override
 	public ParserResult extract(String parserName, MultivaluedMap<String, String> parameters, String filePath,
-					InputStream inputStream) {
+			InputStream inputStream) {
 		try {
 			ParserAbstract parser = getParser(parserName);
 
@@ -132,7 +132,7 @@ public class ExtractorServiceImpl implements ExtractorServiceInterface {
 				return null;
 			return match.getMimeType();
 		} catch (MagicParseException | MagicMatchNotFoundException
-						| MagicException e) {
+				| MagicException e) {
 			return null;
 		}
 	}
@@ -159,7 +159,7 @@ public class ExtractorServiceImpl implements ExtractorServiceInterface {
 	}
 
 	private ParserResult putMagicStream(UriInfo uriInfo, String fileName, String mimeType, InputStream inputStream)
-					throws Exception {
+			throws Exception {
 
 		File tempFile = null;
 		try {
@@ -175,8 +175,8 @@ public class ExtractorServiceImpl implements ExtractorServiceInterface {
 			// Find a parser from the mime type
 			if (parserClass == null) {
 				if (StringUtils.isEmpty(mimeType)) {
-					tempFile = File.createTempFile("textextractor",
-									extension == null ? StringUtils.EMPTY : "." + extension);
+					tempFile = File
+							.createTempFile("textextractor", extension == null ? StringUtils.EMPTY : "." + extension);
 					try {
 						IOUtils.copy(inputStream, tempFile);
 					} finally {
@@ -205,7 +205,7 @@ public class ExtractorServiceImpl implements ExtractorServiceInterface {
 
 	@Override
 	public ParserResult putMagic(UriInfo uriInfo, String fileName, String filePath, String mimeType,
-					InputStream inputStream) {
+			InputStream inputStream) {
 		try {
 			if (checkIsPath(filePath, inputStream))
 				return putMagicPath(uriInfo, filePath, mimeType);

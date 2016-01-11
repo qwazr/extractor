@@ -1,12 +1,12 @@
 /**
  * Copyright 2014-2016 Emmanuel Keller / QWAZR
- * <p/>
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p/>
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,7 +26,7 @@ import javax.ws.rs.core.UriInfo;
 import java.io.InputStream;
 import java.util.Map;
 
-@RolesAllowed(ExtractorServer.SERVICE_NAME_EXTRACTOR)
+@RolesAllowed(ParserManager.SERVICE_NAME_EXTRACTOR)
 @Path("/extractor")
 public interface ExtractorServiceInterface {
 
@@ -44,14 +44,14 @@ public interface ExtractorServiceInterface {
 	@Path("/{name}")
 	@Produces(RestApplication.APPLICATION_JSON_UTF8)
 	ParserResult put(@Context UriInfo uriInfo, @PathParam("name") String parserName,
-					@QueryParam("path") String filePath, InputStream inputStream);
+			@QueryParam("path") String filePath, InputStream inputStream);
 
 	ParserResult extract(String parserName, MultivaluedMap<String, String> parameters, String filePath,
-					InputStream inputStream);
+			InputStream inputStream);
 
 	@PUT
 	@Path("/")
 	@Produces(MediaType.APPLICATION_JSON)
 	ParserResult putMagic(@Context UriInfo uriInfo, @QueryParam("name") String fileName,
-					@QueryParam("path") String filePath, @QueryParam("type") String mimeType, InputStream inputStream);
+			@QueryParam("path") String filePath, @QueryParam("type") String mimeType, InputStream inputStream);
 }

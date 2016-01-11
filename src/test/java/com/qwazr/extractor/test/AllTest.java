@@ -1,12 +1,12 @@
 /**
  * Copyright 2014 Emmanuel Keller
- * <p/>
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p/>
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,6 +22,7 @@ import com.qwazr.extractor.ParserResult;
 import com.qwazr.extractor.parser.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.ws.rs.core.MultivaluedHashMap;
@@ -41,6 +42,11 @@ public class AllTest {
 
 	static final String DEFAULT_TEST_STRING = "osstextextractor";
 
+	@BeforeClass
+	public static void init() throws IOException {
+		ParserManager.load();
+	}
+
 	/**
 	 * Check if the parser has been registered, and create the an instance.
 	 *
@@ -51,11 +57,9 @@ public class AllTest {
 	 * @throws IOException
 	 */
 	protected ParserAbstract createRegisterInstance(Class<? extends ParserAbstract> className)
-					throws InstantiationException, IllegalAccessException, IOException {
-		if (ParserManager.INSTANCE == null)
-			ParserManager.load();
-		Class<? extends ParserAbstract> parserClass = ParserManager.INSTANCE
-						.findParserClassByName(className.getSimpleName().toLowerCase());
+			throws InstantiationException, IllegalAccessException, IOException {
+		Class<? extends ParserAbstract> parserClass = ParserManager.getInstance()
+				.findParserClassByName(className.getSimpleName().toLowerCase());
 		assert (parserClass != null);
 		return parserClass.newInstance();
 	}
@@ -134,7 +138,7 @@ public class AllTest {
 	 * @throws Exception
 	 */
 	protected void doTest(Class<? extends ParserAbstract> className, String fileName, String testString,
-					String... keyValueParams) throws Exception {
+			String... keyValueParams) throws Exception {
 		logger.info("Testing " + className);
 		MultivaluedMap<String, String> parameters = getParameters(keyValueParams);
 

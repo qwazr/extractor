@@ -15,7 +15,7 @@
  */
 package com.qwazr.extractor;
 
-import com.qwazr.cluster.ClusterServer;
+import com.qwazr.cluster.manager.ClusterManager;
 import com.qwazr.cluster.service.ClusterServiceImpl;
 import com.qwazr.utils.server.AbstractServer;
 import com.qwazr.utils.server.RestApplication;
@@ -31,18 +31,8 @@ import java.util.Set;
 
 public class ExtractorServer extends AbstractServer {
 
-	public final static String SERVICE_NAME_EXTRACTOR = "extractor";
-
-	private final static ServerDefinition serverDefinition = new ServerDefinition();
-
-	static {
-		serverDefinition.defaultWebApplicationTcpPort = 9091;
-		serverDefinition.mainJarPath = "qwazr-extractor.jar";
-		serverDefinition.defaultDataDirName = "qwazr";
-	}
-
 	private ExtractorServer() {
-		super(serverDefinition);
+		super(new ServerDefinition());
 	}
 
 	@ApplicationPath("/")
@@ -51,14 +41,10 @@ public class ExtractorServer extends AbstractServer {
 		@Override
 		public Set<Class<?>> getClasses() {
 			Set<Class<?>> classes = super.getClasses();
-			classes.add(ExtractorServiceImpl.class);
 			classes.add(ClusterServiceImpl.class);
+			classes.add(ExtractorServiceImpl.class);
 			return classes;
 		}
-	}
-
-	public static void loadParserManager() throws IOException {
-		ParserManager.load();
 	}
 
 	@Override
@@ -67,8 +53,8 @@ public class ExtractorServer extends AbstractServer {
 
 	@Override
 	public void load() throws IOException {
-		ClusterServer.load(getWebServicePublicAddress(), getCurrentDataDir());
-		load();
+		ClusterManager.load(getWebServicePublicAddress(), getCurrentDataDir());
+		ParserManager.load();
 	}
 
 	@Override
