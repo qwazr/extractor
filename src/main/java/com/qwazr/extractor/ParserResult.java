@@ -1,12 +1,12 @@
 /**
  * Copyright 2014-2016 Emmanuel Keller / QWAZR
- * <p/>
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p/>
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,6 +19,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,6 +29,7 @@ import java.util.List;
 
 @JsonInclude(Include.NON_EMPTY)
 @XmlRootElement
+@XmlAccessorType(XmlAccessType.PUBLIC_MEMBER)
 public class ParserResult {
 
 	public String parser_name;
@@ -54,7 +57,7 @@ public class ParserResult {
 		metas = parserMetas == null ? null : parserMetas.fields;
 
 		documents = new ArrayList<LinkedHashMap<String, ArrayList<Object>>>(
-						parserDocuments == null ? 0 : parserDocuments.size());
+				parserDocuments == null ? 0 : parserDocuments.size());
 		// Extract the documents found
 		if (parserDocuments != null)
 			for (ParserDocument parserDocument : parserDocuments)
