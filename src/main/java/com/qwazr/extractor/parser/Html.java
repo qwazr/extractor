@@ -40,7 +40,7 @@ public class Html extends ParserAbstract {
 	final protected static ParserField TITLE = ParserField.newString("title", "The title of the document");
 
 	final protected static ParserField CONTENT = ParserField
-					.newString("content", "The text content of the document. One item per paragraph");
+			.newString("content", "The text content of the document. One item per paragraph");
 
 	final protected static ParserField H1 = ParserField.newString("h1", "H1 header contents");
 
@@ -61,10 +61,10 @@ public class Html extends ParserAbstract {
 	final protected static ParserField METAS = ParserField.newMap("metas", "Meta tags");
 
 	final protected static ParserField LANG_DETECTION = ParserField
-					.newString("lang_detection", "Detection of the language");
+			.newString("lang_detection", "Detection of the language");
 
 	final protected static ParserField[] FIELDS = { TITLE, CONTENT, H1, H2, H3, H4, H5, H6, ANCHORS, IMAGES, METAS,
-					LANG_DETECTION };
+			LANG_DETECTION };
 
 	final protected static ParserField[] PARAMETERS = {};
 
@@ -153,7 +153,7 @@ public class Html extends ParserAbstract {
 
 		} finally {
 			if (webClient != null)
-				IOUtils.closeQuietly(webClient);
+				IOUtils.close(webClient);
 		}
 
 	}
