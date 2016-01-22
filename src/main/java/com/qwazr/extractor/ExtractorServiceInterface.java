@@ -15,7 +15,8 @@
  */
 package com.qwazr.extractor;
 
-import com.qwazr.utils.server.RestApplication;
+import com.qwazr.utils.server.ServiceInterface;
+import com.qwazr.utils.server.ServiceName;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
@@ -28,30 +29,31 @@ import java.util.Map;
 
 @RolesAllowed(ParserManager.SERVICE_NAME_EXTRACTOR)
 @Path("/extractor")
-public interface ExtractorServiceInterface {
+@ServiceName(ParserManager.SERVICE_NAME_EXTRACTOR)
+public interface ExtractorServiceInterface extends ServiceInterface {
 
 	@GET
 	@Path("/")
-	@Produces(MediaType.APPLICATION_JSON)
+	@Produces(ServiceInterface.APPLICATION_JSON_UTF8)
 	Map<String, ResourceLink> list();
 
 	@GET
 	@Path("/{name}")
-	@Produces(RestApplication.APPLICATION_JSON_UTF8)
+	@Produces(ServiceInterface.APPLICATION_JSON_UTF8)
 	Object get(@Context UriInfo uriInfo, @PathParam("name") String parserName, @QueryParam("path") String path);
 
 	@PUT
 	@Path("/{name}")
-	@Produces(RestApplication.APPLICATION_JSON_UTF8)
+	@Produces(ServiceInterface.APPLICATION_JSON_UTF8)
 	ParserResult put(@Context UriInfo uriInfo, @PathParam("name") String parserName,
-			@QueryParam("path") String filePath, InputStream inputStream);
+					@QueryParam("path") String filePath, InputStream inputStream);
 
 	ParserResult extract(String parserName, MultivaluedMap<String, String> parameters, String filePath,
-			InputStream inputStream);
+					InputStream inputStream);
 
 	@PUT
 	@Path("/")
-	@Produces(MediaType.APPLICATION_JSON)
+	@Produces(ServiceInterface.APPLICATION_JSON_UTF8)
 	ParserResult putMagic(@Context UriInfo uriInfo, @QueryParam("name") String fileName,
-			@QueryParam("path") String filePath, @QueryParam("type") String mimeType, InputStream inputStream);
+					@QueryParam("path") String filePath, @QueryParam("type") String mimeType, InputStream inputStream);
 }

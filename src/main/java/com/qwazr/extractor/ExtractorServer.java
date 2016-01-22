@@ -16,18 +16,16 @@
 package com.qwazr.extractor;
 
 import com.qwazr.cluster.manager.ClusterManager;
-import com.qwazr.cluster.service.ClusterServiceImpl;
 import com.qwazr.utils.server.AbstractServer;
-import com.qwazr.utils.server.RestApplication;
+import com.qwazr.utils.server.ServiceInterface;
 import com.qwazr.utils.server.ServletApplication;
 import io.undertow.security.idm.IdentityManager;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
 import javax.servlet.ServletException;
-import javax.ws.rs.ApplicationPath;
 import java.io.IOException;
-import java.util.Set;
+import java.util.Collection;
 import java.util.concurrent.Executors;
 
 public class ExtractorServer extends AbstractServer {
@@ -36,35 +34,14 @@ public class ExtractorServer extends AbstractServer {
 		super(new ServerDefinition(), Executors.newCachedThreadPool());
 	}
 
-	@ApplicationPath("/")
-	public static class TextExtractorApplication extends RestApplication {
-
-		@Override
-		public Set<Class<?>> getClasses() {
-			Set<Class<?>> classes = super.getClasses();
-			classes.add(ClusterServiceImpl.class);
-			classes.add(ExtractorServiceImpl.class);
-			return classes;
-		}
-	}
-
 	@Override
 	public void commandLine(CommandLine cmd) throws IOException {
 	}
 
 	@Override
-	public void load() throws IOException {
-		ClusterManager.load(executorService, getWebServicePublicAddress(), null);
-		ParserManager.load();
-	}
-
-	@Override
-	public Class<TextExtractorApplication> getRestApplication() {
-		return TextExtractorApplication.class;
-	}
-
-	@Override
-	protected Class<ServletApplication> getServletApplication() {
+	public ServletApplication load(Collection<Class<? extends ServiceInterface>> services) throws IOException {
+		services.add(ClusterManager.load(executorService, getWebServicePublicAddress(), null));
+		services.add(ParserManager.load());
 		return null;
 	}
 
@@ -73,8 +50,8 @@ public class ExtractorServer extends AbstractServer {
 		return null;
 	}
 
-	public static void main(String[] args)
-			throws IOException, ParseException, ServletException, InstantiationException, IllegalAccessException {
+	public static void main(String[] args) throws IOException, ParseException, ServletException, InstantiationException,
+					IllegalAccessException {
 		new ExtractorServer().start(args);
 	}
 
