@@ -52,7 +52,7 @@ public class ExtractorServer extends AbstractServer {
 
 	public static void main(String[] args) throws IOException, ParseException, ServletException, InstantiationException,
 					IllegalAccessException {
-		new ExtractorServer().start(args);
+		new ExtractorServer().start(args, true);
 	}
 
 }
