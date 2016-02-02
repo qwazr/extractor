@@ -21,7 +21,6 @@ import com.qwazr.utils.server.ServiceName;
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 import java.io.InputStream;
@@ -46,14 +45,18 @@ public interface ExtractorServiceInterface extends ServiceInterface {
 	@Path("/{name}")
 	@Produces(ServiceInterface.APPLICATION_JSON_UTF8)
 	ParserResult put(@Context UriInfo uriInfo, @PathParam("name") String parserName,
-					@QueryParam("path") String filePath, InputStream inputStream);
+			@QueryParam("path") String filePath, InputStream inputStream);
 
 	ParserResult extract(String parserName, MultivaluedMap<String, String> parameters, String filePath,
-					InputStream inputStream);
+			InputStream inputStream);
 
 	@PUT
 	@Path("/")
 	@Produces(ServiceInterface.APPLICATION_JSON_UTF8)
 	ParserResult putMagic(@Context UriInfo uriInfo, @QueryParam("name") String fileName,
-					@QueryParam("path") String filePath, @QueryParam("type") String mimeType, InputStream inputStream);
+			@QueryParam("path") String filePath, @QueryParam("type") String mimeType, InputStream inputStream);
+
+	public static ExtractorServiceInterface getClient() {
+		return new ExtractorServiceImpl();
+	}
 }
