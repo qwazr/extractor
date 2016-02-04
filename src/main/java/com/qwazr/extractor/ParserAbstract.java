@@ -33,7 +33,7 @@ public abstract class ParserAbstract {
 
 	protected ParserAbstract() {
 		name = this.getClass().getSimpleName().toLowerCase();
-		documents = new ArrayList<ParserDocument>(0);
+		documents = new ArrayList<>(0);
 		metas = new ParserDocument();
 		parameters = null;
 	}
