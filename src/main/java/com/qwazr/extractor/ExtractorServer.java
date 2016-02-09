@@ -36,7 +36,7 @@ public class ExtractorServer extends AbstractServer<ServerConfiguration> {
 	@Override
 	public ServletApplication load(Collection<Class<? extends ServiceInterface>> services) throws IOException {
 		services.add(ClusterManager.load(executorService, getWebServicePublicAddress(), null));
-		services.add(ParserManager.load());
+		services.add(ExtractorManager.load());
 		return null;
 	}
 

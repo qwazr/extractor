@@ -35,7 +35,7 @@ public class ExtractorServiceImpl implements ExtractorServiceInterface {
 
 	@Override
 	public Map<String, ResourceLink> list() {
-		Set<String> parserList = ParserManager.INSTANCE.getList();
+		Set<String> parserList = ExtractorManager.INSTANCE.getList();
 		Map<String, ResourceLink> map = new LinkedHashMap<String, ResourceLink>(parserList.size());
 		for (String parserName : parserList)
 			map.put(parserName, new ResourceLink(ClusterManager.INSTANCE.myAddress + "/extractor/" + parserName));
@@ -54,7 +54,7 @@ public class ExtractorServiceImpl implements ExtractorServiceInterface {
 	}
 
 	private ParserAbstract getParser(String parserName) throws ServerException {
-		Class<? extends ParserAbstract> parserClass = ParserManager.INSTANCE.findParserClassByName(parserName);
+		Class<? extends ParserAbstract> parserClass = ExtractorManager.INSTANCE.findParserClassByName(parserName);
 		if (parserClass == null)
 			throw new ServerException(Status.NOT_FOUND, "Unknown parser: " + parserName);
 		return getParser(parserClass);
@@ -116,13 +116,13 @@ public class ExtractorServiceImpl implements ExtractorServiceInterface {
 	private Class<? extends ParserAbstract> getClassParserExtension(String extension) {
 		if (StringUtils.isEmpty(extension))
 			return null;
-		return ParserManager.INSTANCE.findParserClassByExtensionFirst(extension);
+		return ExtractorManager.INSTANCE.findParserClassByExtensionFirst(extension);
 	}
 
 	private Class<? extends ParserAbstract> getClassParserMimeType(String mimeType) {
 		if (StringUtils.isEmpty(mimeType))
 			return null;
-		return ParserManager.INSTANCE.findParserClassByMimeTypeFirst(mimeType);
+		return ExtractorManager.INSTANCE.findParserClassByMimeTypeFirst(mimeType);
 	}
 
 	private String getMimeMagic(File file) {

@@ -15,9 +15,9 @@
  */
 package com.qwazr.extractor.test;
 
+import com.qwazr.extractor.ExtractorManager;
 import com.qwazr.extractor.ExtractorServiceImpl;
 import com.qwazr.extractor.ParserAbstract;
-import com.qwazr.extractor.ParserManager;
 import com.qwazr.extractor.ParserResult;
 import com.qwazr.extractor.parser.*;
 import org.apache.commons.io.FilenameUtils;
@@ -44,7 +44,7 @@ public class AllTest {
 
 	@BeforeClass
 	public static void init() throws IOException {
-		ParserManager.load();
+		ExtractorManager.load();
 	}
 
 	/**
@@ -58,7 +58,7 @@ public class AllTest {
 	 */
 	protected ParserAbstract createRegisterInstance(Class<? extends ParserAbstract> className)
 			throws InstantiationException, IllegalAccessException, IOException {
-		Class<? extends ParserAbstract> parserClass = ParserManager.getInstance()
+		Class<? extends ParserAbstract> parserClass = ExtractorManager.getInstance()
 				.findParserClassByName(className.getSimpleName().toLowerCase());
 		assert (parserClass != null);
 		return parserClass.newInstance();

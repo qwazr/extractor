@@ -26,7 +26,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public class ParserManager {
+public class ExtractorManager {
 
 	public final static String SERVICE_NAME_EXTRACTOR = "extractor";
 
@@ -38,22 +38,22 @@ public class ParserManager {
 
 	private final MultivaluedHashMap<String, Class<? extends ParserAbstract>> extensionsMap;
 
-	static ParserManager INSTANCE = null;
+	static ExtractorManager INSTANCE = null;
 
 	public synchronized static Class<? extends ExtractorServiceImpl> load() throws IOException {
 		if (INSTANCE != null)
 			throw new IOException("Already loaded");
-		INSTANCE = new ParserManager();
+		INSTANCE = new ExtractorManager();
 		return ExtractorServiceImpl.class;
 	}
 
-	public static ParserManager getInstance() {
-		if (ParserManager.INSTANCE == null)
+	public static ExtractorManager getInstance() {
+		if (ExtractorManager.INSTANCE == null)
 			throw new RuntimeException("The extractor service is not enabled");
-		return ParserManager.INSTANCE;
+		return ExtractorManager.INSTANCE;
 	}
 
-	private ParserManager() {
+	private ExtractorManager() {
 		namesMap = new LinkedHashMap<String, Class<? extends ParserAbstract>>();
 		mimeTypesMap = new MultivaluedHashMap<String, Class<? extends ParserAbstract>>();
 		extensionsMap = new MultivaluedHashMap<String, Class<? extends ParserAbstract>>();

@@ -26,9 +26,9 @@ import javax.ws.rs.core.UriInfo;
 import java.io.InputStream;
 import java.util.Map;
 
-@RolesAllowed(ParserManager.SERVICE_NAME_EXTRACTOR)
+@RolesAllowed(ExtractorManager.SERVICE_NAME_EXTRACTOR)
 @Path("/extractor")
-@ServiceName(ParserManager.SERVICE_NAME_EXTRACTOR)
+@ServiceName(ExtractorManager.SERVICE_NAME_EXTRACTOR)
 public interface ExtractorServiceInterface extends ServiceInterface {
 
 	@GET
