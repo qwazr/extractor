@@ -1,12 +1,12 @@
 /**
  * Copyright 2014-2016 Emmanuel Keller / QWAZR
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,13 +15,8 @@
  */
 package com.qwazr.extractor.parser;
 
-import java.io.File;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.qwazr.extractor.ParserAbstract;
+import com.qwazr.extractor.ParserField;
 import org.apache.commons.lang3.StringUtils;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
@@ -31,8 +26,12 @@ import org.jaudiotagger.tag.Tag;
 import org.jaudiotagger.tag.TagField;
 import org.jaudiotagger.tag.TagTextField;
 
-import com.qwazr.extractor.ParserAbstract;
-import com.qwazr.extractor.ParserField;
+import java.io.File;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Audio extends ParserAbstract {
 
@@ -43,19 +42,18 @@ public class Audio extends ParserAbstract {
 
 	static {
 		MIMEMAP = new HashMap<String, String>();
-		MIMEMAP.put("audio/ogg".intern(), "ogg");
-		MIMEMAP.put("audio/mpeg".intern(), "mpg");
-		MIMEMAP.put("audio/mpeg3".intern(), "mp3");
-		MIMEMAP.put("audio/flac".intern(), "flag");
-		MIMEMAP.put("audio/mp4".intern(), "mp4");
-		MIMEMAP.put("audio/vnd.rn-realaudio".intern(), "ra");
-		MIMEMAP.put("audio/x-pn-realaudio".intern(), "ra");
-		MIMEMAP.put("audio/x-realaudio".intern(), "ra");
-		MIMEMAP.put("audio/wav".intern(), "wav");
-		MIMEMAP.put("audio/x-wav".intern(), "wav");
+		MIMEMAP.put("audio/ogg", "ogg");
+		MIMEMAP.put("audio/mpeg", "mpg");
+		MIMEMAP.put("audio/mpeg3", "mp3");
+		MIMEMAP.put("audio/flac", "flag");
+		MIMEMAP.put("audio/mp4", "mp4");
+		MIMEMAP.put("audio/vnd.rn-realaudio", "ra");
+		MIMEMAP.put("audio/x-pn-realaudio", "ra");
+		MIMEMAP.put("audio/x-realaudio", "ra");
+		MIMEMAP.put("audio/wav", "wav");
+		MIMEMAP.put("audio/x-wav", "wav");
 
-		DEFAULT_MIMETYPES = MIMEMAP.keySet()
-				.toArray(new String[MIMEMAP.size()]);
+		DEFAULT_MIMETYPES = MIMEMAP.keySet().toArray(new String[MIMEMAP.size()]);
 	}
 
 	final protected static Map<FieldKey, ParserField> FIELDMAP;
@@ -82,8 +80,7 @@ public class Audio extends ParserAbstract {
 		// Build the list of fields returned by the library
 		FIELDMAP = new HashMap<FieldKey, ParserField>();
 		for (FieldKey fieldKey : FieldKey.values())
-			FIELDMAP.put(fieldKey,
-					ParserField.newString(fieldKey.name().toLowerCase(), null));
+			FIELDMAP.put(fieldKey, ParserField.newString(fieldKey.name().toLowerCase(), null));
 		FIELDS = FIELDMAP.values().toArray(new ParserField[FIELDMAP.size()]);
 		Arrays.sort(FIELDS, ParserField.COMPARATOR);
 	}
@@ -114,8 +111,7 @@ public class Audio extends ParserAbstract {
 	}
 
 	@Override
-	protected void parseContent(File file, String extension, String mimeType)
-			throws Exception {
+	protected void parseContent(File file, String extension, String mimeType) throws Exception {
 		AudioFile f = AudioFileIO.read(file);
 		Tag tag = f.getTag();
 		if (tag == null)
@@ -129,15 +125,13 @@ public class Audio extends ParserAbstract {
 			for (TagField tagField : tagFields) {
 				if (!(tagField instanceof TagTextField))
 					continue;
-				metas.add(entry.getValue(),
-						((TagTextField) tagField).getContent());
+				metas.add(entry.getValue(), ((TagTextField) tagField).getContent());
 			}
 		}
 	}
 
 	@Override
-	protected void parseContent(InputStream inputStream, String extension,
-			String mimeType) throws Exception {
+	protected void parseContent(InputStream inputStream, String extension, String mimeType) throws Exception {
 		String format = getParameterValue(FORMAT, 0);
 		if (StringUtils.isEmpty(format))
 			format = extension;
@@ -145,8 +139,7 @@ public class Audio extends ParserAbstract {
 			format = MIMEMAP.get(mimeType.intern());
 		if (StringUtils.isEmpty(format))
 			throw new Exception("The format is not found");
-		File tempFile = ParserAbstract
-				.createTempFile(inputStream, '.' + format);
+		File tempFile = ParserAbstract.createTempFile(inputStream, '.' + format);
 		try {
 			parseContent(tempFile, extension, mimeType);
 		} finally {
