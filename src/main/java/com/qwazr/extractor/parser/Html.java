@@ -15,6 +15,7 @@
  */
 package com.qwazr.extractor.parser;
 
+import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebClientOptions;
 import com.gargoylesoftware.htmlunit.html.*;
@@ -88,7 +89,10 @@ public class Html extends ParserAbstract {
 			options.setThrowExceptionOnFailingStatusCode(false);
 			options.setThrowExceptionOnScriptError(false);
 
-			HtmlPage page = webClient.getPage(file.toURI().toURL());
+			Page unknownPage = webClient.getPage(file.toURI().toURL());
+			if (!unknownPage.isHtmlPage())
+				return;
+			HtmlPage page = (HtmlPage) unknownPage;
 			ParserDocument document = getNewParserDocument();
 
 			String title = page.getTitleText();
