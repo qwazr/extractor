@@ -1,12 +1,12 @@
 /**
  * Copyright 2014-2016 Emmanuel Keller / QWAZR
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,6 +15,18 @@
  */
 package com.qwazr.extractor.parser;
 
+import com.qwazr.extractor.ParserAbstract;
+import com.qwazr.extractor.ParserDocument;
+import com.qwazr.extractor.ParserField;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
+import org.apache.pdfbox.pdmodel.PDDocumentInformation;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.encryption.StandardDecryptionMaterial;
+import org.apache.pdfbox.util.PDFTextStripper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,65 +34,43 @@ import java.io.StringWriter;
 import java.util.Calendar;
 import java.util.Date;
 
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
-import org.apache.pdfbox.pdmodel.PDDocumentInformation;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.encryption.StandardDecryptionMaterial;
-import org.apache.pdfbox.util.PDFTextStripper;
-
-import com.qwazr.extractor.ParserAbstract;
-import com.qwazr.extractor.ParserDocument;
-import com.qwazr.extractor.ParserField;
-
 public class PdfBox extends ParserAbstract {
+
+	private static final Logger logger = LoggerFactory.getLogger(PdfBox.class);
 
 	public static final String[] DEFAULT_MIMETYPES = { "application/pdf" };
 
 	public static final String[] DEFAULT_EXTENSIONS = { "pdf" };
 
-	final protected static ParserField TITLE = ParserField.newString("title",
-			"The title of the Word document");
+	final protected static ParserField TITLE = ParserField.newString("title", "The title of the Word document");
 
-	final protected static ParserField AUTHOR = ParserField.newString("author",
-			"The name of the author");
+	final protected static ParserField AUTHOR = ParserField.newString("author", "The name of the author");
 
-	final protected static ParserField SUBJECT = ParserField.newString(
-			"subject", "The subject of the document");
+	final protected static ParserField SUBJECT = ParserField.newString("subject", "The subject of the document");
 
-	final protected static ParserField CONTENT = ParserField.newString(
-			"content", "The content of the document");
+	final protected static ParserField CONTENT = ParserField.newString("content", "The content of the document");
 
-	final protected static ParserField PRODUCER = ParserField.newString(
-			"producer", "The producer of the document");
+	final protected static ParserField PRODUCER = ParserField.newString("producer", "The producer of the document");
 
-	final protected static ParserField KEYWORDS = ParserField.newString(
-			"keywords", "The keywords of the document");
+	final protected static ParserField KEYWORDS = ParserField.newString("keywords", "The keywords of the document");
 
-	final protected static ParserField CREATION_DATE = ParserField.newDate(
-			"creation_date", null);
+	final protected static ParserField CREATION_DATE = ParserField.newDate("creation_date", null);
 
-	final protected static ParserField MODIFICATION_DATE = ParserField.newDate(
-			"modification_date", null);
+	final protected static ParserField MODIFICATION_DATE = ParserField.newDate("modification_date", null);
 
-	final protected static ParserField LANGUAGE = ParserField.newString(
-			"language", null);
+	final protected static ParserField LANGUAGE = ParserField.newString("language", null);
 
-	final protected static ParserField ROTATION = ParserField.newInteger(
-			"rotation", null);
+	final protected static ParserField ROTATION = ParserField.newInteger("rotation", null);
 
-	final protected static ParserField NUMBER_OF_PAGES = ParserField
-			.newInteger("number_of_pages", null);
+	final protected static ParserField NUMBER_OF_PAGES = ParserField.newInteger("number_of_pages", null);
 
-	final protected static ParserField CHARACTER_COUNT = ParserField
-			.newInteger("character_count", null);
+	final protected static ParserField CHARACTER_COUNT = ParserField.newInteger("character_count", null);
 
-	final protected static ParserField LANG_DETECTION = ParserField.newString(
-			"lang_detection", "Detection of the language");
+	final protected static ParserField LANG_DETECTION = ParserField
+			.newString("lang_detection", "Detection of the language");
 
-	final protected static ParserField[] FIELDS = { TITLE, AUTHOR, SUBJECT,
-			CONTENT, PRODUCER, KEYWORDS, CREATION_DATE, MODIFICATION_DATE,
-			LANGUAGE, ROTATION, NUMBER_OF_PAGES, LANG_DETECTION };
+	final protected static ParserField[] FIELDS = { TITLE, AUTHOR, SUBJECT, CONTENT, PRODUCER, KEYWORDS, CREATION_DATE,
+			MODIFICATION_DATE, LANGUAGE, ROTATION, NUMBER_OF_PAGES, LANG_DETECTION };
 
 	public PdfBox() {
 	}
@@ -89,7 +79,7 @@ public class PdfBox extends ParserAbstract {
 		try {
 			return pdfInfo.getCreationDate();
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.warn(e.getMessage());
 			return null;
 		}
 	}
@@ -98,7 +88,7 @@ public class PdfBox extends ParserAbstract {
 		try {
 			return pdfInfo.getCreationDate();
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.warn(e.getMessage());
 			return null;
 		}
 	}
@@ -129,7 +119,7 @@ public class PdfBox extends ParserAbstract {
 
 	/**
 	 * Extract text content using PDFBox
-	 * 
+	 *
 	 * @param pdf
 	 * @throws Exception
 	 */
@@ -147,14 +137,12 @@ public class PdfBox extends ParserAbstract {
 	}
 
 	@Override
-	public void parseContent(InputStream inputStream, String extension,
-			String mimeType) throws Exception {
+	public void parseContent(InputStream inputStream, String extension, String mimeType) throws Exception {
 		parseContent(PDDocument.loadNonSeq(inputStream, null));
 	}
 
 	@Override
-	public void parseContent(File file, String extension, String mimeType)
-			throws Exception {
+	public void parseContent(File file, String extension, String mimeType) throws Exception {
 		parseContent(PDDocument.loadNonSeq(file, null));
 	}
 
