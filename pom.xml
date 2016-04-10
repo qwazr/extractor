@@ -12,10 +12,6 @@
         <version>1.0.1-SNAPSHOT</version>
     </parent>
 
-    <properties>
-        <poi.version>3.14</poi.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>io.undertow</groupId>
