@@ -24,12 +24,13 @@ import io.undertow.security.idm.IdentityManager;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.concurrent.Executors;
 
 public class ExtractorServer extends AbstractServer<ServerConfiguration> {
 
-	private ExtractorServer() {
+	private ExtractorServer() throws UnknownHostException {
 		super(Executors.newCachedThreadPool(), new ServerConfiguration());
 	}
 
