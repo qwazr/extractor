@@ -38,7 +38,8 @@ public class ExtractorServiceImpl implements ExtractorServiceInterface {
 		Set<String> parserList = ExtractorManager.INSTANCE.getList();
 		Map<String, ResourceLink> map = new LinkedHashMap<String, ResourceLink>(parserList.size());
 		for (String parserName : parserList)
-			map.put(parserName, new ResourceLink(ClusterManager.INSTANCE.myAddress + "/extractor/" + parserName));
+			map.put(parserName,
+					new ResourceLink(ClusterManager.INSTANCE.me.httpAddressKey + "/extractor/" + parserName));
 		return map;
 	}
 
