@@ -44,7 +44,7 @@ public class AllTest {
 
 	@BeforeClass
 	public static void init() throws IOException {
-		ExtractorManager.load();
+		ExtractorManager.load(null);
 	}
 
 	/**

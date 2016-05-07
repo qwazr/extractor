@@ -16,38 +16,24 @@
 package com.qwazr.extractor;
 
 import com.qwazr.cluster.manager.ClusterManager;
-import com.qwazr.utils.server.AbstractServer;
-import com.qwazr.utils.server.ServerConfiguration;
-import com.qwazr.utils.server.ServiceInterface;
-import com.qwazr.utils.server.ServletApplication;
-import io.undertow.security.idm.IdentityManager;
+import com.qwazr.utils.server.GenericServer;
+import com.qwazr.utils.server.ServerBuilder;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
-import java.net.UnknownHostException;
-import java.util.Collection;
-import java.util.concurrent.Executors;
 
-public class ExtractorServer extends AbstractServer<ServerConfiguration> {
+public class ExtractorServer {
 
-	private ExtractorServer() throws UnknownHostException {
-		super(Executors.newCachedThreadPool(), new ServerConfiguration());
-	}
-
-	@Override
-	public ServletApplication load(Collection<Class<? extends ServiceInterface>> services) throws IOException {
-		services.add(ClusterManager.load(executorService, udpServer, getWebServicePublicAddress(), null));
-		services.add(ExtractorManager.load());
-		return null;
-	}
-
-	@Override
-	protected IdentityManager getIdentityManager(String realm) {
-		return null;
+	public static GenericServer start()
+			throws InstantiationException, IllegalAccessException, ServletException, IOException {
+		final ServerBuilder builder = new ServerBuilder();
+		ClusterManager.load(builder, null);
+		ExtractorManager.load(builder);
+		return new GenericServer(builder).start(true);
 	}
 
 	public static void main(String[] args) throws IOException, ServletException, ReflectiveOperationException {
-		new ExtractorServer().start(true);
+		start();
 	}
 
 }
