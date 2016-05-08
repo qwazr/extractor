@@ -56,9 +56,9 @@ public class ExtractorManager {
 	}
 
 	private ExtractorManager() {
-		namesMap = new LinkedHashMap<String, Class<? extends ParserAbstract>>();
-		mimeTypesMap = new MultivaluedHashMap<String, Class<? extends ParserAbstract>>();
-		extensionsMap = new MultivaluedHashMap<String, Class<? extends ParserAbstract>>();
+		namesMap = new LinkedHashMap<>();
+		mimeTypesMap = new MultivaluedHashMap<>();
+		extensionsMap = new MultivaluedHashMap<>();
 
 		register(Audio.class);
 		register(Doc.class);

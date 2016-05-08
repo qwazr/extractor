@@ -18,25 +18,19 @@ package com.qwazr.extractor.parser;
 import com.qwazr.extractor.ParserAbstract;
 import com.qwazr.extractor.ParserDocument;
 import com.qwazr.extractor.ParserField;
+import com.qwazr.utils.StringUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
 import org.apache.pdfbox.pdmodel.PDDocumentInformation;
 import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.encryption.StandardDecryptionMaterial;
-import org.apache.pdfbox.util.PDFTextStripper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.pdfbox.text.PDFTextStripper;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
-import java.util.Calendar;
-import java.util.Date;
 
 public class PdfBox extends ParserAbstract {
-
-	private static final Logger logger = LoggerFactory.getLogger(PdfBox.class);
 
 	public static final String[] DEFAULT_MIMETYPES = { "application/pdf" };
 
@@ -66,37 +60,18 @@ public class PdfBox extends ParserAbstract {
 
 	final protected static ParserField CHARACTER_COUNT = ParserField.newInteger("character_count", null);
 
-	final protected static ParserField LANG_DETECTION = ParserField
-			.newString("lang_detection", "Detection of the language");
+	final protected static ParserField LANG_DETECTION =
+			ParserField.newString("lang_detection", "Detection of the language");
 
-	final protected static ParserField[] FIELDS = { TITLE, AUTHOR, SUBJECT, CONTENT, PRODUCER, KEYWORDS, CREATION_DATE,
-			MODIFICATION_DATE, LANGUAGE, ROTATION, NUMBER_OF_PAGES, LANG_DETECTION };
+	final protected static ParserField[] FIELDS =
+			{ TITLE, AUTHOR, SUBJECT, CONTENT, PRODUCER, KEYWORDS, CREATION_DATE, MODIFICATION_DATE, LANGUAGE, ROTATION,
+					NUMBER_OF_PAGES, LANG_DETECTION };
+
+	final protected static ParserField PASSWORD = ParserField.newString("password", StringUtils.EMPTY);
+
+	final protected static ParserField[] PARAMETERS = { PASSWORD };
 
 	public PdfBox() {
-	}
-
-	private Calendar getCreationDate(PDDocumentInformation pdfInfo) {
-		try {
-			return pdfInfo.getCreationDate();
-		} catch (IOException e) {
-			logger.warn(e.getMessage());
-			return null;
-		}
-	}
-
-	private Calendar getModificationDate(PDDocumentInformation pdfInfo) {
-		try {
-			return pdfInfo.getCreationDate();
-		} catch (IOException e) {
-			logger.warn(e.getMessage());
-			return null;
-		}
-	}
-
-	private Date getDate(Calendar cal) {
-		if (cal == null)
-			return null;
-		return cal.getTime();
 	}
 
 	private void extractMetaData(PDDocument pdf) throws IOException {
@@ -107,8 +82,8 @@ public class PdfBox extends ParserAbstract {
 			metas.add(AUTHOR, info.getAuthor());
 			metas.add(PRODUCER, info.getProducer());
 			metas.add(KEYWORDS, info.getKeywords());
-			metas.add(CREATION_DATE, getDate(getCreationDate(info)));
-			metas.add(MODIFICATION_DATE, getModificationDate(info));
+			metas.add(CREATION_DATE, info.getCreationDate());
+			metas.add(MODIFICATION_DATE, info.getModificationDate());
 		}
 		int pages = pdf.getNumberOfPages();
 		metas.add(NUMBER_OF_PAGES, pages);
@@ -125,8 +100,6 @@ public class PdfBox extends ParserAbstract {
 	 */
 	private void parseContent(PDDocument pdf) throws Exception {
 		try {
-			if (pdf.isEncrypted())
-				pdf.openProtection(new StandardDecryptionMaterial(""));
 			extractMetaData(pdf);
 			Stripper stripper = new Stripper();
 			stripper.getText(pdf);
@@ -136,19 +109,24 @@ public class PdfBox extends ParserAbstract {
 		}
 	}
 
+	private String getPassword() {
+		final String password = getParameterValue(PASSWORD, 0);
+		return password == null ? StringUtils.EMPTY : password;
+	}
+
 	@Override
 	public void parseContent(InputStream inputStream, String extension, String mimeType) throws Exception {
-		parseContent(PDDocument.loadNonSeq(inputStream, null));
+		parseContent(PDDocument.load(inputStream, getPassword()));
 	}
 
 	@Override
 	public void parseContent(File file, String extension, String mimeType) throws Exception {
-		parseContent(PDDocument.loadNonSeq(file, null));
+		parseContent(PDDocument.load(file, getPassword()));
 	}
 
 	@Override
 	protected ParserField[] getParameters() {
-		return null;
+		return PARAMETERS;
 	}
 
 	@Override
@@ -180,7 +158,7 @@ public class PdfBox extends ParserAbstract {
 			document.add(CHARACTER_COUNT, text.length());
 			document.add(CONTENT, text);
 			document.add(LANG_DETECTION, languageDetection(CONTENT, 10000));
-			document.add(ROTATION, page.findRotation());
+			document.add(ROTATION, page.getRotation());
 			output = new StringWriter();
 		}
 	}

@@ -12,6 +12,10 @@
         <version>1.0.1-SNAPSHOT</version>
     </parent>
 
+    <properties>
+        <bouncycastle.version>1.54</bouncycastle.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>io.undertow</groupId>
@@ -61,7 +65,22 @@
         </dependency>
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
-            <artifactId>pdfbox-ant</artifactId>
+            <artifactId>pdfbox</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>${bouncycastle.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcmail-jdk15on</artifactId>
+            <version>${bouncycastle.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk15on</artifactId>
+            <version>${bouncycastle.version}</version>
         </dependency>
         <dependency>
             <groupId>org.pegdown</groupId>

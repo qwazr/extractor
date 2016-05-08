@@ -1,12 +1,12 @@
 /**
  * Copyright 2014-2016 Emmanuel Keller / QWAZR
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,45 +15,41 @@
  */
 package com.qwazr.extractor.parser;
 
-import java.io.File;
-import java.io.InputStream;
-import java.util.Iterator;
+import com.qwazr.extractor.ParserAbstract;
+import com.qwazr.extractor.ParserDocument;
+import com.qwazr.extractor.ParserField;
+import com.qwazr.extractor.util.ImagePHash;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.stream.ImageInputStream;
-
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-
-import com.qwazr.extractor.ParserAbstract;
-import com.qwazr.extractor.ParserDocument;
-import com.qwazr.extractor.ParserField;
-import com.qwazr.extractor.util.ImagePHash;
+import java.io.File;
+import java.io.InputStream;
+import java.util.Iterator;
 
 public class Image extends ParserAbstract {
 
-	public static final String[] DEFAULT_MIMETYPES = ImageIO
-			.getReaderMIMETypes();
+	public static final String[] DEFAULT_MIMETYPES;
 
-	public static final String[] DEFAULT_EXTENSIONS = ImageIO
-			.getReaderFileSuffixes();
+	public static final String[] DEFAULT_EXTENSIONS;
 
-	final protected static ParserField WIDTH = ParserField.newInteger("width",
-			"Width of the image in pixels");
+	static {
+		DEFAULT_MIMETYPES = ImageIO.getReaderMIMETypes();
+		DEFAULT_EXTENSIONS = ImageIO.getReaderFileSuffixes();
+	}
 
-	final protected static ParserField HEIGHT = ParserField.newInteger(
-			"height", "Height of the image in pixels");
+	final protected static ParserField WIDTH = ParserField.newInteger("width", "Width of the image in pixels");
 
-	final protected static ParserField FORMAT = ParserField.newString("format",
-			"The detected format");
+	final protected static ParserField HEIGHT = ParserField.newInteger("height", "Height of the image in pixels");
 
-	final protected static ParserField PHASH = ParserField.newString("phash",
-			"Perceptual Hash");
+	final protected static ParserField FORMAT = ParserField.newString("format", "The detected format");
 
-	final protected static ParserField[] FIELDS = { WIDTH, HEIGHT, FORMAT,
-			PHASH };
+	final protected static ParserField PHASH = ParserField.newString("phash", "Perceptual Hash");
+
+	final protected static ParserField[] FIELDS = { WIDTH, HEIGHT, FORMAT, PHASH };
 
 	public Image() {
 	}
@@ -104,8 +100,7 @@ public class Image extends ParserAbstract {
 	}
 
 	@Override
-	protected void parseContent(File file, String extension, String mimeType)
-			throws Exception {
+	protected void parseContent(File file, String extension, String mimeType) throws Exception {
 		ImagePHash imgPhash = new ImagePHash();
 		ImageInputStream in = ImageIO.createImageInputStream(file);
 		try {
@@ -124,8 +119,7 @@ public class Image extends ParserAbstract {
 						String[] names = metadata.getMetadataFormatNames();
 						if (names != null)
 							for (String name : names)
-								browseNodes("META", metadata.getAsTree(name),
-										result);
+								browseNodes("META", metadata.getAsTree(name), result);
 					}
 				} finally {
 					reader.dispose();
@@ -138,10 +132,8 @@ public class Image extends ParserAbstract {
 	}
 
 	@Override
-	protected void parseContent(InputStream inputStream, String extension,
-			String mimeType) throws Exception {
-		File tempFile = ParserAbstract.createTempFile(inputStream,
-				extension == null ? "image" : "." + extension);
+	protected void parseContent(InputStream inputStream, String extension, String mimeType) throws Exception {
+		File tempFile = ParserAbstract.createTempFile(inputStream, extension == null ? "image" : "." + extension);
 		try {
 			parseContent(tempFile, extension, mimeType);
 		} finally {

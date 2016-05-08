@@ -25,8 +25,7 @@ import org.apache.commons.io.IOUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.UriInfo;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -58,8 +57,8 @@ public class AllTest {
 	 */
 	protected ParserAbstract createRegisterInstance(Class<? extends ParserAbstract> className)
 			throws InstantiationException, IllegalAccessException, IOException {
-		Class<? extends ParserAbstract> parserClass = ExtractorManager.getInstance()
-				.findParserClassByName(className.getSimpleName().toLowerCase());
+		Class<? extends ParserAbstract> parserClass =
+				ExtractorManager.getInstance().findParserClassByName(className.getSimpleName().toLowerCase());
 		assert (parserClass != null);
 		return parserClass.newInstance();
 	}
@@ -114,22 +113,6 @@ public class AllTest {
 	}
 
 	/**
-	 * Build a map of parameters using key/value pairs
-	 *
-	 * @param keyValueParams
-	 * @return
-	 */
-	protected MultivaluedMap<String, String> getParameters(String... keyValueParams) {
-		if (keyValueParams == null)
-			return null;
-		MultivaluedHashMap<String, String> parameters = null;
-		parameters = new MultivaluedHashMap<>();
-		for (int i = 0; i < keyValueParams.length; i += 2)
-			parameters.add(keyValueParams[i], keyValueParams[i + 1]);
-		return parameters;
-	}
-
-	/**
 	 * Test inputstream and file parsing
 	 *
 	 * @param className
@@ -140,29 +123,30 @@ public class AllTest {
 	protected void doTest(Class<? extends ParserAbstract> className, String fileName, String testString,
 			String... keyValueParams) throws Exception {
 		logger.info("Testing " + className);
-		MultivaluedMap<String, String> parameters = getParameters(keyValueParams);
+
+		final UriInfo uriInfo = new UriInfoMock(keyValueParams);
 
 		File tempFile = getTempFile(fileName);
 
 		// Test stream
 		ParserAbstract parser = createRegisterInstance(className);
-		ParserResult parserResult = parser.doParsing(parameters, getStream(fileName), null, null);
+		ParserResult parserResult = parser.doParsing(uriInfo.getQueryParameters(), getStream(fileName), null, null);
 		assert (parserResult != null);
 		checkText(parserResult, testString);
 
 		// Test file
 		parser = createRegisterInstance(className);
-		parserResult = parser.doParsing(parameters, tempFile, null, null);
+		parserResult = parser.doParsing(uriInfo.getQueryParameters(), tempFile, null, null);
 		assert (parserResult != null);
 		checkText(parserResult, testString);
 
 		// Test stream with magic mime service
-		parserResult = new ExtractorServiceImpl().putMagic(null, fileName, null, null, getStream(fileName));
+		parserResult = new ExtractorServiceImpl().putMagic(uriInfo, fileName, null, null, getStream(fileName));
 		assert (parserResult != null);
 		checkText(parserResult, testString);
 
 		// Test path with magic mime service
-		parserResult = new ExtractorServiceImpl().putMagic(null, fileName, tempFile.getAbsolutePath(), null, null);
+		parserResult = new ExtractorServiceImpl().putMagic(uriInfo, fileName, tempFile.getAbsolutePath(), null, null);
 		assert (parserResult != null);
 		checkText(parserResult, testString);
 	}
@@ -234,9 +218,10 @@ public class AllTest {
 		doTest(Image.class, "file.png", DEFAULT_TEST_STRING);
 	}
 
-	// public void testImageTiff() throws Exception {
-	// doTest(Image.class, "file.tiff", null);
-	// }
+	//TODO tiff disabled
+	public void testImageTiff() throws Exception {
+		doTest(Image.class, "file.tiff", DEFAULT_TEST_STRING);
+	}
 
 	@Test
 	public void testMarkdown() throws Exception {
@@ -246,6 +231,11 @@ public class AllTest {
 	@Test
 	public void testPdf() throws Exception {
 		doTest(PdfBox.class, "file.pdf", DEFAULT_TEST_STRING);
+	}
+
+	@Test
+	public void testPwdPdf() throws Exception {
+		doTest(PdfBox.class, "file-pass.pdf", DEFAULT_TEST_STRING, "password", "1234");
 	}
 
 	@Test
