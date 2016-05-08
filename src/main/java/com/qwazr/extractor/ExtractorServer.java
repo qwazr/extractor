@@ -29,7 +29,7 @@ public class ExtractorServer {
 		final ServerBuilder builder = new ServerBuilder();
 		ClusterManager.load(builder, null);
 		ExtractorManager.load(builder);
-		return new GenericServer(builder).start(true);
+		return builder.build().start(true);
 	}
 
 	public static void main(String[] args) throws IOException, ServletException, ReflectiveOperationException {
