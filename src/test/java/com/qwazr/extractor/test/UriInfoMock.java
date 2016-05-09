@@ -21,7 +21,7 @@ import java.util.List;
 
 class UriInfoMock implements UriInfo {
 
-	private final MultivaluedMap parameters;
+	private final MultivaluedMap<String, String> parameters;
 
 	UriInfoMock(String... keyValueParams) {
 		if (keyValueParams == null) {
