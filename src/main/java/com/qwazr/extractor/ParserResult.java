@@ -56,8 +56,7 @@ public class ParserResult {
 		// Extract the metas
 		metas = parserMetas == null ? null : parserMetas.fields;
 
-		documents = new ArrayList<LinkedHashMap<String, ArrayList<Object>>>(
-				parserDocuments == null ? 0 : parserDocuments.size());
+		documents = new ArrayList<>(parserDocuments == null ? 0 : parserDocuments.size());
 		// Extract the documents found
 		if (parserDocuments != null)
 			for (ParserDocument parserDocument : parserDocuments)
