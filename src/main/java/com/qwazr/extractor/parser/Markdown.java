@@ -1,12 +1,12 @@
 /**
  * Copyright 2014-2016 Emmanuel Keller / QWAZR
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,43 +15,32 @@
  */
 package com.qwazr.extractor.parser;
 
-import java.io.InputStream;
-
+import com.qwazr.extractor.ParserAbstract;
+import com.qwazr.extractor.ParserDocument;
+import com.qwazr.extractor.ParserField;
+import com.qwazr.utils.CharsetUtils;
 import org.apache.commons.io.IOUtils;
 import org.pegdown.LinkRenderer;
 import org.pegdown.PegDownProcessor;
 import org.pegdown.ToHtmlSerializer;
-import org.pegdown.ast.DefinitionNode;
-import org.pegdown.ast.DefinitionTermNode;
-import org.pegdown.ast.HeaderNode;
-import org.pegdown.ast.ListItemNode;
-import org.pegdown.ast.ParaNode;
-import org.pegdown.ast.RootNode;
-import org.pegdown.ast.SuperNode;
-import org.pegdown.ast.TextNode;
+import org.pegdown.ast.*;
 
-import com.qwazr.extractor.ParserAbstract;
-import com.qwazr.extractor.ParserDocument;
-import com.qwazr.extractor.ParserField;
+import java.io.InputStream;
 
 public class Markdown extends ParserAbstract {
 
-	public static final String[] DEFAULT_MIMETYPES = { "text/x-markdown",
-			"text/markdown" };
+	public static final String[] DEFAULT_MIMETYPES = { "text/x-markdown", "text/markdown" };
 
 	public static final String[] DEFAULT_EXTENSIONS = { "md", "markdown" };
 
-	final protected static ParserField CONTENT = ParserField.newString(
-			"content", "The content of the document");
+	final protected static ParserField CONTENT = ParserField.newString("content", "The content of the document");
 
-	final protected static ParserField URL = ParserField.newString("url",
-			"Detected URLs");
+	final protected static ParserField URL = ParserField.newString("url", "Detected URLs");
 
-	final protected static ParserField LANG_DETECTION = ParserField.newString(
-			"lang_detection", "Detection of the language");
+	final protected static ParserField LANG_DETECTION =
+			ParserField.newString("lang_detection", "Detection of the language");
 
-	final protected static ParserField[] FIELDS = { CONTENT, URL,
-			LANG_DETECTION };
+	final protected static ParserField[] FIELDS = { CONTENT, URL, LANG_DETECTION };
 
 	private ParserDocument result;
 
@@ -80,17 +69,16 @@ public class Markdown extends ParserAbstract {
 
 	private void parseContent(char[] source) throws Exception {
 		// PegDownProcessor is not thread safe One processor per thread
-		PegDownProcessor pdp = new PegDownProcessor();
-		RootNode rootNode = pdp.parseMarkdown(source);
+		final PegDownProcessor pdp = new PegDownProcessor(30000);
+		final RootNode rootNode = pdp.parseMarkdown(source);
 		result = getNewParserDocument();
 		rootNode.accept(new ExtractorSerializer());
 		result.add(LANG_DETECTION, languageDetection(CONTENT, 10000));
 	}
 
 	@Override
-	protected void parseContent(InputStream inputStream, String extension,
-			String mimeType) throws Exception {
-		parseContent(IOUtils.toCharArray(inputStream));
+	protected void parseContent(InputStream inputStream, String extension, String mimeType) throws Exception {
+		parseContent(IOUtils.toCharArray(inputStream, CharsetUtils.CharsetUTF8));
 	}
 
 	public class ExtractorSerializer extends ToHtmlSerializer {
