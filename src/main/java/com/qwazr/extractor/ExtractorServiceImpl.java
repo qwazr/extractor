@@ -21,6 +21,8 @@ import com.qwazr.utils.StringUtils;
 import com.qwazr.utils.server.ServerException;
 import net.sf.jmimemagic.*;
 import org.apache.commons.io.FilenameUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response.Status;
@@ -32,6 +34,8 @@ import java.util.Map;
 import java.util.Set;
 
 public class ExtractorServiceImpl implements ExtractorServiceInterface {
+
+	private static final Logger logger = LoggerFactory.getLogger(ExtractorServiceImpl.class);
 
 	@Override
 	public Map<String, ResourceLink> list() {
@@ -79,7 +83,7 @@ public class ExtractorServiceImpl implements ExtractorServiceInterface {
 			File file = getFilePath(path);
 			return parser.doParsing(getQueryParameters(uriInfo), file, null, null);
 		} catch (Exception e) {
-			throw ServerException.getJsonException(e);
+			throw ServerException.getJsonException(logger, e);
 		}
 	}
 
@@ -105,7 +109,7 @@ public class ExtractorServiceImpl implements ExtractorServiceInterface {
 			else
 				return parser.doParsing(parameters, inputStream, null, null);
 		} catch (Exception e) {
-			throw ServerException.getJsonException(e);
+			throw ServerException.getJsonException(logger, e);
 		}
 	}
 
@@ -176,8 +180,8 @@ public class ExtractorServiceImpl implements ExtractorServiceInterface {
 			// Find a parser from the mime type
 			if (parserClass == null) {
 				if (StringUtils.isEmpty(mimeType)) {
-					tempFile = File
-							.createTempFile("textextractor", extension == null ? StringUtils.EMPTY : "." + extension);
+					tempFile = File.createTempFile("textextractor",
+							extension == null ? StringUtils.EMPTY : "." + extension);
 					try {
 						IOUtils.copy(inputStream, tempFile);
 					} finally {
@@ -213,7 +217,7 @@ public class ExtractorServiceImpl implements ExtractorServiceInterface {
 			else
 				return putMagicStream(uriInfo, fileName, mimeType, inputStream);
 		} catch (Exception e) {
-			throw ServerException.getJsonException(e);
+			throw ServerException.getJsonException(logger, e);
 		}
 	}
 
