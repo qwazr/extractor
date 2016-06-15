@@ -24,7 +24,7 @@ public class ParserDocument {
 	public final LinkedHashMap<String, ArrayList<Object>> fields;
 
 	ParserDocument() {
-		fields = new LinkedHashMap<String, ArrayList<Object>>();
+		fields = new LinkedHashMap<>();
 	}
 
 	private List<Object> getList(ParserField field, Object value) {
@@ -32,7 +32,7 @@ public class ParserDocument {
 			return null;
 		ArrayList<Object> values = fields.get(field.name);
 		if (values == null) {
-			values = new ArrayList<Object>(1);
+			values = new ArrayList<>(1);
 			fields.put(field.name, values);
 		}
 		return values;

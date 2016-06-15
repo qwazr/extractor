@@ -15,16 +15,16 @@
  */
 package com.qwazr.extractor.test;
 
-import com.qwazr.extractor.ExtractorManager;
-import com.qwazr.extractor.ExtractorServiceImpl;
-import com.qwazr.extractor.ParserAbstract;
-import com.qwazr.extractor.ParserResult;
+import com.qwazr.extractor.*;
 import com.qwazr.extractor.parser.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -201,6 +202,33 @@ public class AllTest {
 	@Test
 	public void testHtml() throws Exception {
 		doTest(Html.class, "file.html", "search engine software");
+	}
+
+	private final static String[] XPATH_SELECTORS =
+			{ "//*[@id=\"crawl\"]/ul/li[1]/strong", "//*[@id=\"download\"]/div/div[2]/div/h3", "))-/$/$ dummy" };
+	private final static String[] XPATH_RESULTS = { "web crawler", "Documentation", null };
+
+	@Test
+	public void testHtmlXPath() {
+		ExtractorServiceInterface client = ExtractorServiceInterface.getClient();
+		MultivaluedMap map = new MultivaluedHashMap<>();
+		for (String xpath : XPATH_SELECTORS)
+			map.addAll("xpath", xpath);
+
+		ParserResult parserResult = client.extract("html", map, null, getStream("file.html"));
+		Assert.assertNotNull(parserResult);
+		List<Object> results = parserResult.getDocumentFieldValues(0, "xpath");
+		Assert.assertNotNull(results);
+		Assert.assertEquals(XPATH_SELECTORS.length, results.size());
+		int i = 0;
+		for (String xpathResult : XPATH_RESULTS) {
+			Map<String, Object> result = (Map<String, Object>) parserResult.getDocumentFieldValue(0, "xpath", i++);
+			Assert.assertNotNull(result);
+			if (xpathResult != null)
+				Assert.assertEquals(xpathResult, ((List) result.get("text")).get(0));
+			else
+				Assert.assertTrue(result.containsKey("error"));
+		}
 	}
 
 	@Test

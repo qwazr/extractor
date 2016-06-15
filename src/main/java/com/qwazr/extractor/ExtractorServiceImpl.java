@@ -40,7 +40,7 @@ public class ExtractorServiceImpl implements ExtractorServiceInterface {
 	@Override
 	public Map<String, ResourceLink> list() {
 		Set<String> parserList = ExtractorManager.INSTANCE.getList();
-		Map<String, ResourceLink> map = new LinkedHashMap<String, ResourceLink>(parserList.size());
+		Map<String, ResourceLink> map = new LinkedHashMap<>(parserList.size());
 		for (String parserName : parserList)
 			map.put(parserName,
 					new ResourceLink(ClusterManager.INSTANCE.me.httpAddressKey + "/extractor/" + parserName));

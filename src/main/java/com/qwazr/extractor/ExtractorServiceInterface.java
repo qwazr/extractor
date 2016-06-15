@@ -40,7 +40,7 @@ public interface ExtractorServiceInterface extends ServiceInterface {
 	@Path("/{name}")
 	@Produces(ServiceInterface.APPLICATION_JSON_UTF8)
 	Object get(@Context UriInfo uriInfo, @PathParam("name") String parserName, @QueryParam("path") String path);
-
+	
 	@PUT
 	@Path("/{name}")
 	@Produces(ServiceInterface.APPLICATION_JSON_UTF8)
