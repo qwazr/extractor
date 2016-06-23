@@ -25,14 +25,14 @@ import java.io.IOException;
 public class ExtractorServer {
 
 	public static GenericServer start()
-			throws InstantiationException, IllegalAccessException, ServletException, IOException {
+			throws Exception {
 		final ServerBuilder builder = new ServerBuilder();
 		ClusterManager.load(builder, null);
 		ExtractorManager.load(builder);
 		return builder.build().start(true);
 	}
 
-	public static void main(String[] args) throws IOException, ServletException, ReflectiveOperationException {
+	public static void main(String[] args) throws Exception {
 		start();
 	}
 
