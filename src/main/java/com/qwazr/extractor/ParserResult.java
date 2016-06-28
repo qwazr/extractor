@@ -34,24 +34,25 @@ public class ParserResult {
 
 	public String parser_name;
 
-	public long time_elapsed;
+	public Long time_elapsed;
 
 	public LinkedHashMap<String, ArrayList<Object>> metas;
 
 	public final ArrayList<LinkedHashMap<String, ArrayList<Object>>> documents;
 
 	ParserResult() {
-		time_elapsed = System.currentTimeMillis();
+		time_elapsed = null;
 		documents = null;
 		metas = null;
 		parser_name = null;
 	}
 
-	ParserResult(String parserName, ParserDocument parserMetas, ArrayList<ParserDocument> parserDocuments) {
+	ParserResult(String parserName, long startTime, ParserDocument parserMetas,
+			ArrayList<ParserDocument> parserDocuments) {
 		parser_name = parserName;
 
 		// Calculate the time elapsed
-		time_elapsed = System.currentTimeMillis() - time_elapsed;
+		time_elapsed = System.currentTimeMillis() - startTime;
 
 		// Extract the metas
 		metas = parserMetas == null ? null : parserMetas.fields;

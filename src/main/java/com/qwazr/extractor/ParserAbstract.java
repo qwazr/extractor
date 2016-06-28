@@ -68,14 +68,10 @@ public abstract class ParserAbstract {
 	/**
 	 * Read a document and fill the ParserDocument list.
 	 *
-	 * @param inputStream
-	 *            a stream of the content to analyze
-	 * @param extension
-	 *            the optional extension of the file
-	 * @param mimeType
-	 *            the option mime type of the file
-	 * @throws Exception
-	 *             if any error occurs
+	 * @param inputStream a stream of the content to analyze
+	 * @param extension   the optional extension of the file
+	 * @param mimeType    the option mime type of the file
+	 * @throws Exception if any error occurs
 	 */
 	protected abstract void parseContent(InputStream inputStream, String extension, String mimeType) throws Exception;
 
@@ -92,14 +88,10 @@ public abstract class ParserAbstract {
 	/**
 	 * Read a document and fill the ParserDocument list.
 	 *
-	 * @param file
-	 *            the file instance of the document to parse
-	 * @param extension
-	 *            an optional extension of the file
-	 * @param mimeType
-	 *            an optional mime type of the file
-	 * @throws Exception
-	 *             if any error occurs
+	 * @param file      the file instance of the document to parse
+	 * @param extension an optional extension of the file
+	 * @param mimeType  an optional mime type of the file
+	 * @throws Exception if any error occurs
 	 */
 	protected void parseContent(File file, String extension, String mimeType) throws Exception {
 		InputStream is = null;
@@ -128,29 +120,29 @@ public abstract class ParserAbstract {
 	}
 
 	public final ParserResult doParsing(MultivaluedMap<String, String> parameters, InputStream inputStream,
-					String extension, String mimeType) throws Exception {
+			String extension, String mimeType) throws Exception {
 		this.parameters = parameters;
+		final long startTime = System.currentTimeMillis();
 		parseContent(inputStream, extension, mimeType);
-		return new ParserResult(name, metas, documents);
+		return new ParserResult(name, startTime, metas, documents);
 	}
 
 	public final ParserResult doParsing(MultivaluedMap<String, String> parameters, File file, String extension,
-					String mimeType) throws Exception {
+			String mimeType) throws Exception {
 		this.parameters = parameters;
 		if (extension == null)
 			extension = FilenameUtils.getExtension(file.getName());
+		final long startTime = System.currentTimeMillis();
 		parseContent(file, extension, mimeType);
-		return new ParserResult(name, metas, documents);
+		return new ParserResult(name, startTime, metas, documents);
 	}
 
 	/**
 	 * Submit the content of a field to language detection. It checks all the
 	 * document.
 	 *
-	 * @param source
-	 *            The field to submit
-	 * @param maxLength
-	 *            The maximum number of characters
+	 * @param source    The field to submit
+	 * @param maxLength The maximum number of characters
 	 * @return the detected language
 	 */
 	protected final String languageDetection(ParserField source, int maxLength) {
@@ -174,12 +166,9 @@ public abstract class ParserAbstract {
 	/**
 	 * Submit the content if of a field to language detection.
 	 *
-	 * @param document
-	 *            the document to check
-	 * @param source
-	 *            the field containing the text to match
-	 * @param maxLength
-	 *            the maximum number of characters to test
+	 * @param document  the document to check
+	 * @param source    the field containing the text to match
+	 * @param maxLength the maximum number of characters to test
 	 * @return the detected language
 	 */
 	protected final String languageDetection(ParserDocument document, ParserField source, int maxLength) {
