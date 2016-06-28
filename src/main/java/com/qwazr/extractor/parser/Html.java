@@ -63,15 +63,19 @@ public class Html extends ParserAbstract {
 
 	final protected static ParserField XPATH = ParserField.newMap("xpath", "XPath selector results");
 
+	final protected static ParserField CSS = ParserField.newMap("css", "CSS selector results");
+
 	final protected static ParserField LANG_DETECTION =
 			ParserField.newString("lang_detection", "Detection of the language");
 
 	final protected static ParserField[] FIELDS =
 			{ TITLE, CONTENT, H1, H2, H3, H4, H5, H6, ANCHORS, IMAGES, METAS, LANG_DETECTION, XPATH };
 
-	final protected static ParserField XPATH_PARAM = ParserField.newString("xpath", "Any xpath selector");
+	final protected static ParserField XPATH_PARAM = ParserField.newString("xpath", "Any XPATH selector");
 
-	final protected static ParserField[] PARAMETERS = { XPATH_PARAM };
+	final protected static ParserField CSS_PARAM = ParserField.newString("css", "Any CSS selector");
+
+	final protected static ParserField[] PARAMETERS = { XPATH_PARAM, CSS_PARAM };
 
 	@Override
 	protected ParserField[] getParameters() {
@@ -152,6 +156,21 @@ public class Html extends ParserAbstract {
 		}
 	}
 
+	private final List<String> dumpSelectors(final List<?> results) {
+		final List<String> textList = new ArrayList<>();
+		if (results == null)
+			return textList;
+		for (Object result : results) {
+			final String content;
+			if (result instanceof HtmlElement)
+				content = ((HtmlElement) result).asText();
+			else
+				content = result.toString();
+			textList.add(content);
+		}
+		return textList;
+	}
+
 	private final int extractXPath(final HtmlPage page, final ParserDocument document) {
 		int i = 0;
 		String xpath;
@@ -159,22 +178,28 @@ public class Html extends ParserAbstract {
 			final LinkedHashMap<String, Object> xpathResult = new LinkedHashMap<>();
 			try {
 				final List<?> results = page.getByXPath(xpath);
-				final List<String> textList = new ArrayList<>();
-				if (results != null) {
-					for (Object result : results) {
-						final String content;
-						if (result instanceof HtmlElement)
-							content = ((HtmlElement) result).asText();
-						else
-							content = result.toString();
-						textList.add(content);
-					}
-				}
-				xpathResult.put("text", textList);
+				xpathResult.put("text", dumpSelectors(results));
 			} catch (Exception e) {
 				xpathResult.put("error", e.getMessage());
 			}
 			document.add(XPATH, xpathResult);
+			i++;
+		}
+		return i;
+	}
+
+	private final int extractCss(final HtmlPage page, final ParserDocument document) {
+		int i = 0;
+		String css;
+		while ((css = getParameterValue(CSS, i)) != null) {
+			final LinkedHashMap<String, Object> xpathResult = new LinkedHashMap<>();
+			try {
+				final DomNodeList<DomNode> results = page.querySelectorAll(css);
+				xpathResult.put("text", dumpSelectors(results));
+			} catch (Exception e) {
+				xpathResult.put("error", e.getMessage());
+			}
+			document.add(CSS, xpathResult);
 			i++;
 		}
 		return i;
@@ -199,7 +224,7 @@ public class Html extends ParserAbstract {
 			final ParserDocument document = getNewParserDocument();
 			final HtmlElement documentElement = page.getDocumentElement();
 
-			if (extractXPath(page, document) == 0) {
+			if (extractXPath(page, document) == 0 && extractCss(page, document) == 0) {
 				extractTitle(page, document);
 				extractHeaders(documentElement, document);
 				extractAnchors(page, document);
