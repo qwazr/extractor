@@ -34,9 +34,9 @@ import java.util.Map;
 
 public class Html extends ParserAbstract {
 
-	public static final String[] DEFAULT_MIMETYPES = {"text/html"};
+	public static final String[] DEFAULT_MIMETYPES = { "text/html" };
 
-	public static final String[] DEFAULT_EXTENSIONS = {"htm", "html"};
+	public static final String[] DEFAULT_EXTENSIONS = { "htm", "html" };
 
 	final protected static ParserField TITLE = ParserField.newString("title", "The title of the document");
 
@@ -69,7 +69,7 @@ public class Html extends ParserAbstract {
 			ParserField.newString("lang_detection", "Detection of the language");
 
 	final protected static ParserField[] FIELDS =
-			{TITLE, CONTENT, H1, H2, H3, H4, H5, H6, ANCHORS, IMAGES, METAS, LANG_DETECTION, XPATH};
+			{ TITLE, CONTENT, H1, H2, H3, H4, H5, H6, ANCHORS, IMAGES, METAS, LANG_DETECTION, XPATH };
 
 	final protected static ParserField XPATH_PARAM = ParserField.newString("xpath", "Any XPATH selector");
 
@@ -81,7 +81,7 @@ public class Html extends ParserAbstract {
 	final protected static ParserField CSS_NAME_PARAM =
 			ParserField.newString("css_name", "The name of the CSS selector");
 
-	final protected static ParserField[] PARAMETERS = {XPATH_PARAM, XPATH_NAME_PARAM, CSS_PARAM, CSS_NAME_PARAM};
+	final protected static ParserField[] PARAMETERS = { XPATH_PARAM, XPATH_NAME_PARAM, CSS_PARAM, CSS_NAME_PARAM };
 
 	@Override
 	protected ParserField[] getParameters() {
@@ -225,7 +225,7 @@ public class Html extends ParserAbstract {
 			final ParserDocument document = getNewParserDocument();
 			final HtmlElement documentElement = page.getDocumentElement();
 
-			if (extractXPath(page, document) == 0 && extractCss(page, document) == 0) {
+			if (extractXPath(page, document) + extractCss(page, document) == 0) {
 				extractTitle(page, document);
 				extractHeaders(documentElement, document);
 				extractAnchors(page, document);
