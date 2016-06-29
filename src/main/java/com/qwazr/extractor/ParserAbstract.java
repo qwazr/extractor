@@ -44,7 +44,7 @@ public abstract class ParserAbstract {
 		return document;
 	}
 
-	protected String getParameterValue(ParserField param, int position) {
+	protected String getParameterValue(final ParserField param, final int position) {
 		if (parameters == null)
 			return null;
 		List<String> values = parameters.get(param.name);
@@ -93,7 +93,7 @@ public abstract class ParserAbstract {
 	 * @param mimeType  an optional mime type of the file
 	 * @throws Exception if any error occurs
 	 */
-	protected void parseContent(File file, String extension, String mimeType) throws Exception {
+	protected void parseContent(final File file, final String extension, final String mimeType) throws Exception {
 		InputStream is = null;
 		try {
 			is = new FileInputStream(file);
@@ -104,7 +104,8 @@ public abstract class ParserAbstract {
 		}
 	}
 
-	protected final static File createTempFile(InputStream inputStream, String extension) throws IOException {
+	protected final static File createTempFile(final InputStream inputStream, final String extension)
+			throws IOException {
 		File tempFile = File.createTempFile("oss-extractor", extension);
 		FileOutputStream fos = null;
 		try {
@@ -119,22 +120,39 @@ public abstract class ParserAbstract {
 		}
 	}
 
-	public final ParserResult doParsing(MultivaluedMap<String, String> parameters, InputStream inputStream,
-			String extension, String mimeType) throws Exception {
+	public final ParserResult doParsing(final MultivaluedMap<String, String> parameters, final InputStream inputStream,
+			final String extension, final String mimeType) throws Exception {
 		this.parameters = parameters;
 		final long startTime = System.currentTimeMillis();
 		parseContent(inputStream, extension, mimeType);
 		return new ParserResult(name, startTime, metas, documents);
 	}
 
-	public final ParserResult doParsing(MultivaluedMap<String, String> parameters, File file, String extension,
-			String mimeType) throws Exception {
+	public final ParserResult doParsing(final MultivaluedMap<String, String> parameters, final File file,
+			String extension, final String mimeType) throws Exception {
 		this.parameters = parameters;
 		if (extension == null)
 			extension = FilenameUtils.getExtension(file.getName());
 		final long startTime = System.currentTimeMillis();
 		parseContent(file, extension, mimeType);
 		return new ParserResult(name, startTime, metas, documents);
+	}
+
+	private void extractField(final ParserDocument document, final ParserField source, final int maxLength,
+			final StringBuilder sb) {
+		if (sb.length() >= maxLength)
+			return;
+		List<Object> objectList = document.fields.get(source.name);
+		if (objectList == null)
+			return;
+		for (Object object : objectList) {
+			if (object == null)
+				continue;
+			sb.append(object.toString());
+			sb.append(' ');
+			if (sb.length() >= maxLength)
+				return;
+		}
 	}
 
 	/**
@@ -145,21 +163,10 @@ public abstract class ParserAbstract {
 	 * @param maxLength The maximum number of characters
 	 * @return the detected language
 	 */
-	protected final String languageDetection(ParserField source, int maxLength) {
-		StringBuilder sb = new StringBuilder();
-		for (ParserDocument document : documents) {
-			List<Object> objectList = document.fields.get(source.name);
-			if (objectList == null)
-				continue;
-			for (Object object : objectList) {
-				if (object == null)
-					continue;
-				sb.append(object.toString());
-				sb.append(' ');
-				if (sb.length() > maxLength)
-					Language.quietDetect(sb.toString(), maxLength);
-			}
-		}
+	protected final String languageDetection(final ParserField source, final int maxLength) {
+		final StringBuilder sb = new StringBuilder();
+		for (ParserDocument document : documents)
+			extractField(document, source, maxLength, sb);
 		return Language.quietDetect(sb.toString(), maxLength);
 	}
 
@@ -171,19 +178,10 @@ public abstract class ParserAbstract {
 	 * @param maxLength the maximum number of characters to test
 	 * @return the detected language
 	 */
-	protected final String languageDetection(ParserDocument document, ParserField source, int maxLength) {
-		StringBuilder sb = new StringBuilder();
-		List<Object> objectList = document.fields.get(source.name);
-		if (objectList == null)
-			return null;
-		for (Object object : objectList) {
-			if (object == null)
-				continue;
-			sb.append(object.toString());
-			sb.append(' ');
-			if (sb.length() > maxLength)
-				Language.quietDetect(sb.toString(), maxLength);
-		}
+	protected final String languageDetection(final ParserDocument document, final ParserField source,
+			final int maxLength) {
+		final StringBuilder sb = new StringBuilder();
+		extractField(document, source, maxLength, sb);
 		return Language.quietDetect(sb.toString(), maxLength);
 	}
 

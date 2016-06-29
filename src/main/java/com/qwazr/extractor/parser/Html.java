@@ -34,9 +34,9 @@ import java.util.Map;
 
 public class Html extends ParserAbstract {
 
-	public static final String[] DEFAULT_MIMETYPES = { "text/html" };
+	public static final String[] DEFAULT_MIMETYPES = {"text/html"};
 
-	public static final String[] DEFAULT_EXTENSIONS = { "htm", "html" };
+	public static final String[] DEFAULT_EXTENSIONS = {"htm", "html"};
 
 	final protected static ParserField TITLE = ParserField.newString("title", "The title of the document");
 
@@ -69,13 +69,19 @@ public class Html extends ParserAbstract {
 			ParserField.newString("lang_detection", "Detection of the language");
 
 	final protected static ParserField[] FIELDS =
-			{ TITLE, CONTENT, H1, H2, H3, H4, H5, H6, ANCHORS, IMAGES, METAS, LANG_DETECTION, XPATH };
+			{TITLE, CONTENT, H1, H2, H3, H4, H5, H6, ANCHORS, IMAGES, METAS, LANG_DETECTION, XPATH};
 
 	final protected static ParserField XPATH_PARAM = ParserField.newString("xpath", "Any XPATH selector");
 
+	final protected static ParserField XPATH_NAME_PARAM =
+			ParserField.newString("xpath_name", "The name of the XPATH selector");
+
 	final protected static ParserField CSS_PARAM = ParserField.newString("css", "Any CSS selector");
 
-	final protected static ParserField[] PARAMETERS = { XPATH_PARAM, CSS_PARAM };
+	final protected static ParserField CSS_NAME_PARAM =
+			ParserField.newString("css_name", "The name of the CSS selector");
+
+	final protected static ParserField[] PARAMETERS = {XPATH_PARAM, XPATH_NAME_PARAM, CSS_PARAM, CSS_NAME_PARAM};
 
 	@Override
 	protected ParserField[] getParameters() {
@@ -174,14 +180,11 @@ public class Html extends ParserAbstract {
 	private final int extractXPath(final HtmlPage page, final ParserDocument document) {
 		int i = 0;
 		String xpath;
-		while ((xpath = getParameterValue(XPATH, i)) != null) {
+		while ((xpath = getParameterValue(XPATH_PARAM, i)) != null) {
+			final String name = getParameterValue(XPATH_NAME_PARAM, i);
 			final LinkedHashMap<String, Object> xpathResult = new LinkedHashMap<>();
-			try {
-				final List<?> results = page.getByXPath(xpath);
-				xpathResult.put("text", dumpSelectors(results));
-			} catch (Exception e) {
-				xpathResult.put("error", e.getMessage());
-			}
+			final List<?> results = page.getByXPath(xpath);
+			xpathResult.put(name == null ? Integer.toString(i) : name, dumpSelectors(results));
 			document.add(XPATH, xpathResult);
 			i++;
 		}
@@ -191,15 +194,12 @@ public class Html extends ParserAbstract {
 	private final int extractCss(final HtmlPage page, final ParserDocument document) {
 		int i = 0;
 		String css;
-		while ((css = getParameterValue(CSS, i)) != null) {
-			final LinkedHashMap<String, Object> xpathResult = new LinkedHashMap<>();
-			try {
-				final DomNodeList<DomNode> results = page.querySelectorAll(css);
-				xpathResult.put("text", dumpSelectors(results));
-			} catch (Exception e) {
-				xpathResult.put("error", e.getMessage());
-			}
-			document.add(CSS, xpathResult);
+		while ((css = getParameterValue(CSS_PARAM, i)) != null) {
+			final String name = getParameterValue(CSS_NAME_PARAM, i);
+			final LinkedHashMap<String, Object> cssResult = new LinkedHashMap<>();
+			final DomNodeList<DomNode> results = page.querySelectorAll(css);
+			cssResult.put(name == null ? Integer.toString(i) : name, dumpSelectors(results));
+			document.add(CSS, cssResult);
 			i++;
 		}
 		return i;
@@ -211,6 +211,7 @@ public class Html extends ParserAbstract {
 		try (WebClient webClient = new WebClient()) {
 
 			final WebClientOptions options = webClient.getOptions();
+			options.setRedirectEnabled(false);
 			options.setJavaScriptEnabled(false);
 			options.setCssEnabled(false);
 			options.setThrowExceptionOnFailingStatusCode(false);

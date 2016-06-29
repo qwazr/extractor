@@ -204,11 +204,12 @@ public class AllTest {
 		doTest(Html.class, "file.html", "search engine software");
 	}
 
-	private void testSelector(String[] selectors, String param, String[] selectorResults) {
-		ExtractorServiceInterface client = ExtractorServiceInterface.getClient();
-		MultivaluedMap map = new MultivaluedHashMap<>();
-		for (String selector : selectors)
-			map.addAll(param, selector);
+	private void testSelector(String[] names, String[] selectors, String param, String[] selectorResults) {
+		final ExtractorServiceInterface client = ExtractorServiceInterface.getClient();
+		final MultivaluedMap map = new MultivaluedHashMap<>();
+		map.addAll(param, selectors);
+		if (names != null)
+			map.addAll(param + "_name", names);
 
 		ParserResult parserResult = client.extract("html", map, null, getStream("file.html"));
 		Assert.assertNotNull(parserResult);
@@ -217,32 +218,34 @@ public class AllTest {
 		Assert.assertEquals(selectorResults.length, results.size());
 		int i = 0;
 		for (String selectorResult : selectorResults) {
-			Map<String, Object> result = (Map<String, Object>) parserResult.getDocumentFieldValue(0, param, i++);
+			Map<String, Object> result = (Map<String, Object>) parserResult.getDocumentFieldValue(0, param, i);
 			Assert.assertNotNull(result);
-			if (selectorResult != null)
-				Assert.assertEquals(selectorResult, ((List) result.get("text")).get(0));
-			else
-				Assert.assertTrue(result.containsKey("error"));
+			String key = names == null ? Integer.toString(i) : names[i];
+			Assert.assertEquals(selectorResult, ((List) result.get(key)).get(0));
+			i++;
 		}
 	}
 
+	private final static String[] XPATH_NAMES = {"xp1", "xp2"};
 	private final static String[] XPATH_SELECTORS =
-			{ "//*[@id=\"crawl\"]/ul/li[1]/strong", "//*[@id=\"download\"]/div/div[2]/div/h3", "))-/$/$ dummy" };
-	private final static String[] XPATH_RESULTS = { "web crawler", "Documentation", null };
+			{"//*[@id=\"crawl\"]/ul/li[1]/strong", "//*[@id=\"download\"]/div/div[2]/div/h3"};
+	private final static String[] XPATH_RESULTS = {"web crawler", "Documentation"};
 
 	@Test
 	public void testHtmlXPath() {
-		testSelector(XPATH_SELECTORS, "xpath", XPATH_RESULTS);
+		testSelector(null, XPATH_SELECTORS, "xpath", XPATH_RESULTS);
+		testSelector(XPATH_NAMES, XPATH_SELECTORS, "xpath", XPATH_RESULTS);
 	}
 
-	private final static String[] CSS_SELECTORS = { "#crawl > ul > li:nth-child(1) > strong",
-			"#download > div > div:nth-child(2) > div > h3",
-			"))-/$/$ dummy" };
-	private final static String[] CSS_RESULTS = { "web crawler", "Documentation", null };
+	private final static String[] CSS_NAMES = {"css1", "css2"};
+	private final static String[] CSS_SELECTORS = {"#crawl > ul > li:nth-child(1) > strong",
+			"#download > div > div:nth-child(2) > div > h3"};
+	private final static String[] CSS_RESULTS = {"web crawler", "Documentation"};
 
 	@Test
 	public void testHtmlCSS() {
-		testSelector(CSS_SELECTORS, "css", CSS_RESULTS);
+		testSelector(null, CSS_SELECTORS, "css", CSS_RESULTS);
+		testSelector(CSS_NAMES, CSS_SELECTORS, "css", CSS_RESULTS);
 	}
 
 	@Test
