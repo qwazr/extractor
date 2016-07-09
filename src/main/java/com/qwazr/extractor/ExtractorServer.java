@@ -19,15 +19,11 @@ import com.qwazr.cluster.manager.ClusterManager;
 import com.qwazr.utils.server.GenericServer;
 import com.qwazr.utils.server.ServerBuilder;
 
-import javax.servlet.ServletException;
-import java.io.IOException;
-
 public class ExtractorServer {
 
-	public static GenericServer start()
-			throws Exception {
+	public static GenericServer start() throws Exception {
 		final ServerBuilder builder = new ServerBuilder();
-		ClusterManager.load(builder, null);
+		ClusterManager.load(builder, null, null);
 		ExtractorManager.load(builder);
 		return builder.build().start(true);
 	}
