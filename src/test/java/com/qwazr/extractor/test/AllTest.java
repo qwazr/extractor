@@ -226,10 +226,10 @@ public class AllTest {
 		}
 	}
 
-	private final static String[] XPATH_NAMES = {"xp1", "xp2"};
+	private final static String[] XPATH_NAMES = { "xp1", "xp2" };
 	private final static String[] XPATH_SELECTORS =
-			{"//*[@id=\"crawl\"]/ul/li[1]/strong", "//*[@id=\"download\"]/div/div[2]/div/h3"};
-	private final static String[] XPATH_RESULTS = {"web crawler", "Documentation"};
+			{ "//*[@id=\"crawl\"]/ul/li[1]/strong", "//*[@id=\"download\"]/div/div[2]/div/h3" };
+	private final static String[] XPATH_RESULTS = { "web crawler", "Documentation" };
 
 	@Test
 	public void testHtmlXPath() {
@@ -237,10 +237,10 @@ public class AllTest {
 		testSelector(XPATH_NAMES, XPATH_SELECTORS, "xpath", XPATH_RESULTS);
 	}
 
-	private final static String[] CSS_NAMES = {"css1", "css2"};
-	private final static String[] CSS_SELECTORS = {"#crawl > ul > li:nth-child(1) > strong",
-			"#download > div > div:nth-child(2) > div > h3"};
-	private final static String[] CSS_RESULTS = {"web crawler", "Documentation"};
+	private final static String[] CSS_NAMES = { "css1", "css2" };
+	private final static String[] CSS_SELECTORS =
+			{ "#crawl > ul > li:nth-child(1) > strong", "#download > div > div:nth-child(2) > div > h3" };
+	private final static String[] CSS_RESULTS = { "web crawler", "Documentation" };
 
 	@Test
 	public void testHtmlCSS() {
