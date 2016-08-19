@@ -15,7 +15,7 @@
     <properties>
         <bouncycastle.version>1.54</bouncycastle.version>
     </properties>
-
+    
     <dependencies>
         <dependency>
             <groupId>io.undertow</groupId>
