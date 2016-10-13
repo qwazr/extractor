@@ -39,11 +39,11 @@ public class ExtractorServiceImpl implements ExtractorServiceInterface {
 
 	@Override
 	public Map<String, ResourceLink> list() {
-		Set<String> parserList = ExtractorManager.INSTANCE.getList();
-		Map<String, ResourceLink> map = new LinkedHashMap<>(parserList.size());
+		final Set<String> parserList = ExtractorManager.INSTANCE.getList();
+		final Map<String, ResourceLink> map = new LinkedHashMap<>(parserList.size());
 		for (String parserName : parserList)
 			map.put(parserName,
-					new ResourceLink(ClusterManager.INSTANCE.me.httpAddressKey + "/extractor/" + parserName));
+					new ResourceLink(ClusterManager.INSTANCE.getHttpAddressKey() + "/extractor/" + parserName));
 		return map;
 	}
 
@@ -52,8 +52,7 @@ public class ExtractorServiceImpl implements ExtractorServiceInterface {
 			if (parserClass == null)
 				throw new ServerException(Status.NOT_FOUND, "No parser found.");
 			return parserClass.newInstance();
-		} catch (InstantiationException | IllegalAccessException
-				| IllegalArgumentException | SecurityException e) {
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | SecurityException e) {
 			throw new ServerException(e);
 		}
 	}
@@ -136,8 +135,7 @@ public class ExtractorServiceImpl implements ExtractorServiceInterface {
 			if (match == null)
 				return null;
 			return match.getMimeType();
-		} catch (MagicParseException | MagicMatchNotFoundException
-				| MagicException e) {
+		} catch (MagicParseException | MagicMatchNotFoundException | MagicException e) {
 			return null;
 		}
 	}
