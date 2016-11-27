@@ -169,7 +169,7 @@ public class Html extends ParserAbstract {
 		for (Object result : results) {
 			final String content;
 			if (result instanceof HtmlElement)
-				content = ((HtmlElement) result).getTextContent();
+				content = ((HtmlElement) result).asText();
 			else
 				content = result.toString();
 			if (content != null)
