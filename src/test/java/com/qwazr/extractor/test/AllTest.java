@@ -142,12 +142,14 @@ public class AllTest {
 		checkText(parserResult, testString);
 
 		// Test stream with magic mime service
-		parserResult = new ExtractorServiceImpl().putMagic(uriInfo, fileName, null, null, getStream(fileName));
+		parserResult =
+				ExtractorServiceInterface.getClient().putMagic(uriInfo, fileName, null, null, getStream(fileName));
 		assert (parserResult != null);
 		checkText(parserResult, testString);
 
 		// Test path with magic mime service
-		parserResult = new ExtractorServiceImpl().putMagic(uriInfo, fileName, tempFile.getAbsolutePath(), null, null);
+		parserResult = ExtractorServiceInterface.getClient()
+				.putMagic(uriInfo, fileName, tempFile.getAbsolutePath(), null, null);
 		assert (parserResult != null);
 		checkText(parserResult, testString);
 	}

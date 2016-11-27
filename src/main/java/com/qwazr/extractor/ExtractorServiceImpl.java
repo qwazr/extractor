@@ -33,9 +33,20 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class ExtractorServiceImpl implements ExtractorServiceInterface {
+class ExtractorServiceImpl implements ExtractorServiceInterface {
 
 	private static final Logger logger = LoggerFactory.getLogger(ExtractorServiceImpl.class);
+
+	static volatile ExtractorServiceImpl INSTANCE = null;
+
+	final static ExtractorServiceImpl getInstance() {
+		synchronized (ExtractorServiceImpl.class) {
+			if (INSTANCE != null)
+				return INSTANCE;
+			INSTANCE = new ExtractorServiceImpl();
+			return INSTANCE;
+		}
+	}
 
 	@Override
 	public Map<String, ResourceLink> list() {

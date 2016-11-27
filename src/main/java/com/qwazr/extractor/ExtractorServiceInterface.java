@@ -40,7 +40,7 @@ public interface ExtractorServiceInterface extends ServiceInterface {
 	@Path("/{name}")
 	@Produces(ServiceInterface.APPLICATION_JSON_UTF8)
 	Object get(@Context UriInfo uriInfo, @PathParam("name") String parserName, @QueryParam("path") String path);
-	
+
 	@PUT
 	@Path("/{name}")
 	@Produces(ServiceInterface.APPLICATION_JSON_UTF8)
@@ -56,7 +56,7 @@ public interface ExtractorServiceInterface extends ServiceInterface {
 	ParserResult putMagic(@Context UriInfo uriInfo, @QueryParam("name") String fileName,
 			@QueryParam("path") String filePath, @QueryParam("type") String mimeType, InputStream inputStream);
 
-	public static ExtractorServiceInterface getClient() {
-		return new ExtractorServiceImpl();
+	static ExtractorServiceInterface getClient() {
+		return ExtractorServiceImpl.getInstance();
 	}
 }
