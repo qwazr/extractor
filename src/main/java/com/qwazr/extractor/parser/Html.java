@@ -15,16 +15,21 @@
  */
 package com.qwazr.extractor.parser;
 
-import com.gargoylesoftware.htmlunit.Page;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.WebClientOptions;
-import com.gargoylesoftware.htmlunit.html.*;
 import com.qwazr.extractor.ParserAbstract;
 import com.qwazr.extractor.ParserDocument;
 import com.qwazr.extractor.ParserField;
 import com.qwazr.utils.StringUtils;
+import com.qwazr.utils.XPathParser;
+import org.cyberneko.html.parsers.DOMParser;
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import se.fishtank.css.selectors.Selectors;
+import se.fishtank.css.selectors.dom.W3CNode;
 
-import java.io.File;
+import javax.xml.xpath.XPathExpressionException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -93,13 +98,14 @@ public class Html extends ParserAbstract {
 		return FIELDS;
 	}
 
-	private void extractTitle(final HtmlPage page, final ParserDocument document) {
-		String title = page.getTitleText();
+	private void extractTitle(final XPathParser xpath, final Document documentElement, final ParserDocument document)
+			throws XPathExpressionException {
+		final String title = xpath.evaluateString(documentElement, "/html/head/title");
 		if (title != null)
 			document.add(TITLE, title);
 	}
 
-	private void extractHeaders(final HtmlElement documentElement, final ParserDocument document) {
+	private void extractHeaders(final Document documentElement, final ParserDocument document) {
 		addToField(document, H1, documentElement.getElementsByTagName("h1"));
 		addToField(document, H2, documentElement.getElementsByTagName("h2"));
 		addToField(document, H3, documentElement.getElementsByTagName("h3"));
@@ -108,29 +114,28 @@ public class Html extends ParserAbstract {
 		addToField(document, H6, documentElement.getElementsByTagName("h6"));
 	}
 
-	private void extractAnchors(final HtmlPage page, final ParserDocument document) {
-		List<HtmlAnchor> anchors = page.getAnchors();
-		if (anchors == null)
-			return;
-		for (HtmlAnchor anchor : anchors)
-			document.add(ANCHORS, anchor.getHrefAttribute());
+	private void extractAnchors(final XPathParser xpath, final Document documentElement, final ParserDocument document)
+			throws XPathExpressionException {
+		final XPathParser.NodeIterator iterator = xpath.evaluateNodes(documentElement, "//a/@href");
+		while (iterator.hasNext())
+			document.add(ANCHORS, iterator.next().getAttributes().getNamedItem("href").getTextContent());
 	}
 
-	private void extractImgTags(final HtmlPage page, final ParserDocument document) {
-		List<DomElement> elements = page.getElementsByTagName("img");
-		if (elements == null)
-			return;
-		for (DomElement element : elements) {
-			Map<String, String> map = new LinkedHashMap<>();
-			addToMap(map, "src", element.getAttribute("src"));
-			addToMap(map, "alt", element.getAttribute("alt"));
+	private void extractImgTags(final Document documentElement, final ParserDocument document) {
+		final XPathParser.NodeIterator iterator =
+				new XPathParser.NodeIterator(documentElement.getElementsByTagName("img"));
+		while (iterator.hasNext()) {
+			final Node node = iterator.next();
+			final Map<String, String> map = new LinkedHashMap<>();
+			addToMap(map, "src", XPathParser.getAttributeString(node, "src"));
+			addToMap(map, "alt", XPathParser.getAttributeString(node, "alt"));
 			if (!map.isEmpty())
 				document.add(IMAGES, map);
 		}
 	}
 
-	private void extractTextContent(final HtmlPage page, final ParserDocument document) throws IOException {
-		String text = page.asText();
+	private void extractTextContent(final Document documentElement, final ParserDocument document) throws IOException {
+		String text = documentElement.asText();
 		if (text == null)
 			return;
 		final ArrayList<String> lines = new ArrayList<>();
@@ -162,43 +167,72 @@ public class Html extends ParserAbstract {
 		}
 	}
 
-	private final List<String> dumpSelectors(final List<?> results) {
+	private final List<String> dumpSelectors(final Object object) {
 		final List<String> textList = new ArrayList<>();
-		if (results == null)
+		if (object == null)
 			return textList;
-		for (Object result : results) {
-			final String content;
-			if (result instanceof HtmlElement)
-				content = ((HtmlElement) result).asText();
-			else
-				content = result.toString();
-			if (content != null)
-				textList.add(content.trim());
+		if (object instanceof NodeList) {
+			final NodeList nodeList = (NodeList) object;
+			int length = nodeList.getLength();
+			for (int i = 0; i < length; i++)
+				textList.add(nodeList.item(i).getTextContent());
+		} else if (object instanceof Node) {
+			final Node node = (Node) object;
+			textList.add(node.getTextContent());
 		}
 		return textList;
 	}
 
-	private final int extractXPath(final HtmlPage page, final ParserDocument document) {
+	private final List<Object> getXPath(final XPathParser xPath, final String query, final Document doc)
+			throws XPathExpressionException {
+		final List<Object> list = new ArrayList<>();
+		xPath.evaluate(doc, query, new XPathParser.Consumer() {
+			@Override
+			public void accept(Node object) {
+				list.add(object.getTextContent());
+			}
+
+			@Override
+			public void accept(Boolean object) {
+				list.add(object);
+			}
+
+			@Override
+			public void accept(String object) {
+				list.add(object);
+			}
+
+			@Override
+			public void accept(Number object) {
+				list.add(object);
+			}
+		});
+		return list;
+	}
+
+	private final int extractXPath(final XPathParser xPath, final Document htmlDocument, final ParserDocument document)
+			throws XPathExpressionException {
 		int i = 0;
 		String xpath;
 		while ((xpath = getParameterValue(XPATH_PARAM, i)) != null) {
 			final String name = getParameterValue(XPATH_NAME_PARAM, i);
 			final LinkedHashMap<String, Object> xpathResult = new LinkedHashMap<>();
-			final List<?> results = page.getByXPath(xpath);
-			xpathResult.put(name == null ? Integer.toString(i) : name, dumpSelectors(results));
+			xpathResult.put(name == null ? Integer.toString(i) : name,
+					dumpSelectors(getXPath(xPath, xpath, htmlDocument)));
 			document.add(XPATH, xpathResult);
 			i++;
 		}
 		return i;
 	}
 
-	private final int extractCss(final HtmlPage page, final ParserDocument document) {
+	private int extractCss(final Document htmlDocument, final ParserDocument document) {
 		int i = 0;
 		String css;
+		final Selectors selectors = new Selectors<>(new W3CNode(htmlDocument));
 		while ((css = getParameterValue(CSS_PARAM, i)) != null) {
 			final String name = getParameterValue(CSS_NAME_PARAM, i);
 			final LinkedHashMap<String, Object> cssResult = new LinkedHashMap<>();
-			final DomNodeList<DomNode> results = page.querySelectorAll(css);
+			final List<Node> results = selectors.querySelectorAll(css);
 			cssResult.put(name == null ? Integer.toString(i) : name, dumpSelectors(results));
 			document.add(CSS, cssResult);
 			i++;
@@ -206,56 +240,42 @@ public class Html extends ParserAbstract {
 		return i;
 	}
 
-	@Override
-	protected void parseContent(File file, String extension, String mimeType) throws Exception {
-
-		try (WebClient webClient = new WebClient()) {
-
-			final WebClientOptions options = webClient.getOptions();
-			options.setRedirectEnabled(false);
-			options.setJavaScriptEnabled(false);
-			options.setCssEnabled(false);
-			options.setThrowExceptionOnFailingStatusCode(false);
-			options.setThrowExceptionOnScriptError(false);
-
-			final Page unknownPage = webClient.getPage(file.toURI().toURL());
-			if (!unknownPage.isHtmlPage())
-				return;
-
-			final HtmlPage page = (HtmlPage) unknownPage;
-			final ParserDocument document = getNewParserDocument();
-			final HtmlElement documentElement = page.getDocumentElement();
-
-			if (extractXPath(page, document) + extractCss(page, document) == 0) {
-				extractTitle(page, document);
-				extractHeaders(documentElement, document);
-				extractAnchors(page, document);
-				extractImgTags(page, document);
-				extractTextContent(page, document);
-				extractMeta(page, document);
-			}
-		}
-	}
-
-	private void addToMap(Map<String, String> map, String name, String value) {
+	private void addToMap(final Map<String, String> map, final String name, final String value) {
 		if (!StringUtils.isEmpty(value))
 			map.put(name, value);
 	}
 
-	private void addToField(ParserDocument document, ParserField parserField, DomNodeList<HtmlElement> elements) {
+	private void addToField(ParserDocument document, ParserField parserField, NodeList elements) {
 		if (elements == null)
 			return;
-		for (HtmlElement element : elements)
-			document.add(parserField, element.asText());
+		final XPathParser.NodeIterator nodeIterator = new XPathParser.NodeIterator(elements);
+		while (nodeIterator.hasNext())
+			document.add(parserField, nodeIterator.next().getTextContent());
 	}
 
 	@Override
 	protected void parseContent(InputStream inputStream, String extension, String mimeType) throws Exception {
-		File tempFile = ParserAbstract.createTempFile(inputStream, extension == null ? "page.html" : "." + extension);
-		try {
-			parseContent(tempFile, extension, mimeType);
-		} finally {
-			tempFile.delete();
+		final DOMParser htmlParser = new DOMParser();
+		htmlParser.setFeature("http://xml.org/sax/features/namespaces", true);
+		htmlParser.setFeature("http://cyberneko.org/html/features/balance-tags/ignore-outside-content", false);
+		htmlParser.setFeature("http://cyberneko.org/html/features/balance-tags", true);
+		htmlParser.setFeature("http://cyberneko.org/html/features/report-errors", false);
+		htmlParser.setProperty("http://cyberneko.org/html/properties/names/elems", "lower");
+		htmlParser.setProperty("http://cyberneko.org/html/properties/names/attrs", "lower");
+		htmlParser.parse(new InputSource(inputStream));
+
+		final ParserDocument parserDocument = getNewParserDocument();
+		final Document htmlDocument = htmlParser.getDocument();
+
+		final XPathParser xPath = new XPathParser();
+
+		if (extractXPath(xPath, htmlDocument, parserDocument) + extractCss(htmlDocument, parserDocument) == 0) {
+			extractTitle(page, parserDocument);
+			extractHeaders(documentElement, parserDocument);
+			extractAnchors(page, parserDocument);
+			extractImgTags(page, parserDocument);
+			extractTextContent(page, parserDocument);
+			extractMeta(page, parserDocument);
 		}
 	}
 
