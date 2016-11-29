@@ -162,7 +162,7 @@ public class Html extends ParserAbstract {
 		@Override
 		@JsonIgnore
 		public void accept(Node object) {
-			add(object.getTextContent());
+			accept(object.getTextContent());
 		}
 
 		@Override
@@ -174,7 +174,8 @@ public class Html extends ParserAbstract {
 		@Override
 		@JsonIgnore
 		public void accept(String object) {
-			add(object);
+			if (object != null)
+				add(object.trim());
 		}
 
 		@Override
