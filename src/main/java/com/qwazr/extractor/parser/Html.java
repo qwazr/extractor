@@ -205,7 +205,7 @@ public class Html extends ParserAbstract {
 	private int extractCss(final Node htmlDocument, final ParserDocument document) {
 		int i = 0;
 		String css;
-		final Selectors<Node, ?> selectors = new Selectors<>(new W3CNode(htmlDocument));
+		final Selectors<Node, W3CNode> selectors = new Selectors<>(new W3CNode(htmlDocument));
 		while ((css = getParameterValue(CSS_PARAM, i)) != null) {
 			final String name = getParameterValue(CSS_NAME_PARAM, i);
 			final LinkedHashMap<String, Object> cssResult = new LinkedHashMap<>();
