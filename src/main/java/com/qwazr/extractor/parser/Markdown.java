@@ -20,6 +20,7 @@ import com.qwazr.extractor.ParserDocument;
 import com.qwazr.extractor.ParserField;
 import com.qwazr.utils.CharsetUtils;
 import org.apache.commons.io.IOUtils;
+import org.pegdown.Extensions;
 import org.pegdown.LinkRenderer;
 import org.pegdown.PegDownProcessor;
 import org.pegdown.ToHtmlSerializer;
@@ -69,7 +70,7 @@ public class Markdown extends ParserAbstract {
 
 	private void parseContent(char[] source) throws Exception {
 		// PegDownProcessor is not thread safe One processor per thread
-		final PegDownProcessor pdp = new PegDownProcessor(30000);
+		final PegDownProcessor pdp = new PegDownProcessor(Extensions.NONE, 30000);
 		final RootNode rootNode = pdp.parseMarkdown(source);
 		result = getNewParserDocument();
 		rootNode.accept(new ExtractorSerializer());
