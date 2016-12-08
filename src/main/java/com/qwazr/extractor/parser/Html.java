@@ -69,15 +69,13 @@ public class Html extends ParserAbstract {
 
 	final protected static ParserField METAS = ParserField.newMap("metas", "Meta tags");
 
-	final protected static ParserField XPATH = ParserField.newMap("xpath", "XPath selector results");
-
-	final protected static ParserField CSS = ParserField.newMap("css", "CSS selector results");
+	final protected static ParserField SELECTORS = ParserField.newMap("selectors", "Selector results");
 
 	final protected static ParserField LANG_DETECTION =
 			ParserField.newString("lang_detection", "Detection of the language");
 
 	final protected static ParserField[] FIELDS =
-			{ TITLE, CONTENT, H1, H2, H3, H4, H5, H6, ANCHORS, IMAGES, METAS, LANG_DETECTION, XPATH };
+			{ TITLE, CONTENT, H1, H2, H3, H4, H5, H6, ANCHORS, IMAGES, METAS, LANG_DETECTION, SELECTORS };
 
 	final protected static ParserField XPATH_PARAM = ParserField.newString("xpath", "Any XPATH selector");
 
@@ -186,33 +184,29 @@ public class Html extends ParserAbstract {
 
 	}
 
-	private final int extractXPath(final XPathParser xPath, final Node htmlDocument, final ParserDocument document)
-			throws XPathExpressionException {
+	private final int extractXPath(final XPathParser xPath, final Node htmlDocument,
+			final LinkedHashMap<String, Object> selectorsResult) throws XPathExpressionException {
 		int i = 0;
 		String xpath;
 		while ((xpath = getParameterValue(XPATH_PARAM, i)) != null) {
 			final String name = getParameterValue(XPATH_NAME_PARAM, i);
-			final LinkedHashMap<String, Object> xpathResult = new LinkedHashMap<>();
 			final ListConsumer results = new ListConsumer();
 			xPath.evaluate(htmlDocument, xpath, results);
-			xpathResult.put(name == null ? Integer.toString(i) : name, results);
-			document.add(XPATH, xpathResult);
+			selectorsResult.put(name == null ? Integer.toString(i) : name, results);
 			i++;
 		}
 		return i;
 	}
 
-	private int extractCss(final Node htmlDocument, final ParserDocument document) {
+	private int extractCss(final Node htmlDocument, final LinkedHashMap<String, Object> selectorsResult) {
 		int i = 0;
 		String css;
 		final Selectors<Node, W3CNode> selectors = new Selectors<>(new W3CNode(htmlDocument));
 		while ((css = getParameterValue(CSS_PARAM, i)) != null) {
 			final String name = getParameterValue(CSS_NAME_PARAM, i);
-			final LinkedHashMap<String, Object> cssResult = new LinkedHashMap<>();
 			final ListConsumer results = new ListConsumer();
 			selectors.querySelectorAll(css).forEach(results::accept);
-			cssResult.put(name == null ? Integer.toString(i) : name, results);
-			document.add(CSS, cssResult);
+			selectorsResult.put(name == null ? Integer.toString(i) : name, results);
 			i++;
 		}
 		return i;
@@ -244,7 +238,12 @@ public class Html extends ParserAbstract {
 
 		final XPathParser xPath = new XPathParser();
 
-		if (extractXPath(xPath, htmlDocument, parserDocument) + extractCss(htmlDocument, parserDocument) == 0) {
+		final LinkedHashMap<String, Object> selectorsResult = new LinkedHashMap<>();
+		extractXPath(xPath, htmlDocument, selectorsResult);
+		extractCss(htmlDocument, selectorsResult);
+		if (!selectorsResult.isEmpty()) {
+			parserDocument.add(SELECTORS, selectorsResult);
+		} else {
 			extractTitle(xPath, htmlDocument, parserDocument);
 			extractHeaders(htmlDocument, parserDocument);
 			extractAnchors(xPath, htmlDocument, parserDocument);
@@ -252,7 +251,6 @@ public class Html extends ParserAbstract {
 			extractTextContent(htmlDocument, parserDocument);
 			extractMeta(htmlDocument, parserDocument);
 		}
-
 	}
 
 	@Override

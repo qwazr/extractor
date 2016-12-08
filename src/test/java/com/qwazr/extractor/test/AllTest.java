@@ -15,7 +15,10 @@
  */
 package com.qwazr.extractor.test;
 
-import com.qwazr.extractor.*;
+import com.qwazr.extractor.ExtractorManager;
+import com.qwazr.extractor.ExtractorServiceInterface;
+import com.qwazr.extractor.ParserAbstract;
+import com.qwazr.extractor.ParserResult;
 import com.qwazr.extractor.parser.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -215,15 +218,16 @@ public class AllTest {
 
 		ParserResult parserResult = client.extract("html", map, null, getStream("file.html"));
 		Assert.assertNotNull(parserResult);
-		List<Object> results = parserResult.getDocumentFieldValues(0, param);
+		Map<String, List<String>> results =
+				(Map<String, List<String>>) parserResult.getDocumentFieldValue(0, "selectors", 0);
 		Assert.assertNotNull(results);
 		Assert.assertEquals(selectorResults.length, results.size());
 		int i = 0;
 		for (String selectorResult : selectorResults) {
-			Map<String, Object> result = (Map<String, Object>) parserResult.getDocumentFieldValue(0, param, i);
-			Assert.assertNotNull(result);
 			String key = names == null ? Integer.toString(i) : names[i];
-			Assert.assertEquals(selectorResult, ((List) result.get(key)).get(0));
+			String result = results.get(key).get(0);
+			Assert.assertNotNull(result);
+			Assert.assertEquals(selectorResult, result);
 			i++;
 		}
 	}
