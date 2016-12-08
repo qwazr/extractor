@@ -23,7 +23,6 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -36,9 +35,9 @@ public class ParserResult {
 
 	public Long time_elapsed;
 
-	public LinkedHashMap<String, ArrayList<Object>> metas;
+	public LinkedHashMap<String, Object> metas;
 
-	public final ArrayList<LinkedHashMap<String, ArrayList<Object>>> documents;
+	public final ArrayList<LinkedHashMap<String, Object>> documents;
 
 	ParserResult() {
 		time_elapsed = null;
@@ -47,7 +46,7 @@ public class ParserResult {
 		parser_name = null;
 	}
 
-	ParserResult(String parserName, long startTime, ParserDocument parserMetas,
+	ParserResult(final String parserName, long startTime, ParserDocument parserMetas,
 			ArrayList<ParserDocument> parserDocuments) {
 		parser_name = parserName;
 
@@ -72,12 +71,16 @@ public class ParserResult {
 	 */
 	@JsonIgnore
 	public Object getDocumentFieldValue(int documentPos, String fieldName, int valuePos) {
-		if (documents == null || documentPos >= documents.size())
+		final Object value = getDocumentFieldValues(documentPos, fieldName);
+		if (value == null)
 			return null;
-		List<Object> fieldList = getDocumentFieldValues(documentPos, fieldName);
-		if (fieldList.isEmpty() || valuePos >= fieldList.size())
-			return null;
-		return fieldList.get(valuePos);
+		if (value instanceof List) {
+			List valueList = (List) value;
+			if (valuePos >= valueList.size())
+				return null;
+			return valueList.get(valuePos);
+		}
+		return valuePos == 0 ? value : null;
 	}
 
 	/**
@@ -86,11 +89,10 @@ public class ParserResult {
 	 * @return a list of values
 	 */
 	@JsonIgnore
-	public List<Object> getDocumentFieldValues(int documentPos, String fieldName) {
+	public Object getDocumentFieldValues(int documentPos, String fieldName) {
 		if (documents == null || documentPos >= documents.size())
 			return null;
-		LinkedHashMap<String, ArrayList<Object>> fields = documents.get(documentPos);
-		ArrayList<Object> values = fields.get(fieldName);
-		return values == null ? Collections.emptyList() : values;
+		LinkedHashMap<String, Object> fields = documents.get(documentPos);
+		return fields == null ? null : fields.get(fieldName);
 	}
 }

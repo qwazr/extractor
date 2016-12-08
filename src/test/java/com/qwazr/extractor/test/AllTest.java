@@ -33,8 +33,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -82,20 +81,34 @@ public class AllTest {
 	}
 
 	/**
-	 * Check if the given string is present in a multivalued map
+	 * Check if the given string is present in a map
 	 *
 	 * @param map
 	 * @param text
 	 * @return
 	 */
-	protected boolean checkText(LinkedHashMap<String, ArrayList<Object>> map, String text) {
-		if (map == null)
-			return false;
-		for (Map.Entry<String, ArrayList<Object>> entry : map.entrySet())
-			for (Object object : entry.getValue())
-				if (object.toString().contains(text))
-					return true;
+	protected boolean checkMapContainsText(Map<String, Object> map, String text) {
+		for (Object value : map.values())
+			if (checkContainsText(value, text))
+				return true;
 		return false;
+	}
+
+	protected boolean checkCollectionContainsText(Collection<Object> collection, String text) {
+		for (Object value : collection)
+			if (checkContainsText(value, text))
+				return true;
+		return false;
+	}
+
+	protected boolean checkContainsText(Object value, String text) {
+		if (value == null)
+			return false;
+		if (value instanceof Collection)
+			return checkCollectionContainsText((Collection) value, text);
+		if (value instanceof Map)
+			return checkMapContainsText((Map) value, text);
+		return value.toString().contains(text);
 	}
 
 	/**
@@ -104,13 +117,12 @@ public class AllTest {
 	 * @param result
 	 * @param text
 	 */
-	protected void checkText(ParserResult result, String text) {
+	protected void checkContainsText(ParserResult result, String text) {
 		if (text == null)
 			return;
-		for (LinkedHashMap<String, ArrayList<Object>> map : result.documents)
-			if (checkText(map, text))
-				return;
-		if (checkText(result.metas, text))
+		if (checkContainsText(result.documents, text))
+			return;
+		if (checkContainsText(result.metas, text))
 			return;
 		logger.severe("Text " + text + " not found");
 		assert (false);
@@ -136,25 +148,25 @@ public class AllTest {
 		ParserAbstract parser = createRegisterInstance(className);
 		ParserResult parserResult = parser.doParsing(uriInfo.getQueryParameters(), getStream(fileName), null, null);
 		assert (parserResult != null);
-		checkText(parserResult, testString);
+		checkContainsText(parserResult, testString);
 
 		// Test file
 		parser = createRegisterInstance(className);
 		parserResult = parser.doParsing(uriInfo.getQueryParameters(), tempFile, null, null);
 		assert (parserResult != null);
-		checkText(parserResult, testString);
+		checkContainsText(parserResult, testString);
 
 		// Test stream with magic mime service
 		parserResult =
 				ExtractorServiceInterface.getClient().putMagic(uriInfo, fileName, null, null, getStream(fileName));
 		assert (parserResult != null);
-		checkText(parserResult, testString);
+		checkContainsText(parserResult, testString);
 
 		// Test path with magic mime service
 		parserResult = ExtractorServiceInterface.getClient()
 				.putMagic(uriInfo, fileName, tempFile.getAbsolutePath(), null, null);
 		assert (parserResult != null);
-		checkText(parserResult, testString);
+		checkContainsText(parserResult, testString);
 	}
 
 	final String AUDIO_TEST_STRING = "opensearchserver";

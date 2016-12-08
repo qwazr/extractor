@@ -103,7 +103,7 @@ public class Html extends ParserAbstract {
 			throws XPathExpressionException {
 		final String title = xpath.evaluateString(documentElement, "/html/head/title");
 		if (title != null)
-			document.add(TITLE, title);
+			document.set(TITLE, title);
 	}
 
 	private void extractHeaders(final Document documentElement, final ParserDocument document) {
@@ -242,7 +242,7 @@ public class Html extends ParserAbstract {
 		extractXPath(xPath, htmlDocument, selectorsResult);
 		extractCss(htmlDocument, selectorsResult);
 		if (!selectorsResult.isEmpty()) {
-			parserDocument.add(SELECTORS, selectorsResult);
+			parserDocument.set(SELECTORS, selectorsResult);
 		} else {
 			extractTitle(xPath, htmlDocument, parserDocument);
 			extractHeaders(htmlDocument, parserDocument);

@@ -21,7 +21,7 @@ import java.util.List;
 
 public class ParserDocument {
 
-	public final LinkedHashMap<String, ArrayList<Object>> fields;
+	public final LinkedHashMap<String, Object> fields;
 
 	ParserDocument() {
 		fields = new LinkedHashMap<>();
@@ -30,7 +30,7 @@ public class ParserDocument {
 	private List<Object> getList(final ParserField field, final Object value) {
 		if (value == null || field == null)
 			return null;
-		ArrayList<Object> values = fields.get(field.name);
+		List<Object> values = (ArrayList<Object>) fields.get(field.name);
 		if (values == null) {
 			values = new ArrayList<>(1);
 			fields.put(field.name, values);
@@ -49,6 +49,16 @@ public class ParserDocument {
 		if (values == null)
 			return;
 		values.add(value);
+	}
+
+	/**
+	 * Set the unique field/value to the document
+	 *
+	 * @param field the name of the field
+	 * @param value any value
+	 */
+	public void set(final ParserField field, final Object value) {
+		fields.put(field.name, value);
 	}
 
 }

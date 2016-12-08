@@ -142,17 +142,20 @@ public abstract class ParserAbstract {
 			final StringBuilder sb) {
 		if (sb.length() >= maxLength)
 			return;
-		List<Object> objectList = document.fields.get(source.name);
-		if (objectList == null)
+		Object value = document.fields.get(source.name);
+		if (value == null)
 			return;
-		for (Object object : objectList) {
-			if (object == null)
-				continue;
-			sb.append(object.toString());
-			sb.append(' ');
-			if (sb.length() >= maxLength)
-				return;
-		}
+		if (value instanceof List) {
+			for (Object object : (List) value) {
+				if (object == null)
+					continue;
+				sb.append(object.toString());
+				sb.append(' ');
+				if (sb.length() >= maxLength)
+					return;
+			}
+		} else
+			sb.append(value.toString());
 	}
 
 	/**
