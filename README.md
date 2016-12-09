@@ -17,8 +17,12 @@ Here is the list of supported binary formats. Click on the link to see the descr
 Usage
 =====
 
-Obtain the parser list
-----------------------
+## Run using Docker
+
+    docker run -p 9091:9091 qwazr/extractor
+    
+    
+### Obtain the parser list
 
 * Method: GET
 * URL: http://{hostname}:{port}/extractor
@@ -124,8 +128,7 @@ The function return the list of available parsers.
 }
 ```
 
-Get information about a parser
-------------------------------
+### Get information about a parser
 
 * Method: GET
 * URL: http://{hostname}:{port}/extractor/{parser_name}
@@ -171,8 +174,7 @@ The function displays which fields are returned by the parser and the available 
 }
 ```
 
-Submit a document
------------------
+### Submit a document
 
 There are several options to extract data from a file.
 
@@ -228,7 +230,7 @@ curl -XGET http://localhost:9091/extractor/pdfbox?path=/home/manu/tutorial.pdf
 curl -XGET http://localhost:9091/extractor?path=/home/manu/tutorial.pdf
 ```
 
-### The returned informations
+#### The returned informations
 
 The parser extracts the metas and text information using the following JSON format:
 
