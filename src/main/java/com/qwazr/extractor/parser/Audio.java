@@ -41,7 +41,7 @@ public class Audio extends ParserAbstract {
 	public static final String[] DEFAULT_MIMETYPES;
 
 	static {
-		MIMEMAP = new HashMap<String, String>();
+		MIMEMAP = new HashMap<>();
 		MIMEMAP.put("audio/ogg", "ogg");
 		MIMEMAP.put("audio/mpeg", "mpg");
 		MIMEMAP.put("audio/mpeg3", "mp3");

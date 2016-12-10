@@ -68,6 +68,7 @@ public class ExtractorManager {
 		register(Image.class);
 		register(MapiMsg.class);
 		register(Markdown.class);
+		register(Ocr.class);
 		register(Odf.class);
 		register(PdfBox.class);
 		register(Ppt.class);

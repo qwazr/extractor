@@ -40,10 +40,11 @@ class ExtractorServiceImpl implements ExtractorServiceInterface {
 	static volatile ExtractorServiceImpl INSTANCE = null;
 
 	final static ExtractorServiceImpl getInstance() {
+		if (INSTANCE != null)
+			return INSTANCE;
 		synchronized (ExtractorServiceImpl.class) {
-			if (INSTANCE != null)
-				return INSTANCE;
-			INSTANCE = new ExtractorServiceImpl();
+			if (INSTANCE == null)
+				INSTANCE = new ExtractorServiceImpl();
 			return INSTANCE;
 		}
 	}
@@ -58,7 +59,7 @@ class ExtractorServiceImpl implements ExtractorServiceInterface {
 		return map;
 	}
 
-	private ParserAbstract getParser(Class<? extends ParserAbstract> parserClass) throws ServerException {
+	private ParserAbstract getParser(final Class<? extends ParserAbstract> parserClass) throws ServerException {
 		try {
 			if (parserClass == null)
 				throw new ServerException(Status.NOT_FOUND, "No parser found.");

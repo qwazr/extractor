@@ -146,7 +146,8 @@ public class AllTest {
 
 		// Test stream
 		ParserAbstract parser = createRegisterInstance(className);
-		ParserResult parserResult = parser.doParsing(uriInfo.getQueryParameters(), getStream(fileName), null, null);
+		ParserResult parserResult = parser.doParsing(uriInfo.getQueryParameters(), getStream(fileName),
+				FilenameUtils.getExtension(fileName), null);
 		assert (parserResult != null);
 		checkContainsText(parserResult, testString);
 
@@ -294,6 +295,11 @@ public class AllTest {
 	@Test
 	public void testPdf() throws Exception {
 		doTest(PdfBox.class, "file.pdf", DEFAULT_TEST_STRING);
+	}
+
+	@Test
+	public void testOcr() throws Exception {
+		doTest(Ocr.class, "file.pdf", DEFAULT_TEST_STRING);
 	}
 
 	@Test
