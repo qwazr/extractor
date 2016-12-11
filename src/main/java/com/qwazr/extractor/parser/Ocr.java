@@ -21,16 +21,23 @@ import com.qwazr.extractor.ParserField;
 import com.qwazr.utils.StringUtils;
 import net.sourceforge.tess4j.Tesseract1;
 import net.sourceforge.tess4j.TesseractException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.BadRequestException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 
 public class Ocr extends ParserAbstract {
 
-	public static final HashMap<String, String> MIMEMAP;
+	private static final Logger LOGGER = LoggerFactory.getLogger(Ocr.class);
+
+	static final HashMap<String, String> MIMEMAP;
 
 	static {
 		MIMEMAP = new HashMap<>();
@@ -96,7 +103,37 @@ public class Ocr extends ParserAbstract {
 		return null;
 	}
 
-	private static final String TESSDATA_PREFIX = System.getenv("TESSDATA_PREFIX");
+	private static final String TESSDATA_PREFIX;
+
+	static {
+
+		String s = System.getenv("TESSDATA_PREFIX");
+		if (StringUtils.isEmpty(s)) {
+			// Unix/Linux Path
+			Path p = Paths.get("/usr/share/tesseract");
+			if (Files.exists(p) && Files.isDirectory(p))
+				s = p.toString();
+		}
+		if (StringUtils.isEmpty(s)) {
+			// MacOS path
+			Path p = Paths.get("/usr/local/share");
+			if (Files.exists(p) && Files.isDirectory(p))
+				s = p.toString();
+		}
+		if (StringUtils.isEmpty(s)) {
+			// Windows Path
+			String pf = System.getenv("ProgramFiles");
+			if (!StringUtils.isEmpty(pf)) {
+				Path p = Paths.get(pf, "Tesseract-OCR");
+				if (Files.exists(p) && Files.isDirectory(p))
+					s = p.toString();
+			}
+		}
+		TESSDATA_PREFIX = s;
+		if (LOGGER.isInfoEnabled())
+			LOGGER.info("TESSDATA_PREFIX sets to: " + s);
+
+	}
 
 	@Override
 	protected void parseContent(final File file, final String extension, final String mimeType)
