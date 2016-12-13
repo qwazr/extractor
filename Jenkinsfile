@@ -12,7 +12,7 @@ node {
 
     stage 'Test'
 
-    withMagen(maven: 'Maven') {
+    withMaven(maven: 'Maven') {
         sh "mvn clean test jacoco:report coveralls:report"
     }
 
