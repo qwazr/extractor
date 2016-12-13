@@ -12,8 +12,7 @@ node {
 
     stage 'Test'
 
-    withMaven(maven: 'Maven') {
-        sh "mvn clean test jacoco:report coveralls:report"
-    }
+    env.PATH = "${tool 'Maven'}/bin:${env.PATH}"
+    sh "mvn clean test jacoco:report coveralls:report"
 
 }
