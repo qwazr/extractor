@@ -20,6 +20,7 @@ import com.qwazr.extractor.ExtractorServiceInterface;
 import com.qwazr.extractor.ParserAbstract;
 import com.qwazr.extractor.ParserResult;
 import com.qwazr.extractor.parser.*;
+import com.qwazr.utils.StringUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
@@ -299,6 +300,10 @@ public class AllTest {
 
 	@Test
 	public void testOcr() throws Exception {
+		if (StringUtils.isEmpty(Ocr.TESSDATA_PREFIX)) {
+			logger.info("OCR skipped: no TESTDATA_PREFIX");
+			return;
+		}
 		doTest(Ocr.class, "file.pdf", DEFAULT_TEST_STRING);
 	}
 
