@@ -10,9 +10,16 @@ node {
         sh "mvn -U clean deploy"
     }
 
+    stage 'Docker'
+    
+    
+
     stage 'Test'
 
-    env.PATH = "${tool 'Maven'}/bin:${env.PATH}"
-    sh "mvn clean test jacoco:report coveralls:report -DrepoToken=env.repo_token"
+    withMaven(
+        maven: 'Maven',
+        mavenSettingsConfig: 'extractor-settings') {
+        sh "mvn clean test jacoco:report coveralls:report"
+    }
 
 }
