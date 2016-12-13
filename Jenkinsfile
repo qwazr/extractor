@@ -16,7 +16,7 @@ node {
 
     stage 'Test'
 
-    env.PATH = "${tool 'M3'}/bin:${env.PATH}"
+    env.PATH = "${tool 'Maven'}/bin:${env.PATH}"
 
     configFileProvider(
             [configFile(fileId: 'extractor-settings', variable: 'MAVEN_SETTINGS')]) {
