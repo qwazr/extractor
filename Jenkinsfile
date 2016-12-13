@@ -16,10 +16,11 @@ node {
 
     stage 'Test'
 
-    withMaven(
-        maven: 'Maven',
-        mavenSettingsConfig: 'extractor-settings') {
-        sh "mvn clean test jacoco:report coveralls:report"
+    env.PATH = "${tool 'M3'}/bin:${env.PATH}"
+
+    configFileProvider(
+            [configFile(fileId: 'extractor-settings', variable: 'MAVEN_SETTINGS')]) {
+            sh 'mvn -s $MAVEN_SETTINGS clean test jacoco:report coveralls:report'
     }
 
 }
