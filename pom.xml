@@ -2,7 +2,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <groupId>com.qwazr</groupId>
     <artifactId>qwazr-extractor</artifactId>
+    <version>1.1-SNAPSHOT</version>
     <name>QWAZR Extractor</name>
     <packaging>jar</packaging>
 
@@ -18,24 +20,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.undertow</groupId>
-            <artifactId>undertow-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.undertow</groupId>
-            <artifactId>undertow-servlet</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
+            <groupId>com.qwazr</groupId>
+            <artifactId>qwazr-cluster</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
@@ -131,10 +117,6 @@
             <version>1.7.0</version>
         </dependency>
         <dependency>
-            <groupId>com.qwazr</groupId>
-            <artifactId>qwazr-cluster</artifactId>
-        </dependency>
-        <dependency>
             <groupId>xml-apis</groupId>
             <artifactId>xml-apis</artifactId>
             <version>1.4.01</version>
@@ -160,11 +142,6 @@
             <artifactId>css-selectors</artifactId>
             <version>2.0</version>
         </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>
@@ -174,7 +151,7 @@
                 <artifactId>maven-shade-plugin</artifactId>
                 <executions>
                     <execution>
-                        <phase>package</phase>
+                        <phase>none</phase>
                         <goals>
                             <goal>shade</goal>
                         </goals>
