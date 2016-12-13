@@ -103,7 +103,7 @@ public class Ocr extends ParserAbstract {
 		return null;
 	}
 
-	public static final String TESSDATA_PREFIX;
+	private static final String TESSDATA_PREFIX;
 
 	static {
 

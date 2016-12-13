@@ -20,12 +20,13 @@ import com.qwazr.extractor.ExtractorServiceInterface;
 import com.qwazr.extractor.ParserAbstract;
 import com.qwazr.extractor.ParserResult;
 import com.qwazr.extractor.parser.*;
-import com.qwazr.utils.StringUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
@@ -37,11 +38,10 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 public class AllTest {
 
-	static final Logger logger = Logger.getLogger(AllTest.class.getName());
+	static final Logger LOGGER = LoggerFactory.getLogger(AllTest.class);
 
 	static final String DEFAULT_TEST_STRING = "osstextextractor";
 
@@ -125,8 +125,7 @@ public class AllTest {
 			return;
 		if (checkContainsText(result.metas, text))
 			return;
-		logger.severe("Text " + text + " not found");
-		assert (false);
+		Assert.fail("Text " + text + " not found");
 	}
 
 	/**
@@ -139,7 +138,7 @@ public class AllTest {
 	 */
 	protected void doTest(Class<? extends ParserAbstract> className, String fileName, String testString,
 			String... keyValueParams) throws Exception {
-		logger.info("Testing " + className);
+		LOGGER.info("Testing " + className);
 
 		final UriInfo uriInfo = new UriInfoMock(keyValueParams);
 
@@ -300,11 +299,11 @@ public class AllTest {
 
 	@Test
 	public void testOcr() throws Exception {
-		if (StringUtils.isEmpty(Ocr.TESSDATA_PREFIX)) {
-			logger.info("OCR skipped: no TESTDATA_PREFIX");
-			return;
+		try {
+			doTest(Ocr.class, "file.pdf", DEFAULT_TEST_STRING);
+		} catch (UnsatisfiedLinkError e) {
+			LOGGER.warn("OCR skipped: no TESTDATA_PREFIX", e);
 		}
-		doTest(Ocr.class, "file.pdf", DEFAULT_TEST_STRING);
 	}
 
 	@Test

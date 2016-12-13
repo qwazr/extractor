@@ -10,4 +10,10 @@ node {
         sh "mvn -U clean deploy"
     }
 
+    stage 'Test'
+
+    withMagen(maven: 'Maven') {
+        sh "mvn clean test jacoco:report coveralls:report"
+    }
+
 }
