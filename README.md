@@ -1,7 +1,11 @@
 QWAZR Extractor
 ===============
 
-Text and meta-data extraction services services for [QWAZR](https://www.qwazr.com)
+[![Build Status](https://travis-ci.org/qwazr/extractor.svg?branch=master)](https://travis-ci.org/qwazr/extractor)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.qwazr/qwazr-profiler/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.qwazr/qwazr-extractor)
+[![Coverage Status](https://coveralls.io/repos/github/qwazr/extractor/badge.svg?branch=master)](https://coveralls.io/github/qwazr/extractor?branch=master)
+
+Text and meta-data extraction services for [QWAZR](https://www.qwazr.com)
 
 The extractor module exposes REST/JSON API for text and meta-data extraction.
 Here is the list of supported binary formats. Click on the link to see the description of the returned informations.
