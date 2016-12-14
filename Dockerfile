@@ -1,9 +1,10 @@
-FROM openjdk:8-jre
+FROM debian:stretch-slim
 
 MAINTAINER Emmanuel Keller
 
 RUN apt-get update \
- && apt-get install -y --no-install-recommends ghostscript tesseract-ocr tesseract-ocr-* \
+ && apt-get install -y --no-install-recommends \
+          openjdk-8-jre-headless ca-certificates-java ghostscript tesseract-ocr tesseract-ocr-* \
  && rm -rf /var/lib/apt/lists/*
 
 ADD target/qwazr-extractor-1.1-SNAPSHOT-exec.jar /usr/share/qwazr/qwazr-extractor.jar
