@@ -1,4 +1,4 @@
-FROM debian:stretch
+FROM ubuntu:xenial
 
 MAINTAINER Emmanuel Keller
 
