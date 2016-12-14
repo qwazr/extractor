@@ -15,10 +15,9 @@
  */
 package com.qwazr.extractor;
 
-import com.qwazr.cluster.manager.ClusterManager;
+import com.qwazr.server.ServerException;
 import com.qwazr.utils.IOUtils;
 import com.qwazr.utils.StringUtils;
-import com.qwazr.utils.server.ServerException;
 import net.sf.jmimemagic.*;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
@@ -29,9 +28,8 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 import java.io.File;
 import java.io.InputStream;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 class ExtractorServiceImpl implements ExtractorServiceInterface {
 
@@ -50,13 +48,8 @@ class ExtractorServiceImpl implements ExtractorServiceInterface {
 	}
 
 	@Override
-	public Map<String, ResourceLink> list() {
-		final Set<String> parserList = ExtractorManager.INSTANCE.getList();
-		final Map<String, ResourceLink> map = new LinkedHashMap<>(parserList.size());
-		for (String parserName : parserList)
-			map.put(parserName,
-					new ResourceLink(ClusterManager.INSTANCE.getHttpAddressKey() + "/extractor/" + parserName));
-		return map;
+	public Set<String> list() {
+		return new TreeSet<>(ExtractorManager.INSTANCE.getList());
 	}
 
 	private ParserAbstract getParser(final Class<? extends ParserAbstract> parserClass) throws ServerException {
@@ -90,7 +83,7 @@ class ExtractorServiceImpl implements ExtractorServiceInterface {
 		try {
 			ParserAbstract parser = getParser(parserName);
 			if (path == null)
-				return new ParserDefinition(uriInfo.getPath(), parser);
+				return new ParserDefinition(parser);
 			File file = getFilePath(path);
 			return parser.doParsing(getQueryParameters(uriInfo), file, null, null);
 		} catch (Exception e) {

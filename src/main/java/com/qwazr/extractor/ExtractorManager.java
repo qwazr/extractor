@@ -16,7 +16,7 @@
 package com.qwazr.extractor;
 
 import com.qwazr.extractor.parser.*;
-import com.qwazr.utils.server.ServerBuilder;
+import com.qwazr.server.ServerBuilder;
 
 import javax.ws.rs.core.MultivaluedHashMap;
 import java.io.IOException;
