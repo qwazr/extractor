@@ -1,11 +1,15 @@
-FROM debian:stretch-slim
+FROM debian:stretch
 
 MAINTAINER Emmanuel Keller
 
 RUN apt-get update \
- && apt-get install -y --no-install-recommends \
+ && apt-get install -y \
           openjdk-8-jre-headless ca-certificates-java ghostscript tesseract-ocr tesseract-ocr-* \
  && rm -rf /var/lib/apt/lists/*
+
+ENV LANG C.UTF-8
+
+RUN /var/lib/dpkg/info/ca-certificates-java.postinst configure
 
 ADD target/qwazr-extractor-1.1-SNAPSHOT-exec.jar /usr/share/qwazr/qwazr-extractor.jar
 
