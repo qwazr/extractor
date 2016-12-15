@@ -38,98 +38,28 @@ curl -XGET http://localhost:9091/extractor
 The function return the list of available parsers.
 
 ```json
-{
-  "audio" : {
-    "_link" : {
-      "method" : "GET", "rel" : "describe", "href" : "audio"
-    }
-  },
-  "doc" : {
-    "_link" : {
-      "method" : "GET", "rel" : "describe", "href" : "doc"
-    }
-  },
-  "docx" : {
-    "_link" : {
-      "method" : "GET", "rel" : "describe", "href" : "docx"
-    }
-  },
-  "eml" : {
-    "_link" : {
-      "method" : "GET", "rel" : "describe", "href" : "eml"
-    }
-  },
-  "image" : {
-    "_link" : {
-      "method" : "GET", "rel" : "describe", "href" : "image"
-    }
-  },
-  "odf" : {
-    "_link" : {
-      "method" : "GET", "rel" : "describe", "href" : "odf"
-    }
-  },
-  "mapimsg" : {
-    "_link" : {
-      "method" : "GET", "rel" : "describe", "href" : "mapimsg"
-    }
-  },
-  "markdown" : {
-    "_link" : {
-      "method" : "GET", "rel" : "describe", "href" : "markdown"
-    }
-  },
-  "pdfbox" : {
-    "_link" : {
-      "method" : "GET", "rel" : "describe", "href" : "pdfbox"
-    }
-  },
-  "ppt" : {
-    "_link" : {
-      "method" : "GET", "rel" : "describe", "href" : "ppt"
-    }
-  },
-  "pptx" : {
-    "_link" : {
-      "method" : "GET",  "rel" : "describe",  "href" : "pptx"
-    }
-  },
-  "publisher" : {
-    "_link" : {
-      "method" : "GET", "rel" : "describe", "href" : "publisher"
-    }
-  },
-  "rss" : {
-    "_link" : {
-      "method" : "GET", "rel" : "describe",  "href" : "rss"
-    }
-  },
-  "rtf" : {
-    "_link" : {
-      "method" : "GET", "rel" : "describe", "href" : "rtf"
-    }
-  },
-  "text" : {
-    "_link" : {
-      "method" : "GET",   "rel" : "describe", "href" : "text"
-    }
-  },
-  "visio" : {
-    "_link" : {
-      "method" : "GET", "rel" : "describe",  "href" : "visio"
-    }
-  },
-  "xls" : {
-    "_link" : {
-      "method" : "GET",  "rel" : "describe",  "href" : "xls"
-    }
-  },
-  "xlsx" : {
-    "_link" : {
-      "method" : "GET",  "rel" : "describe", "href" : "xlsx"
-    }
-  }
-}
+[
+"audio",
+"doc",
+"docx",
+"eml",
+"html",
+"image",
+"mapimsg",
+"markdown",
+"ocr",
+"odf",
+"pdfbox",
+"ppt",
+"pptx",
+"publisher",
+"rss",
+"rtf",
+"text",
+"visio",
+"xls",
+"xlsx"
+]
 ```
 
 ### Get information about a parser
@@ -159,22 +89,7 @@ The function displays which fields are returned by the parser and the available 
     "description" : "Detection of the charset"
   } ],
   "file_extensions" : [ "txt" ],
-  "mime_types" : [ "text/plain" ],
-  "_link1" : {
-    "method" : "GET",
-    "rel" : "parse local file",
-    "href" : "/text",
-    "queryString" : [ {
-      "name" : "path",
-      "type" : "STRING",
-      "description" : "path to the local file"
-    } ]
-  },
-  "_link2" : {
-    "method" : "PUT",
-    "rel" : "upload",
-    "href" : "/text"
-  }
+  "mime_types" : [ "text/plain" ]
 }
 ```
 
@@ -268,19 +183,18 @@ protected void parseContent(InputStream inputStream, String extension, String mi
 
 The parse must build a list of ParserDocument. A parser may return one or more documents (one document per page, one document per RSS item, ...). A Parser Document is a list of name/value pair.
 
-Have a look at the [Rtf](https://github.com/qwazr/qwazr-extractor/blob/master/src/main/java/com/qwazr/extractor/parser/rtf.java) class to see a simple example.
+Have a look at the [Rtf](https://github.com/qwazr/extractor/blob/master/src/main/java/com/qwazr/extractor/parser/Rtf.java) class to see a simple example.
 
 ```java
+
 	@Override
-	protected void parseContent(InputStream inputStream, String extension, String mimeType) throws Exception {
+	protected void parseContent(InputStream inputStream, String extension,
+			String mimeType) throws Exception {
 
 		// Extract the text data
 		RTFEditorKit rtf = new RTFEditorKit();
 		Document doc = rtf.createDefaultDocument();
 		rtf.read(inputStream, doc, 0);
-
-		// Fill the metas
-		metas.add(TITLE, "title of the document");
 
 		// Obtain a new parser document.
 		ParserDocument result = getNewParserDocument();
