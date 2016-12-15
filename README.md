@@ -35,7 +35,7 @@ Usage
 curl -XGET http://localhost:9091/extractor
 ```
 
-The function return the list of available parsers.
+The function returns the list of available parsers.
 
 ```json
 [
