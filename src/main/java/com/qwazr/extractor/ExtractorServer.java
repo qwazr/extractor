@@ -16,32 +16,38 @@
 package com.qwazr.extractor;
 
 import com.qwazr.cluster.manager.ClusterManager;
+import com.qwazr.server.BaseServer;
 import com.qwazr.server.GenericServer;
-import com.qwazr.server.ServerBuilder;
 import com.qwazr.server.WelcomeShutdownService;
 import com.qwazr.server.configuration.ServerConfiguration;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.concurrent.ExecutorService;
+import java.net.URISyntaxException;
 
-public class ExtractorServer extends GenericServer {
+public class ExtractorServer implements BaseServer {
 
-	private ExtractorServer(final ServerConfiguration serverConfiguration) throws IOException {
-		super(serverConfiguration);
+	private final GenericServer server;
+	private final ExtractorManager extractorManager;
+
+	private ExtractorServer(final ServerConfiguration configuration) throws IOException, URISyntaxException {
+		final GenericServer.Builder builder = GenericServer.of(configuration);
+		new ClusterManager(builder);
+		extractorManager = new ExtractorManager(builder);
+		builder.webService(WelcomeShutdownService.class);
+		server = builder.build();
 	}
 
 	@Override
-	protected void build(final ExecutorService executorService, final ServerBuilder builder,
-			final ServerConfiguration configuration, final Collection<File> etcFiles) throws IOException {
-		ClusterManager.load(builder, configuration);
-		ExtractorManager.load(builder);
-		builder.registerWebService(WelcomeShutdownService.class);
+	public GenericServer getServer() {
+		return server;
+	}
+
+	public ExtractorServiceInterface getService() {
+		return extractorManager.getService();
 	}
 
 	public static void main(final String... args) throws Exception {
-		new ExtractorServer(new ServerConfiguration(args)).start(true);
+		new ExtractorServer(new ServerConfiguration(args)).start();
 	}
 
 }

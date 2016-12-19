@@ -15,11 +15,29 @@
  */
 package com.qwazr.extractor;
 
-import com.qwazr.extractor.parser.*;
-import com.qwazr.server.ServerBuilder;
+import com.qwazr.extractor.parser.Audio;
+import com.qwazr.extractor.parser.Doc;
+import com.qwazr.extractor.parser.Docx;
+import com.qwazr.extractor.parser.Eml;
+import com.qwazr.extractor.parser.Html;
+import com.qwazr.extractor.parser.Image;
+import com.qwazr.extractor.parser.MapiMsg;
+import com.qwazr.extractor.parser.Markdown;
+import com.qwazr.extractor.parser.Ocr;
+import com.qwazr.extractor.parser.Odf;
+import com.qwazr.extractor.parser.PdfBox;
+import com.qwazr.extractor.parser.Ppt;
+import com.qwazr.extractor.parser.Pptx;
+import com.qwazr.extractor.parser.Publisher;
+import com.qwazr.extractor.parser.Rss;
+import com.qwazr.extractor.parser.Rtf;
+import com.qwazr.extractor.parser.Text;
+import com.qwazr.extractor.parser.Visio;
+import com.qwazr.extractor.parser.Xls;
+import com.qwazr.extractor.parser.Xlsx;
+import com.qwazr.server.GenericServer;
 
 import javax.ws.rs.core.MultivaluedHashMap;
-import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -29,8 +47,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class ExtractorManager {
 
-	public final static String SERVICE_NAME_EXTRACTOR = "extractor";
-
 	private final ReadWriteLock rwl = new ReentrantReadWriteLock();
 
 	private final Map<String, Class<? extends ParserAbstract>> namesMap;
@@ -39,23 +55,10 @@ public class ExtractorManager {
 
 	private final MultivaluedHashMap<String, Class<? extends ParserAbstract>> extensionsMap;
 
-	static ExtractorManager INSTANCE = null;
+	private final ExtractorServiceInterface service;
 
-	public synchronized static void load(final ServerBuilder builder) throws IOException {
-		if (INSTANCE != null)
-			throw new IOException("Already loaded");
-		INSTANCE = new ExtractorManager();
-		if (builder != null)
-			builder.registerWebService(ExtractorServiceImpl.class);
-	}
+	public ExtractorManager(final GenericServer.Builder builder) {
 
-	public static ExtractorManager getInstance() {
-		if (ExtractorManager.INSTANCE == null)
-			throw new RuntimeException("The extractor service is not enabled");
-		return ExtractorManager.INSTANCE;
-	}
-
-	private ExtractorManager() {
 		namesMap = new LinkedHashMap<>();
 		mimeTypesMap = new MultivaluedHashMap<>();
 		extensionsMap = new MultivaluedHashMap<>();
@@ -80,9 +83,24 @@ public class ExtractorManager {
 		register(Visio.class);
 		register(Xls.class);
 		register(Xlsx.class);
+
+		service = new ExtractorServiceImpl(this);
+
+		if (builder != null) {
+			builder.webService(ExtractorServiceImpl.class);
+			builder.contextAttribute(this);
+		}
 	}
 
-	public final void register(Class<? extends ParserAbstract> parserClass) {
+	public ExtractorManager() {
+		this(null);
+	}
+
+	public ExtractorServiceInterface getService() {
+		return service;
+	}
+
+	final public void register(Class<? extends ParserAbstract> parserClass) {
 		Lock l = rwl.writeLock();
 		l.lock();
 		try {
@@ -105,7 +123,7 @@ public class ExtractorManager {
 		}
 	}
 
-	public final Class<? extends ParserAbstract> findParserClassByName(String parserName) {
+	final public Class<? extends ParserAbstract> findParserClassByName(String parserName) {
 		Lock l = rwl.readLock();
 		l.lock();
 		try {
@@ -115,7 +133,7 @@ public class ExtractorManager {
 		}
 	}
 
-	public final Class<? extends ParserAbstract> findParserClassByMimeTypeFirst(String mimeType) {
+	final public Class<? extends ParserAbstract> findParserClassByMimeTypeFirst(String mimeType) {
 		Lock l = rwl.readLock();
 		l.lock();
 		try {
@@ -125,7 +143,7 @@ public class ExtractorManager {
 		}
 	}
 
-	public final Class<? extends ParserAbstract> findParserClassByExtensionFirst(String extension) {
+	final public Class<? extends ParserAbstract> findParserClassByExtensionFirst(String extension) {
 		Lock l = rwl.readLock();
 		l.lock();
 		try {
@@ -135,7 +153,7 @@ public class ExtractorManager {
 		}
 	}
 
-	public final Set<String> getList() {
+	final public Set<String> getList() {
 		Lock l = rwl.readLock();
 		l.lock();
 		try {

@@ -15,14 +15,20 @@
  */
 package com.qwazr.extractor;
 
+import com.qwazr.server.AbstractServiceImpl;
 import com.qwazr.server.ServerException;
 import com.qwazr.utils.IOUtils;
 import com.qwazr.utils.StringUtils;
-import net.sf.jmimemagic.*;
+import net.sf.jmimemagic.Magic;
+import net.sf.jmimemagic.MagicException;
+import net.sf.jmimemagic.MagicMatch;
+import net.sf.jmimemagic.MagicMatchNotFoundException;
+import net.sf.jmimemagic.MagicParseException;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.PostConstruct;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
@@ -31,25 +37,28 @@ import java.io.InputStream;
 import java.util.Set;
 import java.util.TreeSet;
 
-class ExtractorServiceImpl implements ExtractorServiceInterface {
+class ExtractorServiceImpl extends AbstractServiceImpl implements ExtractorServiceInterface {
 
-	private static final Logger logger = LoggerFactory.getLogger(ExtractorServiceImpl.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ExtractorServiceImpl.class);
 
-	static volatile ExtractorServiceImpl INSTANCE = null;
+	private volatile ExtractorManager extractorManager;
 
-	final static ExtractorServiceImpl getInstance() {
-		if (INSTANCE != null)
-			return INSTANCE;
-		synchronized (ExtractorServiceImpl.class) {
-			if (INSTANCE == null)
-				INSTANCE = new ExtractorServiceImpl();
-			return INSTANCE;
-		}
+	ExtractorServiceImpl(ExtractorManager extractorManager) {
+		this.extractorManager = extractorManager;
+	}
+
+	public ExtractorServiceImpl() {
+		this(null);
+	}
+
+	@PostConstruct
+	public void init() {
+		extractorManager = getContextAttribute(ExtractorManager.class);
 	}
 
 	@Override
 	public Set<String> list() {
-		return new TreeSet<>(ExtractorManager.INSTANCE.getList());
+		return new TreeSet<>(extractorManager.getList());
 	}
 
 	private ParserAbstract getParser(final Class<? extends ParserAbstract> parserClass) throws ServerException {
@@ -63,7 +72,7 @@ class ExtractorServiceImpl implements ExtractorServiceInterface {
 	}
 
 	private ParserAbstract getParser(String parserName) throws ServerException {
-		Class<? extends ParserAbstract> parserClass = ExtractorManager.INSTANCE.findParserClassByName(parserName);
+		Class<? extends ParserAbstract> parserClass = extractorManager.findParserClassByName(parserName);
 		if (parserClass == null)
 			throw new ServerException(Status.NOT_FOUND, "Unknown parser: " + parserName);
 		return getParser(parserClass);
@@ -87,7 +96,7 @@ class ExtractorServiceImpl implements ExtractorServiceInterface {
 			File file = getFilePath(path);
 			return parser.doParsing(getQueryParameters(uriInfo), file, null, null);
 		} catch (Exception e) {
-			throw ServerException.getJsonException(logger, e);
+			throw ServerException.getJsonException(LOGGER, e);
 		}
 	}
 
@@ -113,7 +122,7 @@ class ExtractorServiceImpl implements ExtractorServiceInterface {
 			else
 				return parser.doParsing(parameters, inputStream, null, null);
 		} catch (Exception e) {
-			throw ServerException.getJsonException(logger, e);
+			throw ServerException.getJsonException(LOGGER, e);
 		}
 	}
 
@@ -125,13 +134,13 @@ class ExtractorServiceImpl implements ExtractorServiceInterface {
 	private Class<? extends ParserAbstract> getClassParserExtension(String extension) {
 		if (StringUtils.isEmpty(extension))
 			return null;
-		return ExtractorManager.INSTANCE.findParserClassByExtensionFirst(extension);
+		return extractorManager.findParserClassByExtensionFirst(extension);
 	}
 
 	private Class<? extends ParserAbstract> getClassParserMimeType(String mimeType) {
 		if (StringUtils.isEmpty(mimeType))
 			return null;
-		return ExtractorManager.INSTANCE.findParserClassByMimeTypeFirst(mimeType);
+		return extractorManager.findParserClassByMimeTypeFirst(mimeType);
 	}
 
 	private String getMimeMagic(File file) {
@@ -220,7 +229,7 @@ class ExtractorServiceImpl implements ExtractorServiceInterface {
 			else
 				return putMagicStream(uriInfo, fileName, mimeType, inputStream);
 		} catch (Exception e) {
-			throw ServerException.getJsonException(logger, e);
+			throw ServerException.getJsonException(LOGGER, e);
 		}
 	}
 

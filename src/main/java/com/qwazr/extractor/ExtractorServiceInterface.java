@@ -26,10 +26,12 @@ import javax.ws.rs.core.UriInfo;
 import java.io.InputStream;
 import java.util.Set;
 
-@RolesAllowed(ExtractorManager.SERVICE_NAME_EXTRACTOR)
+@RolesAllowed(ExtractorServiceInterface.SERVICE_NAME)
 @Path("/extractor")
-@ServiceName(ExtractorManager.SERVICE_NAME_EXTRACTOR)
+@ServiceName(ExtractorServiceInterface.SERVICE_NAME)
 public interface ExtractorServiceInterface extends ServiceInterface {
+
+	String SERVICE_NAME = "extractor";
 
 	@GET
 	@Path("/")
@@ -56,7 +58,4 @@ public interface ExtractorServiceInterface extends ServiceInterface {
 	ParserResult putMagic(@Context UriInfo uriInfo, @QueryParam("name") String fileName,
 			@QueryParam("path") String filePath, @QueryParam("type") String mimeType, InputStream inputStream);
 
-	static ExtractorServiceInterface getClient() {
-		return ExtractorServiceImpl.getInstance();
-	}
 }

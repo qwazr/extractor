@@ -45,9 +45,14 @@ public class AllTest {
 
 	static final String DEFAULT_TEST_STRING = "osstextextractor";
 
+	static ExtractorManager manager;
+
+	static ExtractorServiceInterface service;
+
 	@BeforeClass
 	public static void init() throws IOException {
-		ExtractorManager.load(null);
+		manager = new ExtractorManager();
+		service = manager.getService();
 	}
 
 	/**
@@ -62,7 +67,7 @@ public class AllTest {
 	protected ParserAbstract createRegisterInstance(Class<? extends ParserAbstract> className)
 			throws InstantiationException, IllegalAccessException, IOException {
 		Class<? extends ParserAbstract> parserClass =
-				ExtractorManager.getInstance().findParserClassByName(className.getSimpleName().toLowerCase());
+				manager.findParserClassByName(className.getSimpleName().toLowerCase());
 		assert (parserClass != null);
 		return parserClass.newInstance();
 	}
@@ -158,14 +163,12 @@ public class AllTest {
 		checkContainsText(parserResult, testString);
 
 		// Test stream with magic mime service
-		parserResult =
-				ExtractorServiceInterface.getClient().putMagic(uriInfo, fileName, null, null, getStream(fileName));
+		parserResult = service.putMagic(uriInfo, fileName, null, null, getStream(fileName));
 		assert (parserResult != null);
 		checkContainsText(parserResult, testString);
 
 		// Test path with magic mime service
-		parserResult = ExtractorServiceInterface.getClient()
-				.putMagic(uriInfo, fileName, tempFile.getAbsolutePath(), null, null);
+		parserResult = service.putMagic(uriInfo, fileName, tempFile.getAbsolutePath(), null, null);
 		assert (parserResult != null);
 		checkContainsText(parserResult, testString);
 	}
@@ -223,13 +226,12 @@ public class AllTest {
 	}
 
 	private void testSelector(String[] names, String[] selectors, String param, String[] selectorResults) {
-		final ExtractorServiceInterface client = ExtractorServiceInterface.getClient();
 		final MultivaluedMap map = new MultivaluedHashMap<>();
 		map.addAll(param, selectors);
 		if (names != null)
 			map.addAll(param + "_name", names);
 
-		ParserResult parserResult = client.extract("html", map, null, getStream("file.html"));
+		ParserResult parserResult = service.extract("html", map, null, getStream("file.html"));
 		Assert.assertNotNull(parserResult);
 		Map<String, List<String>> results =
 				(Map<String, List<String>>) parserResult.getDocumentFieldValue(0, "selectors", 0);
