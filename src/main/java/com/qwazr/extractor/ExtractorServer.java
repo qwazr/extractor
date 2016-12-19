@@ -30,7 +30,7 @@ public class ExtractorServer implements BaseServer {
 	private final ExtractorManager extractorManager;
 
 	private ExtractorServer(final ServerConfiguration configuration) throws IOException, URISyntaxException {
-		final GenericServer.Builder builder = GenericServer.of(configuration);
+		final GenericServer.Builder builder = GenericServer.of(configuration, null);
 		new ClusterManager(builder);
 		extractorManager = new ExtractorManager(builder);
 		builder.webService(WelcomeShutdownService.class);
