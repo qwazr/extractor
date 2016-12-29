@@ -15,7 +15,7 @@
  */
 package com.qwazr.extractor;
 
-import com.qwazr.cluster.manager.ClusterManager;
+import com.qwazr.cluster.ClusterManager;
 import com.qwazr.server.BaseServer;
 import com.qwazr.server.GenericServer;
 import com.qwazr.server.WelcomeShutdownService;
