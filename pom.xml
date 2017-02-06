@@ -14,7 +14,7 @@
     </parent>
 
     <properties>
-        <bouncycastle.version>1.55</bouncycastle.version>
+        <bouncycastle.version>1.56</bouncycastle.version>
     </properties>
 
     <dependencies>
@@ -127,7 +127,7 @@
         <dependency>
             <groupId>com.rometools</groupId>
             <artifactId>rome</artifactId>
-            <version>1.7.0</version>
+            <version>1.7.1</version>
         </dependency>
         <dependency>
             <groupId>xml-apis</groupId>
