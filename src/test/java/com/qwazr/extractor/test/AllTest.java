@@ -304,7 +304,7 @@ public class AllTest {
 		try {
 			doTest(Ocr.class, "file.pdf", DEFAULT_TEST_STRING);
 		} catch (UnsatisfiedLinkError e) {
-			LOGGER.warn("OCR skipped: no TESTDATA_PREFIX", e);
+			LOGGER.warn("OCR skipped: no TESSDATA_PREFIX", e);
 		}
 	}
 
