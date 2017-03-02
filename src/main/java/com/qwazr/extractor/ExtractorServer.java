@@ -23,6 +23,8 @@ import com.qwazr.server.configuration.ServerConfiguration;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ExtractorServer implements BaseServer {
 
@@ -30,8 +32,9 @@ public class ExtractorServer implements BaseServer {
 	private final ExtractorManager extractorManager;
 
 	private ExtractorServer(final ServerConfiguration configuration) throws IOException, URISyntaxException {
-		final GenericServer.Builder builder = GenericServer.of(configuration, null);
-		new ClusterManager(builder);
+		final ExecutorService executorService = Executors.newCachedThreadPool();
+		final GenericServer.Builder builder = GenericServer.of(configuration, executorService);
+		new ClusterManager(builder, executorService);
 		extractorManager = new ExtractorManager(builder);
 		builder.webService(WelcomeShutdownService.class);
 		server = builder.build();
