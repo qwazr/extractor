@@ -19,14 +19,18 @@ import com.qwazr.extractor.ParserAbstract;
 import com.qwazr.extractor.ParserDocument;
 import com.qwazr.extractor.ParserField;
 import com.qwazr.utils.CharsetUtils;
-import org.apache.commons.io.IOUtils;
-import org.pegdown.Extensions;
-import org.pegdown.LinkRenderer;
-import org.pegdown.PegDownProcessor;
-import org.pegdown.ToHtmlSerializer;
-import org.pegdown.ast.*;
+import com.qwazr.utils.StringUtils;
+import org.commonmark.node.Link;
+import org.commonmark.node.Node;
+import org.commonmark.parser.Parser;
+import org.commonmark.renderer.NodeRenderer;
+import org.commonmark.renderer.text.TextContentRenderer;
 
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Markdown extends ParserAbstract {
 
@@ -68,97 +72,39 @@ public class Markdown extends ParserAbstract {
 		return DEFAULT_MIMETYPES;
 	}
 
-	private void parseContent(char[] source) throws Exception {
-		// PegDownProcessor is not thread safe One processor per thread
-		final PegDownProcessor pdp = new PegDownProcessor(Extensions.NONE, 30000);
-		final RootNode rootNode = pdp.parseMarkdown(source);
-		result = getNewParserDocument();
-		rootNode.accept(new ExtractorSerializer());
-		result.add(LANG_DETECTION, languageDetection(CONTENT, 10000));
-	}
-
 	@Override
 	protected void parseContent(InputStream inputStream, String extension, String mimeType) throws Exception {
-		parseContent(IOUtils.toCharArray(inputStream, CharsetUtils.CharsetUTF8));
-	}
-
-	public class ExtractorSerializer extends ToHtmlSerializer {
-
-		@Override
-		public void visit(RootNode node) {
-			super.visit(node);
-			nextContent();
-		}
-
-		protected void nextContent() {
-			if (printer.sb.length() == 0)
-				return;
-			result.add(CONTENT, printer.sb.toString());
-			printer.clear();
-		}
-
-		public ExtractorSerializer() {
-			super(new LinkRenderer());
-		}
-
-		@Override
-		public void visit(DefinitionNode node) {
-			super.visit(node);
-			nextContent();
-		}
-
-		@Override
-		public void visit(DefinitionTermNode node) {
-			super.visit(node);
-			nextContent();
-		}
-
-		@Override
-		public void visit(ParaNode node) {
-			super.visit(node);
-			nextContent();
-		}
-
-		@Override
-		public void visit(HeaderNode node) {
-			super.visit(node);
-			nextContent();
-		}
-
-		@Override
-		public void visit(ListItemNode node) {
-			super.visit(node);
-			nextContent();
-		}
-
-		@Override
-		protected void printTag(TextNode node, String tag) {
-			printer.print(node.getText());
-		}
-
-		@Override
-		protected void printTag(SuperNode node, String tag) {
-			visitChildren(node);
-		}
-
-		@Override
-		protected void printIndentedTag(SuperNode node, String tag) {
-			nextContent();
-			visitChildren(node);
-			nextContent();
-		}
-
-		@Override
-		protected void printImageTag(LinkRenderer.Rendering rendering) {
-			result.add(URL, rendering.href);
-			printer.print(rendering.text);
-		}
-
-		@Override
-		protected void printLink(LinkRenderer.Rendering rendering) {
-			result.add(URL, rendering.href);
-			printer.print(rendering.text);
+		result = getNewParserDocument();
+		final Parser parser = Parser.builder().build();
+		final TextContentRenderer renderer =
+				TextContentRenderer.builder().nodeRendererFactory(context -> new ExtractorNodeRenderer()).build();
+		try (final InputStreamReader reader = new InputStreamReader(inputStream, CharsetUtils.CharsetUTF8)) {
+			final String[] lines = StringUtils.splitLines(renderer.render(parser.parseReader(reader)));
+			for (String line : lines)
+				result.add(CONTENT, line);
 		}
 	}
 
+	private final static Set<Class<? extends Node>> TYPES =
+			new HashSet<>(Arrays.asList(Link.class, org.commonmark.node.Image.class));
+
+	public class ExtractorNodeRenderer implements NodeRenderer {
+
+		@Override
+		public Set<Class<? extends Node>> getNodeTypes() {
+			return TYPES;
+		}
+
+		@Override
+		public void render(Node node) {
+			if (node instanceof Link) {
+				final Link link = (Link) node;
+				result.add(URL, link.getDestination());
+			} else if (node instanceof org.commonmark.node.Image) {
+				final org.commonmark.node.Image img = (org.commonmark.node.Image) node;
+				result.add(URL, img.getDestination());
+			}
+			result.add(CONTENT, node.toString());
+		}
+	}
 }
