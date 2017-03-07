@@ -100,11 +100,12 @@ public class Markdown extends ParserAbstract {
 			if (node instanceof Link) {
 				final Link link = (Link) node;
 				result.add(URL, link.getDestination());
+				result.add(CONTENT, link.getTitle());
 			} else if (node instanceof org.commonmark.node.Image) {
 				final org.commonmark.node.Image img = (org.commonmark.node.Image) node;
 				result.add(URL, img.getDestination());
+				result.add(CONTENT, img.getTitle());
 			}
-			result.add(CONTENT, node.toString());
 		}
 	}
 }
