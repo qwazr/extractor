@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2016 Emmanuel Keller / QWAZR
+ * Copyright 2015-2017 Emmanuel Keller / QWAZR
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,10 +33,12 @@ public class ExtractorServer implements BaseServer {
 
 	private ExtractorServer(final ServerConfiguration configuration) throws IOException, URISyntaxException {
 		final ExecutorService executorService = Executors.newCachedThreadPool();
-		final GenericServer.Builder builder = GenericServer.of(configuration, executorService);
-		new ClusterManager(builder, executorService);
-		extractorManager = new ExtractorManager(builder);
-		builder.webService(WelcomeShutdownService.class);
+		final GenericServer.Builder builder =
+				GenericServer.of(configuration, executorService).webService(WelcomeShutdownService.class);
+		new ClusterManager(executorService, configuration).registerHttpClientMonitoringThread(builder)
+				.registerProtocolListener(builder)
+				.registerWebService(builder);
+		extractorManager = new ExtractorManager().registerWebService(builder);
 		server = builder.build();
 	}
 

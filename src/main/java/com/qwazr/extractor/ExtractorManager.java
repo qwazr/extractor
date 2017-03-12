@@ -57,7 +57,7 @@ public class ExtractorManager {
 
 	private final ExtractorServiceInterface service;
 
-	public ExtractorManager(final GenericServer.Builder builder) {
+	public ExtractorManager() {
 
 		namesMap = new LinkedHashMap<>();
 		mimeTypesMap = new MultivaluedHashMap<>();
@@ -86,14 +86,16 @@ public class ExtractorManager {
 
 		service = new ExtractorServiceImpl(this);
 
-		if (builder != null) {
-			builder.webService(ExtractorServiceImpl.class);
-			builder.contextAttribute(this);
-		}
 	}
 
-	public ExtractorManager() {
-		this(null);
+	public ExtractorManager registerContextAttribute(final GenericServer.Builder builder) {
+		builder.contextAttribute(this);
+		return this;
+	}
+
+	public ExtractorManager registerWebService(final GenericServer.Builder builder) {
+		builder.webService(ExtractorServiceImpl.class);
+		return registerContextAttribute(builder);
 	}
 
 	public ExtractorServiceInterface getService() {
@@ -114,9 +116,7 @@ public class ExtractorManager {
 			if (mimeTypes != null)
 				for (String mimeType : mimeTypes)
 					mimeTypesMap.add(mimeType.intern(), parserClass);
-		} catch (InstantiationException e) {
-			throw new RuntimeException(e);
-		} catch (IllegalAccessException e) {
+		} catch (InstantiationException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		} finally {
 			l.unlock();
