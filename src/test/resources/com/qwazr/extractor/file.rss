@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/" xml:lang="en-US">
+  <id>tag:github.com,2008:/opensearchserver/oss-text-extractor/commits/master</id>
+  <link type="text/html" rel="alternate" href="https://github.com/opensearchserver/oss-text-extractor/commits/master"/>
+  <link type="application/atom+xml" rel="self" href="https://github.com/opensearchserver/oss-text-extractor/commits/master.atom"/>
+  <title>Recent Commits to oss-text-extractor:master</title>
+  <updated>2015-02-15T12:36:01+01:00</updated>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/eb02dc57913fc5fd668c128c435a534a871033d1</id>
+    <link type="text/html" rel="alternate" href="https://github.com/opensearchserver/oss-text-extractor/commit/eb02dc57913fc5fd668c128c435a534a871033d1"/>
+    <title>
+        Merge pull request #49 from emmanuel-keller/master
+    </title>
+    <updated>2015-02-15T12:36:01+01:00</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars2.githubusercontent.com/u/1282276?v=3&amp;s=30"/>
+    <author>
+      <name>emmanuel-keller</name>
+      <uri>https://github.com/emmanuel-keller</uri>
+    </author>
+    <content type="html">
+      &lt;pre style='white-space:pre-wrap;width:81ex'>Merge pull request #49 from emmanuel-keller/master
+
+Add tests for mime magic features.&lt;/pre>
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/810b029bda45def5ed20dac4d43a881f6ea44b51</id>
+    <link type="text/html" rel="alternate" href="https://github.com/opensearchserver/oss-text-extractor/commit/810b029bda45def5ed20dac4d43a881f6ea44b51"/>
+    <title>
+        Add tests for mime magic features.
+    </title>
+    <updated>2015-02-15T12:35:06+01:00</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars2.githubusercontent.com/u/1282276?v=3&amp;s=30"/>
+    <author>
+      <name>emmanuel-keller</name>
+      <uri>https://github.com/emmanuel-keller</uri>
+    </author>
+    <content type="html">
+      &lt;pre style='white-space:pre-wrap;width:81ex'>Add tests for mime magic features.&lt;/pre>
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/9a343dfb485a0062ab50b5cdd5e46ed68301c25d</id>
+    <link type="text/html" rel="alternate" href="https://github.com/opensearchserver/oss-text-extractor/commit/9a343dfb485a0062ab50b5cdd5e46ed68301c25d"/>
+    <title>
+        Merge pull request #48 from emmanuel-keller/master
+    </title>
+    <updated>2015-02-14T21:04:21+01:00</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars2.githubusercontent.com/u/1282276?v=3&amp;s=30"/>
+    <author>
+      <name>emmanuel-keller</name>
+      <uri>https://github.com/emmanuel-keller</uri>
+    </author>
+    <content type="html">
+      &lt;pre style='white-space:pre-wrap;width:81ex'>Merge pull request #48 from emmanuel-keller/master
+
+Work on #44&lt;/pre>
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/0225091142828f02dad9803bda33a2fc407b7100</id>
+    <link type="text/html" rel="alternate" href="https://github.com/opensearchserver/oss-text-extractor/commit/0225091142828f02dad9803bda33a2fc407b7100"/>
+    <title>
+        Work on #44
+    </title>
+    <updated>2015-02-14T21:03:38+01:00</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars2.githubusercontent.com/u/1282276?v=3&amp;s=30"/>
+    <author>
+      <name>emmanuel-keller</name>
+      <uri>https://github.com/emmanuel-keller</uri>
+    </author>
+    <content type="html">
+      &lt;pre style='white-space:pre-wrap;width:81ex'>Work on #44&lt;/pre>
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/eeb74e04ae3c6ee744ddc3440777c673346b6c3c</id>
+    <link type="text/html" rel="alternate" href="https://github.com/opensearchserver/oss-text-extractor/commit/eeb74e04ae3c6ee744ddc3440777c673346b6c3c"/>
+    <title>
+        Merge pull request #47 from emmanuel-keller/master
+    </title>
+    <updated>2015-02-14T15:08:22+01:00</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars2.githubusercontent.com/u/1282276?v=3&amp;s=30"/>
+    <author>
+      <name>emmanuel-keller</name>
+      <uri>https://github.com/emmanuel-keller</uri>
+    </author>
+    <content type="html">
+      &lt;pre style='white-space:pre-wrap;width:81ex'>Merge pull request #47 from emmanuel-keller/master
+
+Implements #46 #45 #43 #9&lt;/pre>
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/00db6768a0d0c9c2d7fc4d3e2c4f14afe96b58ea</id>
+    <link type="text/html" rel="alternate" href="https://github.com/opensearchserver/oss-text-extractor/commit/00db6768a0d0c9c2d7fc4d3e2c4f14afe96b58ea"/>
+    <title>
+        Implements #46 #45 #43 #9
+    </title>
+    <updated>2015-02-14T15:06:47+01:00</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars2.githubusercontent.com/u/1282276?v=3&amp;s=30"/>
+    <author>
+      <name>emmanuel-keller</name>
+      <uri>https://github.com/emmanuel-keller</uri>
+    </author>
+    <content type="html">
+      &lt;pre style='white-space:pre-wrap;width:81ex'>Implements #46 #45 #43 #9&lt;/pre>
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/f75ea95e337c2513a389af964540c5a05945c9b3</id>
+    <link type="text/html" rel="alternate" href="https://github.com/opensearchserver/oss-text-extractor/commit/f75ea95e337c2513a389af964540c5a05945c9b3"/>
+    <title>
+        [maven-release-plugin] prepare for next development iteration
+    </title>
+    <updated>2014-12-26T12:08:35+01:00</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars2.githubusercontent.com/u/1282276?v=3&amp;s=30"/>
+    <author>
+      <name>emmanuel-keller</name>
+      <uri>https://github.com/emmanuel-keller</uri>
+    </author>
+    <content type="html">
+      &lt;pre style='white-space:pre-wrap;width:81ex'>[maven-release-plugin] prepare for next development iteration&lt;/pre>
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/2e61ee16cae382a458f99ea5cca0b0711bd68837</id>
+    <link type="text/html" rel="alternate" href="https://github.com/opensearchserver/oss-text-extractor/commit/2e61ee16cae382a458f99ea5cca0b0711bd68837"/>
+    <title>
+        [maven-release-plugin] prepare release v1.1
+    </title>
+    <updated>2014-12-26T12:08:31+01:00</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars2.githubusercontent.com/u/1282276?v=3&amp;s=30"/>
+    <author>
+      <name>emmanuel-keller</name>
+      <uri>https://github.com/emmanuel-keller</uri>
+    </author>
+    <content type="html">
+      &lt;pre style='white-space:pre-wrap;width:81ex'>[maven-release-plugin] prepare release v1.1&lt;/pre>
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/2d3fe9a621381c7da22e1e6de455155f7bb76564</id>
+    <link type="text/html" rel="alternate" href="https://github.com/opensearchserver/oss-text-extractor/commit/2d3fe9a621381c7da22e1e6de455155f7bb76564"/>
+    <title>
+        Merge pull request #39 from emmanuel-keller/master
+    </title>
+    <updated>2014-12-26T12:05:18+01:00</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars2.githubusercontent.com/u/1282276?v=3&amp;s=30"/>
+    <author>
+      <name>emmanuel-keller</name>
+      <uri>https://github.com/emmanuel-keller</uri>
+    </author>
+    <content type="html">
+      &lt;pre style='white-space:pre-wrap;width:81ex'>Merge pull request #39 from emmanuel-keller/master
+
+Update documentation&lt;/pre>
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/29b7c293a539a551e4682eab107f68182939e4bf</id>
+    <link type="text/html" rel="alternate" href="https://github.com/opensearchserver/oss-text-extractor/commit/29b7c293a539a551e4682eab107f68182939e4bf"/>
+    <title>
+        Update documentation
+    </title>
+    <updated>2014-12-26T12:04:54+01:00</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars2.githubusercontent.com/u/1282276?v=3&amp;s=30"/>
+    <author>
+      <name>emmanuel-keller</name>
+      <uri>https://github.com/emmanuel-keller</uri>
+    </author>
+    <content type="html">
+      &lt;pre style='white-space:pre-wrap;width:81ex'>Update documentation&lt;/pre>
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/342d0961848bbd5ff7708a13b706a0e0224864db</id>
+    <link type="text/html" rel="alternate" href="https://github.com/opensearchserver/oss-text-extractor/commit/342d0961848bbd5ff7708a13b706a0e0224864db"/>
+    <title>
+        Merge pull request #38 from emmanuel-keller/master
+    </title>
+    <updated>2014-12-26T12:01:38+01:00</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars2.githubusercontent.com/u/1282276?v=3&amp;s=30"/>
+    <author>
+      <name>emmanuel-keller</name>
+      <uri>https://github.com/emmanuel-keller</uri>
+    </author>
+    <content type="html">
+      &lt;pre style='white-space:pre-wrap;width:81ex'>Merge pull request #38 from emmanuel-keller/master
+
+Prepare v1.1&lt;/pre>
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/eacaa8bb309fb64ae4debf24fcdaddc6f318f012</id>
+    <link type="text/html" rel="alternate" href="https://github.com/opensearchserver/oss-text-extractor/commit/eacaa8bb309fb64ae4debf24fcdaddc6f318f012"/>
+    <title>
+        Update README
+    </title>
+    <updated>2014-12-26T11:53:30+01:00</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars2.githubusercontent.com/u/1282276?v=3&amp;s=30"/>
+    <author>
+      <name>emmanuel-keller</name>
+      <uri>https://github.com/emmanuel-keller</uri>
+    </author>
+    <content type="html">
+      &lt;pre style='white-space:pre-wrap;width:81ex'>Update README&lt;/pre>
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/df39fa70b6e32b4ac8bb718adda33d7833ff9c73</id>
+    <link type="text/html" rel="alternate" href="https://github.com/opensearchserver/oss-text-extractor/commit/df39fa70b6e32b4ac8bb718adda33d7833ff9c73"/>
+    <title>
+        Implements #37, #36, #34
+    </title>
+    <updated>2014-12-26T11:48:36+01:00</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars2.githubusercontent.com/u/1282276?v=3&amp;s=30"/>
+    <author>
+      <name>emmanuel-keller</name>
+      <uri>https://github.com/emmanuel-keller</uri>
+    </author>
+    <content type="html">
+      &lt;pre style='white-space:pre-wrap;width:81ex'>Implements #37, #36, #34&lt;/pre>
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/16941ffd91f81a4d70b9b3c6846628954681c385</id>
+    <link type="text/html" rel="alternate" href="https://github.com/opensearchserver/oss-text-extractor/commit/16941ffd91f81a4d70b9b3c6846628954681c385"/>
+    <title>
+        Work on #36
+    </title>
+    <updated>2014-12-25T11:59:40+01:00</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars2.githubusercontent.com/u/1282276?v=3&amp;s=30"/>
+    <author>
+      <name>emmanuel-keller</name>
+      <uri>https://github.com/emmanuel-keller</uri>
+    </author>
+    <content type="html">
+      &lt;pre style='white-space:pre-wrap;width:81ex'>Work on #36&lt;/pre>
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/25a40aebcea25521059160fda723fceb203601ba</id>
+    <link type="text/html" rel="alternate" href="https://github.com/opensearchserver/oss-text-extractor/commit/25a40aebcea25521059160fda723fceb203601ba"/>
+    <title>
+        Merge pull request #35 from emmanuel-keller/master
+    </title>
+    <updated>2014-11-23T23:22:40+01:00</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars2.githubusercontent.com/u/1282276?v=3&amp;s=30"/>
+    <author>
+      <name>emmanuel-keller</name>
+      <uri>https://github.com/emmanuel-keller</uri>
+    </author>
+    <content type="html">
+      &lt;pre style='white-space:pre-wrap;width:81ex'>Merge pull request #35 from emmanuel-keller/master
+
+Implements #34&lt;/pre>
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/343a6899b16f4ba9385ee08db0dfd3a28681a7be</id>
+    <link type="text/html" rel="alternate" href="https://github.com/opensearchserver/oss-text-extractor/commit/343a6899b16f4ba9385ee08db0dfd3a28681a7be"/>
+    <title>
+        Implements #34
+    </title>
+    <updated>2014-11-23T23:21:40+01:00</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars2.githubusercontent.com/u/1282276?v=3&amp;s=30"/>
+    <author>
+      <name>emmanuel-keller</name>
+      <uri>https://github.com/emmanuel-keller</uri>
+    </author>
+    <content type="html">
+      &lt;pre style='white-space:pre-wrap;width:81ex'>Implements #34&lt;/pre>
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/cdd5103933096f6e47c52570fab61a760d192397</id>
+    <link type="text/html" rel="alternate" href="https://github.com/opensearchserver/oss-text-extractor/commit/cdd5103933096f6e47c52570fab61a760d192397"/>
+    <title>
+        Merge pull request #33 from emmanuel-keller/master
+    </title>
+    <updated>2014-11-23T22:47:48+01:00</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars2.githubusercontent.com/u/1282276?v=3&amp;s=30"/>
+    <author>
+      <name>emmanuel-keller</name>
+      <uri>https://github.com/emmanuel-keller</uri>
+    </author>
+    <content type="html">
+      &lt;pre style='white-space:pre-wrap;width:81ex'>Merge pull request #33 from emmanuel-keller/master
+
+Fix download links&lt;/pre>
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/03f507de1573d66d2602a02d30a25ae3ff498386</id>
+    <link type="text/html" rel="alternate" href="https://github.com/opensearchserver/oss-text-extractor/commit/03f507de1573d66d2602a02d30a25ae3ff498386"/>
+    <title>
+        Fix download links
+    </title>
+    <updated>2014-11-23T22:47:17+01:00</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars2.githubusercontent.com/u/1282276?v=3&amp;s=30"/>
+    <author>
+      <name>emmanuel-keller</name>
+      <uri>https://github.com/emmanuel-keller</uri>
+    </author>
+    <content type="html">
+      &lt;pre style='white-space:pre-wrap;width:81ex'>Fix download links&lt;/pre>
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/9652c26f745ad4ef79b2cb2e8d92ee8ca9e2d54b</id>
+    <link type="text/html" rel="alternate" href="https://github.com/opensearchserver/oss-text-extractor/commit/9652c26f745ad4ef79b2cb2e8d92ee8ca9e2d54b"/>
+    <title>
+        Merge pull request #32 from emmanuel-keller/master
+    </title>
+    <updated>2014-11-23T22:45:40+01:00</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars2.githubusercontent.com/u/1282276?v=3&amp;s=30"/>
+    <author>
+      <name>emmanuel-keller</name>
+      <uri>https://github.com/emmanuel-keller</uri>
+    </author>
+    <content type="html">
+      &lt;pre style='white-space:pre-wrap;width:81ex'>Merge pull request #32 from emmanuel-keller/master
+
+Change download links to SourceForge&lt;/pre>
+    </content>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Grit::Commit/2c03e05e29d265c3caab4e64df9cc2e7f87d0167</id>
+    <link type="text/html" rel="alternate" href="https://github.com/opensearchserver/oss-text-extractor/commit/2c03e05e29d265c3caab4e64df9cc2e7f87d0167"/>
+    <title>
+        Change download links to SourceForge
+    </title>
+    <updated>2014-11-23T22:44:18+01:00</updated>
+    <media:thumbnail height="30" width="30" url="https://avatars2.githubusercontent.com/u/1282276?v=3&amp;s=30"/>
+    <author>
+      <name>emmanuel-keller</name>
+      <uri>https://github.com/emmanuel-keller</uri>
+    </author>
+    <content type="html">
+      &lt;pre style='white-space:pre-wrap;width:81ex'>Change download links to SourceForge&lt;/pre>
+    </content>
+  </entry>
+</feed>
