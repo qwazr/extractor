@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Emmanuel Keller
+ * Copyright 2015-2017 Emmanuel Keller
  * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,19 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-public class ParserDocument {
+final public class ParserFieldsBuilder {
 
-	public final LinkedHashMap<String, Object> fields;
+	LinkedHashMap<String, Object> fields;
 
-	ParserDocument() {
-		fields = new LinkedHashMap<>();
+	private void checkFields() {
+		if (fields == null)
+			fields = new LinkedHashMap<>();
 	}
 
 	private List<Object> getList(final ParserField field, final Object value) {
 		if (value == null || field == null)
 			return null;
+		checkFields();
 		List<Object> values = (ArrayList<Object>) fields.get(field.name);
 		if (values == null) {
 			values = new ArrayList<>(1);
@@ -58,7 +60,8 @@ public class ParserDocument {
 	 * @param value any value
 	 */
 	public void set(final ParserField field, final Object value) {
+		checkFields();
 		fields.put(field.name, value);
 	}
-
+	
 }

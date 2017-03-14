@@ -16,8 +16,9 @@
 package com.qwazr.extractor.parser;
 
 import com.qwazr.extractor.ParserAbstract;
-import com.qwazr.extractor.ParserDocument;
 import com.qwazr.extractor.ParserField;
+import com.qwazr.extractor.ParserFieldsBuilder;
+import com.qwazr.extractor.ParserResultBuilder;
 import com.qwazr.extractor.util.ImagePHash;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -26,55 +27,53 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.stream.ImageInputStream;
+import javax.ws.rs.core.MultivaluedMap;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Iterator;
 
 public class Image extends ParserAbstract {
 
-	public static final String[] DEFAULT_MIMETYPES;
+	private static final String[] DEFAULT_MIMETYPES;
 
-	public static final String[] DEFAULT_EXTENSIONS;
+	private static final String[] DEFAULT_EXTENSIONS;
 
 	static {
 		DEFAULT_MIMETYPES = ImageIO.getReaderMIMETypes();
 		DEFAULT_EXTENSIONS = ImageIO.getReaderFileSuffixes();
 	}
 
-	final protected static ParserField WIDTH = ParserField.newInteger("width", "Width of the image in pixels");
+	final private static ParserField WIDTH = ParserField.newInteger("width", "Width of the image in pixels");
 
-	final protected static ParserField HEIGHT = ParserField.newInteger("height", "Height of the image in pixels");
+	final private static ParserField HEIGHT = ParserField.newInteger("height", "Height of the image in pixels");
 
-	final protected static ParserField FORMAT = ParserField.newString("format", "The detected format");
+	final private static ParserField FORMAT = ParserField.newString("format", "The detected format");
 
-	final protected static ParserField PHASH = ParserField.newString("phash", "Perceptual Hash");
+	final private static ParserField PHASH = ParserField.newString("phash", "Perceptual Hash");
 
-	final protected static ParserField[] FIELDS = { WIDTH, HEIGHT, FORMAT, PHASH };
-
-	public Image() {
-	}
+	final private static ParserField[] FIELDS = { WIDTH, HEIGHT, FORMAT, PHASH };
 
 	@Override
-	protected ParserField[] getParameters() {
+	public ParserField[] getParameters() {
 		return null;
 	}
 
 	@Override
-	protected ParserField[] getFields() {
+	public ParserField[] getFields() {
 		return FIELDS;
 	}
 
 	@Override
-	protected String[] getDefaultExtensions() {
+	public String[] getDefaultExtensions() {
 		return DEFAULT_EXTENSIONS;
 	}
 
 	@Override
-	protected String[] getDefaultMimeTypes() {
+	public String[] getDefaultMimeTypes() {
 		return DEFAULT_MIMETYPES;
 	}
 
-	private void browseNodes(String path, Node root, ParserDocument result) {
+	private void browseNodes(String path, final Node root, final ParserFieldsBuilder result) {
 		if (root == null)
 			return;
 		switch (root.getNodeType()) {
@@ -82,7 +81,7 @@ public class Image extends ParserAbstract {
 			result.add(ParserField.newString(path, null), root.getNodeValue());
 			break;
 		case Node.ELEMENT_NODE:
-			NamedNodeMap nnm = root.getAttributes();
+			final NamedNodeMap nnm = root.getAttributes();
 			if (nnm != null)
 				for (int i = 0; i < nnm.getLength(); i++)
 					browseNodes(path, nnm.item(i), result);
@@ -100,13 +99,13 @@ public class Image extends ParserAbstract {
 	}
 
 	@Override
-	protected void parseContent(File file, String extension, String mimeType) throws Exception {
-		ImagePHash imgPhash = new ImagePHash();
-		ImageInputStream in = ImageIO.createImageInputStream(file);
-		try {
+	public void parseContent(final MultivaluedMap<String, String> parameters, final File file, final String extension,
+			final String mimeType, final ParserResultBuilder resultBuilder) throws Exception {
+		final ImagePHash imgPhash = new ImagePHash();
+		try (final ImageInputStream in = ImageIO.createImageInputStream(file)) {
 			final Iterator<ImageReader> readers = ImageIO.getImageReaders(in);
 			if (readers.hasNext()) {
-				ParserDocument result = getNewParserDocument();
+				ParserFieldsBuilder result = resultBuilder.newDocument();
 				ImageReader reader = readers.next();
 				try {
 					reader.setInput(in);
@@ -125,17 +124,15 @@ public class Image extends ParserAbstract {
 					reader.dispose();
 				}
 			}
-		} finally {
-			if (in != null)
-				in.close();
 		}
 	}
 
 	@Override
-	protected void parseContent(InputStream inputStream, String extension, String mimeType) throws Exception {
+	public void parseContent(final MultivaluedMap<String, String> parameters, final InputStream inputStream,
+			final String extension, final String mimeType, final ParserResultBuilder resultBuilder) throws Exception {
 		File tempFile = ParserAbstract.createTempFile(inputStream, extension == null ? "image" : "." + extension);
 		try {
-			parseContent(tempFile, extension, mimeType);
+			parseContent(parameters, tempFile, extension, mimeType, resultBuilder);
 		} finally {
 			tempFile.delete();
 		}

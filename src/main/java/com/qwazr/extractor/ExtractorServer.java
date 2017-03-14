@@ -15,6 +15,7 @@
  */
 package com.qwazr.extractor;
 
+import com.qwazr.classloader.ClassLoaderManager;
 import com.qwazr.cluster.ClusterManager;
 import com.qwazr.server.BaseServer;
 import com.qwazr.server.GenericServer;
@@ -38,7 +39,9 @@ public class ExtractorServer implements BaseServer {
 		new ClusterManager(executorService, configuration).registerHttpClientMonitoringThread(builder)
 				.registerProtocolListener(builder)
 				.registerWebService(builder);
-		extractorManager = new ExtractorManager().registerWebService(builder);
+		final ClassLoaderManager classLoaderManager =
+				new ClassLoaderManager(configuration.dataDirectory, Thread.currentThread());
+		extractorManager = new ExtractorManager(classLoaderManager).registerWebService(builder);
 		server = builder.build();
 	}
 

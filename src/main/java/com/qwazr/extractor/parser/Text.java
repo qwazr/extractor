@@ -1,12 +1,12 @@
 /**
- * Copyright 2014-2016 Emmanuel Keller / QWAZR
- *
+ * Copyright 2015-2017 Emmanuel Keller / QWAZR
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,82 +15,77 @@
  */
 package com.qwazr.extractor.parser;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
-import org.apache.commons.io.IOUtils;
-
 import com.ibm.icu.text.CharsetDetector;
 import com.ibm.icu.text.CharsetMatch;
 import com.qwazr.extractor.ParserAbstract;
-import com.qwazr.extractor.ParserDocument;
 import com.qwazr.extractor.ParserField;
+import com.qwazr.extractor.ParserFieldsBuilder;
+import com.qwazr.extractor.ParserResultBuilder;
+import org.apache.commons.io.IOUtils;
+
+import javax.ws.rs.core.MultivaluedMap;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 
 public class Text extends ParserAbstract {
 
-	public static final String[] DEFAULT_MIMETYPES = { "text/plain" };
+	private static final String[] DEFAULT_MIMETYPES = { "text/plain" };
 
-	public static final String[] DEFAULT_EXTENSIONS = { "txt" };
+	private static final String[] DEFAULT_EXTENSIONS = { "txt" };
 
-	final protected static ParserField CONTENT = ParserField.newString(
-			"content", "The content of the document");
+	final private static ParserField CONTENT = ParserField.newString("content", "The content of the document");
 
-	final protected static ParserField LANG_DETECTION = ParserField.newString(
-			"lang_detection", "Detection of the language");
+	final private static ParserField LANG_DETECTION =
+			ParserField.newString("lang_detection", "Detection of the language");
 
-	final protected static ParserField CHARSET_DETECTION = ParserField
-			.newString("charset_detection", "Detection of the charset");
+	final private static ParserField CHARSET_DETECTION =
+			ParserField.newString("charset_detection", "Detection of the charset");
 
-	final protected static ParserField[] FIELDS = { CONTENT, LANG_DETECTION,
-			CHARSET_DETECTION };
-
-	public Text() {
-	}
+	final private static ParserField[] FIELDS = { CONTENT, LANG_DETECTION, CHARSET_DETECTION };
 
 	@Override
-	protected ParserField[] getParameters() {
+	public ParserField[] getParameters() {
 		return null;
 	}
 
 	@Override
-	protected ParserField[] getFields() {
+	public ParserField[] getFields() {
 		return FIELDS;
 	}
 
 	@Override
-	protected String[] getDefaultExtensions() {
+	public String[] getDefaultExtensions() {
 		return DEFAULT_EXTENSIONS;
 	}
 
 	@Override
-	protected String[] getDefaultMimeTypes() {
+	public String[] getDefaultMimeTypes() {
 		return DEFAULT_MIMETYPES;
 	}
 
 	@Override
-	protected void parseContent(InputStream inputStream, String extension,
-			String mimeType) throws IOException {
+	public void parseContent(final MultivaluedMap<String, String> parameters, final InputStream inputStream,
+			String extension, final String mimeType, final ParserResultBuilder resultBuilder) throws IOException {
+
 		// Trying to detect the CHARSET of the stream
-		CharsetDetector detector = new CharsetDetector();
-		BufferedInputStream bis = null;
-		try {
-			bis = new BufferedInputStream(inputStream);
+		final CharsetDetector detector = new CharsetDetector();
+
+		try (BufferedInputStream bis = new BufferedInputStream(inputStream)) {
 			detector.setText(bis);
-			CharsetMatch match = detector.detect();
-			ParserDocument result = getNewParserDocument();
-			String content = null;
+			final CharsetMatch match = detector.detect();
+			final ParserFieldsBuilder result = resultBuilder.newDocument();
+			final String content;
 			if (match != null) {
 				content = match.getString();
 				result.add(CHARSET_DETECTION, match.getName());
 			} else {
 				bis.reset();
-				content = IOUtils.toString(bis);
+				content = IOUtils.toString(bis, Charset.defaultCharset());
 			}
 			result.add(CONTENT, content);
-			result.add(LANG_DETECTION, languageDetection(CONTENT, 10000));
-		} finally {
-			IOUtils.closeQuietly(bis);
+			result.add(LANG_DETECTION, languageDetection(result, CONTENT, 10000));
 		}
 	}
 

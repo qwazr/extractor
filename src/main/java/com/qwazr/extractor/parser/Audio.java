@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2016 Emmanuel Keller / QWAZR
+ * Copyright 2015-2017 Emmanuel Keller / QWAZR
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@ package com.qwazr.extractor.parser;
 
 import com.qwazr.extractor.ParserAbstract;
 import com.qwazr.extractor.ParserField;
+import com.qwazr.extractor.ParserFieldsBuilder;
+import com.qwazr.extractor.ParserResultBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
@@ -26,6 +28,7 @@ import org.jaudiotagger.tag.Tag;
 import org.jaudiotagger.tag.TagField;
 import org.jaudiotagger.tag.TagTextField;
 
+import javax.ws.rs.core.MultivaluedMap;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -33,12 +36,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Audio extends ParserAbstract {
+final public class Audio extends ParserAbstract {
 
-	public static final HashMap<String, String> MIMEMAP;
+	private static final HashMap<String, String> MIMEMAP;
 
-	public static final String[] DEFAULT_EXTENSIONS;
-	public static final String[] DEFAULT_MIMETYPES;
+	private static final String[] DEFAULT_EXTENSIONS;
+	private static final String[] DEFAULT_MIMETYPES;
 
 	static {
 		MIMEMAP = new HashMap<>();
@@ -56,10 +59,10 @@ public class Audio extends ParserAbstract {
 		DEFAULT_MIMETYPES = MIMEMAP.keySet().toArray(new String[MIMEMAP.size()]);
 	}
 
-	final protected static Map<FieldKey, ParserField> FIELDMAP;
-	final protected static ParserField[] FIELDS;
+	private final static Map<FieldKey, ParserField> FIELDMAP;
+	private final static ParserField[] FIELDS;
 
-	final protected static ParserField FORMAT;
+	private final static ParserField FORMAT;
 
 	static {
 		// Build the list of extension for the FORMAT parameter
@@ -85,35 +88,33 @@ public class Audio extends ParserAbstract {
 		Arrays.sort(FIELDS, ParserField.COMPARATOR);
 	}
 
-	final protected static ParserField[] PARAMETERS = { FORMAT };
-
-	public Audio() {
-	}
+	private final static ParserField[] PARAMETERS = { FORMAT };
 
 	@Override
-	protected ParserField[] getParameters() {
+	public ParserField[] getParameters() {
 		return PARAMETERS;
 	}
 
 	@Override
-	protected ParserField[] getFields() {
+	public ParserField[] getFields() {
 		return FIELDS;
 	}
 
 	@Override
-	protected String[] getDefaultExtensions() {
+	public String[] getDefaultExtensions() {
 		return DEFAULT_EXTENSIONS;
 	}
 
 	@Override
-	protected String[] getDefaultMimeTypes() {
+	public String[] getDefaultMimeTypes() {
 		return DEFAULT_MIMETYPES;
 	}
 
 	@Override
-	protected void parseContent(File file, String extension, String mimeType) throws Exception {
-		AudioFile f = AudioFileIO.read(file);
-		Tag tag = f.getTag();
+	public void parseContent(final MultivaluedMap<String, String> parameters, final File file, String extension,
+			final String mimeType, final ParserResultBuilder resultBuilder) throws Exception {
+		final AudioFile f = AudioFileIO.read(file);
+		final Tag tag = f.getTag();
 		if (tag == null)
 			return;
 		if (tag.getFieldCount() == 0)
@@ -122,6 +123,7 @@ public class Audio extends ParserAbstract {
 			List<TagField> tagFields = tag.getFields(entry.getKey());
 			if (tagFields == null)
 				continue;
+			final ParserFieldsBuilder metas = resultBuilder.metas();
 			for (TagField tagField : tagFields) {
 				if (!(tagField instanceof TagTextField))
 					continue;
@@ -131,17 +133,18 @@ public class Audio extends ParserAbstract {
 	}
 
 	@Override
-	protected void parseContent(InputStream inputStream, String extension, String mimeType) throws Exception {
-		String format = getParameterValue(FORMAT, 0);
+	public void parseContent(final MultivaluedMap<String, String> parameters, final InputStream inputStream,
+			final String extension, final String mimeType, final ParserResultBuilder resultBuilder) throws Exception {
+		String format = getParameterValue(parameters, FORMAT, 0);
 		if (StringUtils.isEmpty(format))
 			format = extension;
 		if (StringUtils.isEmpty(format) && mimeType != null)
 			format = MIMEMAP.get(mimeType.intern());
 		if (StringUtils.isEmpty(format))
 			throw new Exception("The format is not found");
-		File tempFile = ParserAbstract.createTempFile(inputStream, '.' + format);
+		final File tempFile = ParserAbstract.createTempFile(inputStream, '.' + format);
 		try {
-			parseContent(tempFile, extension, mimeType);
+			parseContent(parameters, tempFile, extension, mimeType, resultBuilder);
 		} finally {
 			tempFile.delete();
 		}

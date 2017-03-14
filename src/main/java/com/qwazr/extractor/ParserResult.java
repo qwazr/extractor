@@ -23,6 +23,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -31,13 +32,13 @@ import java.util.List;
 @XmlAccessorType(XmlAccessType.PUBLIC_MEMBER)
 public class ParserResult {
 
-	public String parser_name;
+	final public String parser_name;
 
-	public Long time_elapsed;
+	final public Long time_elapsed;
 
-	public LinkedHashMap<String, Object> metas;
+	final public LinkedHashMap<String, Object> metas;
 
-	public final ArrayList<LinkedHashMap<String, Object>> documents;
+	final public List<LinkedHashMap<String, Object>> documents;
 
 	ParserResult() {
 		time_elapsed = null;
@@ -46,21 +47,22 @@ public class ParserResult {
 		parser_name = null;
 	}
 
-	ParserResult(final String parserName, long startTime, ParserDocument parserMetas,
-			ArrayList<ParserDocument> parserDocuments) {
-		parser_name = parserName;
+	ParserResult(final ParserResultBuilder builder) {
+		parser_name = builder.parserName;
 
 		// Calculate the time elapsed
-		time_elapsed = System.currentTimeMillis() - startTime;
+		time_elapsed = System.currentTimeMillis() - builder.startTime;
 
 		// Extract the metas
-		metas = parserMetas == null ? null : parserMetas.fields;
+		metas = builder.metasBuilder == null ? null : builder.metasBuilder.fields;
 
-		documents = new ArrayList<>(parserDocuments == null ? 0 : parserDocuments.size());
 		// Extract the documents found
-		if (parserDocuments != null)
-			for (ParserDocument parserDocument : parserDocuments)
-				documents.add(parserDocument.fields);
+		if (builder.documentsBuilders != null && !builder.documentsBuilders.isEmpty()) {
+			documents = new ArrayList<>(builder.documentsBuilders.size());
+			builder.documentsBuilders.forEach(doc -> documents.add(doc.fields));
+		} else
+			documents = Collections.emptyList();
+
 	}
 
 	/**

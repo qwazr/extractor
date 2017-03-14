@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2016 Emmanuel Keller / QWAZR
+ * Copyright 2015-2017 Emmanuel Keller / QWAZR
  * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,38 +16,29 @@
 package com.qwazr.extractor;
 
 import com.qwazr.utils.Language;
-import org.apache.commons.io.FilenameUtils;
+import com.qwazr.utils.StringUtils;
 import org.apache.commons.io.IOUtils;
 
 import javax.ws.rs.core.MultivaluedMap;
-import java.io.*;
-import java.util.ArrayList;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
-public abstract class ParserAbstract {
+public abstract class ParserAbstract implements ParserInterface {
 
 	private final String name;
-	protected final ParserDocument metas;
-	private final ArrayList<ParserDocument> documents;
-	protected MultivaluedMap<String, String> parameters;
 
 	protected ParserAbstract() {
-		name = this.getClass().getSimpleName().toLowerCase();
-		documents = new ArrayList<>(0);
-		metas = new ParserDocument();
-		parameters = null;
+		name = StringUtils.removeEnd(this.getClass().getSimpleName().toLowerCase(), "Parser");
 	}
 
-	protected ParserDocument getNewParserDocument() {
-		ParserDocument document = new ParserDocument();
-		documents.add(document);
-		return document;
-	}
-
-	protected String getParameterValue(final ParserField param, final int position) {
+	protected String getParameterValue(final MultivaluedMap<String, String> parameters, final ParserField param,
+			final int position) {
 		if (parameters == null)
 			return null;
-		List<String> values = parameters.get(param.name);
+		final List<String> values = parameters.get(param.name);
 		if (values == null)
 			return null;
 		if (position >= values.size())
@@ -55,94 +46,25 @@ public abstract class ParserAbstract {
 		return values.get(position);
 	}
 
-	/**
-	 * @return the parameters of the parser
-	 */
-	protected abstract ParserField[] getParameters();
-
-	/**
-	 * @return the fields returned by this parser
-	 */
-	protected abstract ParserField[] getFields();
-
-	/**
-	 * Read a document and fill the ParserDocument list.
-	 *
-	 * @param inputStream a stream of the content to analyze
-	 * @param extension   the optional extension of the file
-	 * @param mimeType    the option mime type of the file
-	 * @throws Exception if any error occurs
-	 */
-	protected abstract void parseContent(InputStream inputStream, String extension, String mimeType) throws Exception;
-
-	/**
-	 * @return the list of supported extensions
-	 */
-	protected abstract String[] getDefaultExtensions();
-
-	/**
-	 * @return the list of supported mime types
-	 */
-	protected abstract String[] getDefaultMimeTypes();
-
-	/**
-	 * Read a document and fill the ParserDocument list.
-	 *
-	 * @param file      the file instance of the document to parse
-	 * @param extension an optional extension of the file
-	 * @param mimeType  an optional mime type of the file
-	 * @throws Exception if any error occurs
-	 */
-	protected void parseContent(final File file, final String extension, final String mimeType) throws Exception {
-		InputStream is = null;
-		try {
-			is = new FileInputStream(file);
-			parseContent(is, extension, mimeType);
-		} finally {
-			if (is != null)
-				IOUtils.closeQuietly(is);
-		}
+	@Override
+	public final String getName() {
+		return name;
 	}
 
-	protected final static File createTempFile(final InputStream inputStream, final String extension)
-			throws IOException {
-		File tempFile = File.createTempFile("oss-extractor", extension);
-		FileOutputStream fos = null;
-		try {
-			fos = new FileOutputStream(tempFile);
+	protected static File createTempFile(final InputStream inputStream, final String extension) throws IOException {
+		final File tempFile = File.createTempFile("oss-extractor", extension);
+		try (final FileOutputStream fos = new FileOutputStream(tempFile)) {
 			IOUtils.copy(inputStream, fos);
 			fos.close();
-			fos = null;
 			return tempFile;
-		} finally {
-			if (fos != null)
-				IOUtils.closeQuietly(fos);
 		}
 	}
 
-	public final ParserResult doParsing(final MultivaluedMap<String, String> parameters, final InputStream inputStream,
-			final String extension, final String mimeType) throws Exception {
-		this.parameters = parameters;
-		final long startTime = System.currentTimeMillis();
-		parseContent(inputStream, extension, mimeType);
-		return new ParserResult(name, startTime, metas, documents);
-	}
-
-	public final ParserResult doParsing(final MultivaluedMap<String, String> parameters, final File file,
-			String extension, final String mimeType) throws Exception {
-		this.parameters = parameters;
-		if (extension == null)
-			extension = FilenameUtils.getExtension(file.getName());
-		final long startTime = System.currentTimeMillis();
-		parseContent(file, extension, mimeType);
-		return new ParserResult(name, startTime, metas, documents);
-	}
-
-	private void extractField(final ParserDocument document, final ParserField source, final int maxLength,
+	protected void extractField(final ParserFieldsBuilder document, final ParserField source, final int maxLength,
 			final StringBuilder sb) {
 		if (sb.length() >= maxLength)
 			return;
-		Object value = document.fields.get(source.name);
+		final Object value = document.fields.get(source.name);
 		if (value == null)
 			return;
 		if (value instanceof List) {
@@ -162,14 +84,15 @@ public abstract class ParserAbstract {
 	 * Submit the content of a field to language detection. It checks all the
 	 * document.
 	 *
-	 * @param source    The field to submit
-	 * @param maxLength The maximum number of characters
+	 * @param resultBuilder the documents to check
+	 * @param source        The field to submit
+	 * @param maxLength     The maximum number of characters
 	 * @return the detected language
 	 */
-	protected final String languageDetection(final ParserField source, final int maxLength) {
+	protected final String languageDetection(final ParserResultBuilder resultBuilder, final ParserField source,
+			final int maxLength) {
 		final StringBuilder sb = new StringBuilder();
-		for (ParserDocument document : documents)
-			extractField(document, source, maxLength, sb);
+		resultBuilder.documentsBuilders.forEach(doc -> extractField(doc, source, maxLength, sb));
 		return Language.quietDetect(sb.toString(), maxLength);
 	}
 
@@ -181,18 +104,11 @@ public abstract class ParserAbstract {
 	 * @param maxLength the maximum number of characters to test
 	 * @return the detected language
 	 */
-	protected final String languageDetection(final ParserDocument document, final ParserField source,
+	protected final String languageDetection(final ParserFieldsBuilder document, final ParserField source,
 			final int maxLength) {
 		final StringBuilder sb = new StringBuilder();
 		extractField(document, source, maxLength, sb);
 		return Language.quietDetect(sb.toString(), maxLength);
-	}
-
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
 	}
 
 }

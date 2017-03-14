@@ -15,74 +15,60 @@
  */
 package com.qwazr.extractor;
 
+import com.qwazr.classloader.ClassLoaderManager;
 import com.qwazr.extractor.parser.Audio;
-import com.qwazr.extractor.parser.Doc;
-import com.qwazr.extractor.parser.Docx;
 import com.qwazr.extractor.parser.Eml;
 import com.qwazr.extractor.parser.Html;
 import com.qwazr.extractor.parser.Image;
-import com.qwazr.extractor.parser.MapiMsg;
 import com.qwazr.extractor.parser.Markdown;
 import com.qwazr.extractor.parser.Ocr;
 import com.qwazr.extractor.parser.Odf;
 import com.qwazr.extractor.parser.PdfBox;
-import com.qwazr.extractor.parser.Ppt;
-import com.qwazr.extractor.parser.Pptx;
-import com.qwazr.extractor.parser.Publisher;
 import com.qwazr.extractor.parser.Rss;
 import com.qwazr.extractor.parser.Rtf;
 import com.qwazr.extractor.parser.Text;
-import com.qwazr.extractor.parser.Visio;
-import com.qwazr.extractor.parser.Xls;
-import com.qwazr.extractor.parser.Xlsx;
 import com.qwazr.server.GenericServer;
 
 import javax.ws.rs.core.MultivaluedHashMap;
 import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public class ExtractorManager {
+final class ExtractorManager {
 
 	private final ReadWriteLock rwl = new ReentrantReadWriteLock();
 
-	private final Map<String, Class<? extends ParserAbstract>> namesMap;
+	private final LinkedHashMap<String, Class<? extends ParserInterface>> namesMap;
 
-	private final MultivaluedHashMap<String, Class<? extends ParserAbstract>> mimeTypesMap;
+	private final MultivaluedHashMap<String, Class<? extends ParserInterface>> mimeTypesMap;
 
-	private final MultivaluedHashMap<String, Class<? extends ParserAbstract>> extensionsMap;
+	private final MultivaluedHashMap<String, Class<? extends ParserInterface>> extensionsMap;
 
 	private final ExtractorServiceInterface service;
 
-	public ExtractorManager() {
+	private final ClassLoaderManager classLoaderManager;
+
+	ExtractorManager(final ClassLoaderManager classLoaderManager) {
+
+		this.classLoaderManager = classLoaderManager;
 
 		namesMap = new LinkedHashMap<>();
 		mimeTypesMap = new MultivaluedHashMap<>();
 		extensionsMap = new MultivaluedHashMap<>();
 
 		register(Audio.class);
-		register(Doc.class);
-		register(Docx.class);
 		register(Eml.class);
 		register(Html.class);
 		register(Image.class);
-		register(MapiMsg.class);
 		register(Markdown.class);
 		register(Ocr.class);
 		register(Odf.class);
 		register(PdfBox.class);
-		register(Ppt.class);
-		register(Pptx.class);
-		register(Publisher.class);
 		register(Rss.class);
 		register(Rtf.class);
 		register(Text.class);
-		register(Visio.class);
-		register(Xls.class);
-		register(Xlsx.class);
 
 		service = new ExtractorServiceImpl(this);
 
@@ -102,11 +88,11 @@ public class ExtractorManager {
 		return service;
 	}
 
-	final public void register(Class<? extends ParserAbstract> parserClass) {
+	final public void register(Class<? extends ParserInterface> parserClass) {
 		Lock l = rwl.writeLock();
 		l.lock();
 		try {
-			ParserAbstract parser = parserClass.newInstance();
+			ParserInterface parser = parserClass.newInstance();
 			namesMap.put(parser.getName(), parserClass);
 			String[] extensions = parser.getDefaultExtensions();
 			if (extensions != null)
@@ -123,7 +109,13 @@ public class ExtractorManager {
 		}
 	}
 
-	final public Class<? extends ParserAbstract> findParserClassByName(String parserName) {
+	final public void register(String className) throws ClassNotFoundException {
+		register((Class<? extends ParserInterface>) (classLoaderManager == null ?
+				Class.forName(className) :
+				classLoaderManager.findClass(className)));
+	}
+
+	final public Class<? extends ParserInterface> findParserClassByName(String parserName) {
 		Lock l = rwl.readLock();
 		l.lock();
 		try {
@@ -133,7 +125,7 @@ public class ExtractorManager {
 		}
 	}
 
-	final public Class<? extends ParserAbstract> findParserClassByMimeTypeFirst(String mimeType) {
+	final public Class<? extends ParserInterface> findParserClassByMimeTypeFirst(String mimeType) {
 		Lock l = rwl.readLock();
 		l.lock();
 		try {
@@ -143,7 +135,7 @@ public class ExtractorManager {
 		}
 	}
 
-	final public Class<? extends ParserAbstract> findParserClassByExtensionFirst(String extension) {
+	final public Class<? extends ParserInterface> findParserClassByExtensionFirst(String extension) {
 		Lock l = rwl.readLock();
 		l.lock();
 		try {

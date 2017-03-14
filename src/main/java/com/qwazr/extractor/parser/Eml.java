@@ -1,12 +1,12 @@
 /**
- * Copyright 2014-2016 Emmanuel Keller / QWAZR
- *
+ * Copyright 2015-2017 Emmanuel Keller / QWAZR
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,91 +15,84 @@
  */
 package com.qwazr.extractor.parser;
 
-import java.io.InputStream;
-import java.util.Properties;
+import com.qwazr.extractor.ParserAbstract;
+import com.qwazr.extractor.ParserField;
+import com.qwazr.extractor.ParserFieldsBuilder;
+import com.qwazr.extractor.ParserResultBuilder;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.mail.util.MimeMessageParser;
 
 import javax.activation.DataSource;
 import javax.mail.Address;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.mail.util.MimeMessageParser;
-
-import com.qwazr.extractor.ParserAbstract;
-import com.qwazr.extractor.ParserDocument;
-import com.qwazr.extractor.ParserField;
+import javax.ws.rs.core.MultivaluedMap;
+import java.io.InputStream;
+import java.util.Properties;
 
 public class Eml extends ParserAbstract {
 
-	public static final String[] DEFAULT_MIMETYPES = { "message/rfc822" };
+	static final String[] DEFAULT_MIMETYPES = { "message/rfc822" };
 
-	public static final String[] DEFAULT_EXTENSIONS = { "eml" };
+	static final String[] DEFAULT_EXTENSIONS = { "eml" };
 
-	final protected static ParserField SUBJECT = ParserField.newString(
-			"subject", "The subject of the email");
+	final static ParserField SUBJECT = ParserField.newString("subject", "The subject of the email");
 
-	final protected static ParserField FROM = ParserField.newString("from",
-			"The from email");
+	final static ParserField FROM = ParserField.newString("from", "The from email");
 
-	final protected static ParserField RECIPIENT_TO = ParserField.newString(
-			"recipient_to", "The recipient to");
+	final static ParserField RECIPIENT_TO = ParserField.newString("recipient_to", "The recipient to");
 
-	final protected static ParserField RECIPIENT_CC = ParserField.newString(
-			"recipient_cc", "The recipient cc");
+	final static ParserField RECIPIENT_CC = ParserField.newString("recipient_cc", "The recipient cc");
 
-	final protected static ParserField RECIPIENT_BCC = ParserField.newString(
-			"recipient_bcc", "The recipient bcc");
+	final static ParserField RECIPIENT_BCC = ParserField.newString("recipient_bcc", "The recipient bcc");
 
-	final protected static ParserField SENT_DATE = ParserField.newDate(
-			"sent_date", "The sent date");
+	final static ParserField SENT_DATE = ParserField.newDate("sent_date", "The sent date");
 
-	final protected static ParserField RECEIVED_DATE = ParserField.newDate(
-			"received_date", "The received date");
+	final static ParserField RECEIVED_DATE = ParserField.newDate("received_date", "The received date");
 
-	final protected static ParserField ATTACHMENT_NAME = ParserField.newString(
-			"attachment_name", "The attachment name");
+	final static ParserField ATTACHMENT_NAME = ParserField.newString("attachment_name", "The attachment name");
 
-	final protected static ParserField ATTACHMENT_TYPE = ParserField.newString(
-			"attachment_type", "The attachment mime type");
+	final static ParserField ATTACHMENT_TYPE = ParserField.newString("attachment_type", "The attachment mime type");
 
-	final protected static ParserField ATTACHMENT_CONTENT = ParserField
-			.newString("attachment_content", "The attachment content");
+	final static ParserField ATTACHMENT_CONTENT = ParserField.newString("attachment_content", "The attachment content");
 
-	final protected static ParserField PLAIN_CONTENT = ParserField.newString(
-			"plain_content", "The plain text body content");
+	final static ParserField PLAIN_CONTENT = ParserField.newString("plain_content", "The plain text body content");
 
-	final protected static ParserField HTML_CONTENT = ParserField.newString(
-			"html_content", "The html text body content");
+	final static ParserField HTML_CONTENT = ParserField.newString("html_content", "The html text body content");
 
-	final protected static ParserField LANG_DETECTION = ParserField.newString(
-			"lang_detection", "Detection of the language");
+	final static ParserField LANG_DETECTION = ParserField.newString("lang_detection", "Detection of the language");
 
-	final protected static ParserField[] FIELDS = { SUBJECT, FROM,
-			RECIPIENT_TO, RECIPIENT_CC, RECIPIENT_BCC, SENT_DATE,
-			RECEIVED_DATE, ATTACHMENT_NAME, ATTACHMENT_TYPE,
-			ATTACHMENT_CONTENT, PLAIN_CONTENT, HTML_CONTENT, LANG_DETECTION };
-
-	public Eml() {
-	}
+	final static ParserField[] FIELDS = { SUBJECT,
+			FROM,
+			RECIPIENT_TO,
+			RECIPIENT_CC,
+			RECIPIENT_BCC,
+			SENT_DATE,
+			RECEIVED_DATE,
+			ATTACHMENT_NAME,
+			ATTACHMENT_TYPE,
+			ATTACHMENT_CONTENT,
+			PLAIN_CONTENT,
+			HTML_CONTENT,
+			LANG_DETECTION };
 
 	@Override
-	protected ParserField[] getParameters() {
+	public ParserField[] getParameters() {
 		return null;
 	}
 
 	@Override
-	protected ParserField[] getFields() {
+	public ParserField[] getFields() {
 		return FIELDS;
 	}
 
 	@Override
-	protected String[] getDefaultExtensions() {
+	public String[] getDefaultExtensions() {
 		return DEFAULT_EXTENSIONS;
 	}
 
 	@Override
-	protected String[] getDefaultMimeTypes() {
+	public String[] getDefaultMimeTypes() {
 		return DEFAULT_MIMETYPES;
 	}
 
@@ -111,16 +104,15 @@ public class Eml extends ParserAbstract {
 	}
 
 	@Override
-	protected void parseContent(InputStream inputStream, String extension,
-			String mimeType) throws Exception {
-		Session session = Session.getDefaultInstance(JAVAMAIL_PROPS);
+	public void parseContent(final MultivaluedMap<String, String> parameters, final InputStream inputStream,
+			final String extension, final String mimeType, final ParserResultBuilder resultBuilder) throws Exception {
+		final Session session = Session.getDefaultInstance(JAVAMAIL_PROPS);
 
-		MimeMessage mimeMessage = new MimeMessage(session, inputStream);
-		MimeMessageParser mimeMessageParser = new MimeMessageParser(mimeMessage)
-				.parse();
+		final MimeMessage mimeMessage = new MimeMessage(session, inputStream);
+		final MimeMessageParser mimeMessageParser = new MimeMessageParser(mimeMessage).parse();
 
-		ParserDocument document = getNewParserDocument();
-		String from = mimeMessageParser.getFrom();
+		ParserFieldsBuilder document = resultBuilder.newDocument();
+		final String from = mimeMessageParser.getFrom();
 		if (from != null)
 			document.add(FROM, from.toString());
 		for (Address address : mimeMessageParser.getTo())
@@ -156,11 +148,9 @@ public class Eml extends ParserAbstract {
 			// }
 		}
 		if (StringUtils.isEmpty(mimeMessageParser.getHtmlContent()))
-			document.add(LANG_DETECTION,
-					languageDetection(document, PLAIN_CONTENT, 10000));
+			document.add(LANG_DETECTION, languageDetection(document, PLAIN_CONTENT, 10000));
 		else
-			document.add(LANG_DETECTION,
-					languageDetection(document, HTML_CONTENT, 10000));
+			document.add(LANG_DETECTION, languageDetection(document, HTML_CONTENT, 10000));
 	}
 
 }

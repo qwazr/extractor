@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Emmanuel Keller
+ * Copyright 2015-2017 Emmanuel Keller
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ public class ParserDefinition {
 		mime_types = null;
 	}
 
-	public ParserDefinition(ParserAbstract parser) {
+	public ParserDefinition(ParserInterface parser) {
 		ParserField[] parameters = parser.getParameters();
 		ParserField[] getParserFields = new ParserField[parameters == null ? 1 : 1 + parameters.length];
 		getParserFields[0] = ParserField.newString("path", "path to the local file");

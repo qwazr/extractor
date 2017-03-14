@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2016 Emmanuel Keller / QWAZR
+ * Copyright 2015-2017 Emmanuel Keller / QWAZR
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import java.io.InputStream;
 import java.util.Set;
 import java.util.TreeSet;
 
-class ExtractorServiceImpl extends AbstractServiceImpl implements ExtractorServiceInterface {
+final class ExtractorServiceImpl extends AbstractServiceImpl implements ExtractorServiceInterface {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExtractorServiceImpl.class);
 
@@ -61,7 +61,7 @@ class ExtractorServiceImpl extends AbstractServiceImpl implements ExtractorServi
 		return new TreeSet<>(extractorManager.getList());
 	}
 
-	private ParserAbstract getParser(final Class<? extends ParserAbstract> parserClass) throws ServerException {
+	private ParserInterface getParser(final Class<? extends ParserInterface> parserClass) throws ServerException {
 		try {
 			if (parserClass == null)
 				throw new ServerException(Status.NOT_FOUND, "No parser found.");
@@ -71,15 +71,15 @@ class ExtractorServiceImpl extends AbstractServiceImpl implements ExtractorServi
 		}
 	}
 
-	private ParserAbstract getParser(String parserName) throws ServerException {
-		Class<? extends ParserAbstract> parserClass = extractorManager.findParserClassByName(parserName);
+	private ParserInterface getParser(String parserName) throws ServerException {
+		final Class<? extends ParserInterface> parserClass = extractorManager.findParserClassByName(parserName);
 		if (parserClass == null)
 			throw new ServerException(Status.NOT_FOUND, "Unknown parser: " + parserName);
 		return getParser(parserClass);
 	}
 
 	private File getFilePath(String path) throws ServerException {
-		File file = new File(path);
+		final File file = new File(path);
 		if (!file.exists())
 			throw new ServerException(Status.NOT_FOUND, "File not found: " + path);
 		if (!file.isFile())
@@ -90,18 +90,20 @@ class ExtractorServiceImpl extends AbstractServiceImpl implements ExtractorServi
 	@Override
 	public Object get(UriInfo uriInfo, String parserName, String path) {
 		try {
-			ParserAbstract parser = getParser(parserName);
+			final ParserInterface parser = getParser(parserName);
 			if (path == null)
 				return new ParserDefinition(parser);
-			File file = getFilePath(path);
-			return parser.doParsing(getQueryParameters(uriInfo), file, null, null);
+			final File file = getFilePath(path);
+			final ParserResultBuilder result = new ParserResultBuilder(parser);
+			parser.parseContent(getQueryParameters(uriInfo), file, null, null, result);
+			return result.build();
 		} catch (Exception e) {
 			throw ServerException.getJsonException(LOGGER, e);
 		}
 	}
 
 	private boolean checkIsPath(String filePath, InputStream inputStream) throws ServerException {
-		boolean isPath = !StringUtils.isEmpty(filePath);
+		final boolean isPath = !StringUtils.isEmpty(filePath);
 		if (!isPath && inputStream == null)
 			throw new ServerException(Status.NOT_ACCEPTABLE, "Not path and no stream.");
 		return isPath;
@@ -112,15 +114,16 @@ class ExtractorServiceImpl extends AbstractServiceImpl implements ExtractorServi
 	}
 
 	@Override
-	public ParserResult extract(String parserName, MultivaluedMap<String, String> parameters, String filePath,
+	public ParserResult extract(final String parserName, MultivaluedMap<String, String> parameters, String filePath,
 			InputStream inputStream) {
 		try {
-			ParserAbstract parser = getParser(parserName);
-
+			final ParserInterface parser = getParser(parserName);
+			final ParserResultBuilder result = new ParserResultBuilder(parser);
 			if (checkIsPath(filePath, inputStream))
-				return parser.doParsing(parameters, getFilePath(filePath), null, null);
+				parser.parseContent(parameters, getFilePath(filePath), null, null, result);
 			else
-				return parser.doParsing(parameters, inputStream, null, null);
+				parser.parseContent(parameters, inputStream, null, null, result);
+			return result.build();
 		} catch (Exception e) {
 			throw ServerException.getJsonException(LOGGER, e);
 		}
@@ -131,21 +134,17 @@ class ExtractorServiceImpl extends AbstractServiceImpl implements ExtractorServi
 		return extract(parserName, getQueryParameters(uriInfo), filePath, inputStream);
 	}
 
-	private Class<? extends ParserAbstract> getClassParserExtension(String extension) {
-		if (StringUtils.isEmpty(extension))
-			return null;
-		return extractorManager.findParserClassByExtensionFirst(extension);
+	private Class<? extends ParserInterface> getClassParserExtension(String extension) {
+		return StringUtils.isEmpty(extension) ? null : extractorManager.findParserClassByExtensionFirst(extension);
 	}
 
-	private Class<? extends ParserAbstract> getClassParserMimeType(String mimeType) {
-		if (StringUtils.isEmpty(mimeType))
-			return null;
-		return extractorManager.findParserClassByMimeTypeFirst(mimeType);
+	private Class<? extends ParserInterface> getClassParserMimeType(String mimeType) {
+		return StringUtils.isEmpty(mimeType) ? null : extractorManager.findParserClassByMimeTypeFirst(mimeType);
 	}
 
 	private String getMimeMagic(File file) {
 		try {
-			MagicMatch match = Magic.getMagicMatch(file, true, true);
+			final MagicMatch match = Magic.getMagicMatch(file, true, true);
 			if (match == null)
 				return null;
 			return match.getMimeType();
@@ -156,12 +155,12 @@ class ExtractorServiceImpl extends AbstractServiceImpl implements ExtractorServi
 
 	private ParserResult putMagicPath(UriInfo uriInfo, String filePath, String mimeType) throws Exception {
 
-		MultivaluedMap<String, String> queryParameters = getQueryParameters(uriInfo);
-		File file = getFilePath(filePath);
+		final MultivaluedMap<String, String> queryParameters = getQueryParameters(uriInfo);
+		final File file = getFilePath(filePath);
 
 		// Find a parser with the extension
-		String extension = FilenameUtils.getExtension(file.getName());
-		Class<? extends ParserAbstract> parserClass = getClassParserExtension(extension);
+		final String extension = FilenameUtils.getExtension(file.getName());
+		Class<? extends ParserInterface> parserClass = getClassParserExtension(extension);
 
 		// Find a parser with the mimeType
 		if (parserClass == null) {
@@ -172,7 +171,10 @@ class ExtractorServiceImpl extends AbstractServiceImpl implements ExtractorServi
 		}
 
 		// Do the extraction
-		return getParser(parserClass).doParsing(queryParameters, file, extension, mimeType);
+		final ParserInterface parser = getParser(parserClass);
+		final ParserResultBuilder result = new ParserResultBuilder(parser);
+		parser.parseContent(queryParameters, file, extension, mimeType, result);
+		return result.build();
 	}
 
 	private ParserResult putMagicStream(UriInfo uriInfo, String fileName, String mimeType, InputStream inputStream)
@@ -180,7 +182,7 @@ class ExtractorServiceImpl extends AbstractServiceImpl implements ExtractorServi
 
 		File tempFile = null;
 		try {
-			Class<? extends ParserAbstract> parserClass = null;
+			Class<? extends ParserInterface> parserClass = null;
 
 			// Find a parser with the extension
 			String extension = null;
@@ -206,14 +208,14 @@ class ExtractorServiceImpl extends AbstractServiceImpl implements ExtractorServi
 			}
 
 			// Do the extraction
-			MultivaluedMap<String, String> queryParameters = getQueryParameters(uriInfo);
-			ParserAbstract parser = getParser(parserClass);
-			ParserResult result;
+			final MultivaluedMap<String, String> queryParameters = getQueryParameters(uriInfo);
+			final ParserInterface parser = getParser(parserClass);
+			final ParserResultBuilder result = new ParserResultBuilder(parser);
 			if (tempFile != null)
-				result = parser.doParsing(queryParameters, tempFile, extension, mimeType);
+				parser.parseContent(queryParameters, tempFile, extension, mimeType, result);
 			else
-				result = parser.doParsing(queryParameters, inputStream, extension, mimeType);
-			return result;
+				parser.parseContent(queryParameters, inputStream, extension, mimeType, result);
+			return result.build();
 		} finally {
 			if (tempFile != null)
 				tempFile.delete();

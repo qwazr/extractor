@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2016 Emmanuel Keller / QWAZR
+ * Copyright 2016-2017 Emmanuel Keller / QWAZR
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,9 @@
 package com.qwazr.extractor.parser;
 
 import com.qwazr.extractor.ParserAbstract;
-import com.qwazr.extractor.ParserDocument;
 import com.qwazr.extractor.ParserField;
+import com.qwazr.extractor.ParserFieldsBuilder;
+import com.qwazr.extractor.ParserResultBuilder;
 import com.qwazr.utils.StringUtils;
 import net.sourceforge.tess4j.Tesseract1;
 import net.sourceforge.tess4j.TesseractException;
@@ -25,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.core.MultivaluedMap;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,7 +39,7 @@ public class Ocr extends ParserAbstract {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Ocr.class);
 
-	static final HashMap<String, String> MIMEMAP;
+	private static final HashMap<String, String> MIMEMAP;
 
 	static {
 		MIMEMAP = new HashMap<>();
@@ -49,14 +51,14 @@ public class Ocr extends ParserAbstract {
 		MIMEMAP.put("application/pdf", "pdf");
 	}
 
-	final protected static ParserField CONTENT = ParserField.newString("content", "The content of the document");
+	final private static ParserField CONTENT = ParserField.newString("content", "The content of the document");
 
-	final protected static ParserField LANG_DETECTION =
+	final private static ParserField LANG_DETECTION =
 			ParserField.newString("lang_detection", "Detection of the language");
 
-	final protected static ParserField[] FIELDS = { CONTENT, LANG_DETECTION };
+	final private static ParserField[] FIELDS = { CONTENT, LANG_DETECTION };
 
-	final protected static ParserField LANGUAGE = ParserField.newString("language",
+	final private static ParserField LANGUAGE = ParserField.newString("language",
 			"The language code of the document if known: afr (Afrikaans) amh (Amharic) ara (Arabic) asm (Assamese) "
 					+ "aze (Azerbaijani) aze_cyrl (Azerbaijani - Cyrilic) bel (Belarusian) ben (Bengali) "
 					+ "bod (Tibetan) bos (Bosnian) bul (Bulgarian) cat (Catalan; Valencian) ceb (Cebuano) ces (Czech) "
@@ -81,25 +83,25 @@ public class Ocr extends ParserAbstract {
 					+ "uig (Uighur; Uyghur) ukr (Ukrainian) urd (Urdu) uzb (Uzbek) uzb_cyrl (Uzbek - Cyrilic) "
 					+ "vie (Vietnamese) yid (Yiddish)");
 
-	final protected static ParserField[] PARAMETERS = { LANGUAGE };
+	final private static ParserField[] PARAMETERS = { LANGUAGE };
 
 	@Override
-	protected ParserField[] getParameters() {
+	public ParserField[] getParameters() {
 		return PARAMETERS;
 	}
 
 	@Override
-	protected ParserField[] getFields() {
+	public ParserField[] getFields() {
 		return FIELDS;
 	}
 
 	@Override
-	protected String[] getDefaultExtensions() {
+	public String[] getDefaultExtensions() {
 		return null;
 	}
 
 	@Override
-	protected String[] getDefaultMimeTypes() {
+	public String[] getDefaultMimeTypes() {
 		return null;
 	}
 
@@ -136,10 +138,10 @@ public class Ocr extends ParserAbstract {
 	}
 
 	@Override
-	protected void parseContent(final File file, final String extension, final String mimeType)
-			throws IOException, TesseractException {
+	public void parseContent(final MultivaluedMap<String, String> parameters, final File file, final String extension,
+			final String mimeType, final ParserResultBuilder resultBuilder) throws IOException, TesseractException {
 		final Tesseract1 tesseract = new Tesseract1();
-		final String lang = this.getParameterValue(LANGUAGE, 0);
+		final String lang = this.getParameterValue(parameters, LANGUAGE, 0);
 		if (lang != null)
 			tesseract.setLanguage(lang);
 		if (TESSDATA_PREFIX != null)
@@ -147,13 +149,13 @@ public class Ocr extends ParserAbstract {
 		final String result = tesseract.doOCR(file);
 		if (StringUtils.isEmpty(result))
 			return;
-		final ParserDocument document = getNewParserDocument();
+		final ParserFieldsBuilder document = resultBuilder.newDocument();
 		document.add(CONTENT, result);
 	}
 
 	@Override
-	protected void parseContent(final InputStream inputStream, String extension, final String mimeType)
-			throws Exception {
+	public void parseContent(final MultivaluedMap<String, String> parameters, final InputStream inputStream,
+			String extension, final String mimeType, final ParserResultBuilder resultBuilder) throws Exception {
 		if (extension == null) {
 			if (mimeType == null)
 				throw new BadRequestException("The file extension or the mime-type is required.");
@@ -163,7 +165,7 @@ public class Ocr extends ParserAbstract {
 		}
 		final File tempFile = ParserAbstract.createTempFile(inputStream, "." + extension);
 		try {
-			parseContent(tempFile, extension, mimeType);
+			parseContent(parameters, tempFile, extension, mimeType, resultBuilder);
 		} finally {
 			tempFile.delete();
 		}

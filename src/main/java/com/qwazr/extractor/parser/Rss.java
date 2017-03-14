@@ -16,109 +16,124 @@
 package com.qwazr.extractor.parser;
 
 import com.qwazr.extractor.ParserAbstract;
-import com.qwazr.extractor.ParserDocument;
 import com.qwazr.extractor.ParserField;
-import com.rometools.rome.feed.synd.*;
+import com.qwazr.extractor.ParserFieldsBuilder;
+import com.qwazr.extractor.ParserResultBuilder;
+import com.rometools.rome.feed.synd.SyndCategory;
+import com.rometools.rome.feed.synd.SyndContent;
+import com.rometools.rome.feed.synd.SyndEntry;
+import com.rometools.rome.feed.synd.SyndFeed;
+import com.rometools.rome.feed.synd.SyndLink;
+import com.rometools.rome.feed.synd.SyndPerson;
 import com.rometools.rome.io.SyndFeedInput;
 import com.rometools.rome.io.XmlReader;
 
+import javax.ws.rs.core.MultivaluedMap;
 import java.io.InputStream;
 import java.util.List;
 
 public class Rss extends ParserAbstract {
 
-	public static final String[] DEFAULT_MIMETYPES = { "application/rss+xml" };
+	private static final String[] DEFAULT_MIMETYPES = { "application/rss+xml" };
 
 	public static final String[] DEFAULT_EXTENSIONS = { "rss" };
 
-	final protected static ParserField CHANNEL_TITLE =
-			ParserField.newString("channel_title", "The title of the channel");
+	final private static ParserField CHANNEL_TITLE = ParserField.newString("channel_title", "The title of the channel");
 
-	final protected static ParserField CHANNEL_LINK = ParserField.newString("channel_link", "The link of the channel");
+	final private static ParserField CHANNEL_LINK = ParserField.newString("channel_link", "The link of the channel");
 
-	final protected static ParserField CHANNEL_DESCRIPTION =
+	final private static ParserField CHANNEL_DESCRIPTION =
 			ParserField.newString("channel_description", "The description of the channel");
 
-	final protected static ParserField CHANNEL_CATEGORY =
+	final private static ParserField CHANNEL_CATEGORY =
 			ParserField.newString("channel_category", "The category of the channel");
 
-	final protected static ParserField CHANNEL_AUTHOR_NAME =
+	final private static ParserField CHANNEL_AUTHOR_NAME =
 			ParserField.newString("channel_author_name", "The name of the author");
 
-	final protected static ParserField CHANNEL_AUTHOR_EMAIL =
+	final private static ParserField CHANNEL_AUTHOR_EMAIL =
 			ParserField.newString("channel_author_email", "The email address of the author");
 
-	final protected static ParserField CHANNEL_CONTRIBUTOR_NAME =
+	final private static ParserField CHANNEL_CONTRIBUTOR_NAME =
 			ParserField.newString("channel_contributor_name", "The name of the contributor");
 
-	final protected static ParserField CHANNEL_CONTRIBUTOR_EMAIL =
+	final private static ParserField CHANNEL_CONTRIBUTOR_EMAIL =
 			ParserField.newString("channel_contributor_email", "The email address of the contributor");
 
-	final protected static ParserField CHANNEL_PUBLISHED_DATE =
+	final private static ParserField CHANNEL_PUBLISHED_DATE =
 			ParserField.newString("channel_published_date", "The published date of the channel");
 
-	final protected static ParserField ATOM_TITLE = ParserField.newString("atom_title", "The title of the atom");
+	final private static ParserField ATOM_TITLE = ParserField.newString("atom_title", "The title of the atom");
 
-	final protected static ParserField ATOM_LINK = ParserField.newString("atom_link", "The link of the atom");
+	final private static ParserField ATOM_LINK = ParserField.newString("atom_link", "The link of the atom");
 
-	final protected static ParserField ATOM_DESCRIPTION =
+	final private static ParserField ATOM_DESCRIPTION =
 			ParserField.newString("atom_description", "The descriptiln of the atom");
 
-	final protected static ParserField ATOM_CATEGORY =
-			ParserField.newString("atom_category", "The category of the atom");
+	final private static ParserField ATOM_CATEGORY = ParserField.newString("atom_category", "The category of the atom");
 
-	final protected static ParserField ATOM_AUTHOR_NAME =
+	final private static ParserField ATOM_AUTHOR_NAME =
 			ParserField.newString("atom_author_name", "The name of the author");
 
-	final protected static ParserField ATOM_AUTHOR_EMAIL =
+	final private static ParserField ATOM_AUTHOR_EMAIL =
 			ParserField.newString("atom_author_email", "The email address of the author");
 
-	final protected static ParserField ATOM_CONTRIBUTOR_NAME =
+	final private static ParserField ATOM_CONTRIBUTOR_NAME =
 			ParserField.newString("atom_contributor_name", "The name of the contributor");
 
-	final protected static ParserField ATOM_CONTRIBUTOR_EMAIL =
+	final private static ParserField ATOM_CONTRIBUTOR_EMAIL =
 			ParserField.newString("atom_contributor_email", "The email address of the contributor");
 
-	final protected static ParserField ATOM_PUBLISHED_DATE =
+	final private static ParserField ATOM_PUBLISHED_DATE =
 			ParserField.newString("atom_published_date", "The published date");
 
-	final protected static ParserField ATOM_UPDATED_DATE =
-			ParserField.newString("atom_updated_date", "The updated date");
+	final private static ParserField ATOM_UPDATED_DATE = ParserField.newString("atom_updated_date", "The updated date");
 
-	final protected static ParserField LANG_DETECTION =
+	final private static ParserField LANG_DETECTION =
 			ParserField.newString("lang_detection", "Detection of the language");
 
-	final protected static ParserField[] FIELDS =
-			{ CHANNEL_TITLE, CHANNEL_LINK, CHANNEL_DESCRIPTION, CHANNEL_CATEGORY, CHANNEL_AUTHOR_NAME,
-					CHANNEL_AUTHOR_EMAIL, CHANNEL_CONTRIBUTOR_NAME, CHANNEL_CONTRIBUTOR_EMAIL, CHANNEL_PUBLISHED_DATE,
-					ATOM_TITLE, ATOM_LINK, ATOM_DESCRIPTION, ATOM_AUTHOR_NAME, ATOM_AUTHOR_EMAIL, ATOM_CONTRIBUTOR_NAME,
-					ATOM_CONTRIBUTOR_EMAIL, ATOM_PUBLISHED_DATE, ATOM_UPDATED_DATE, LANG_DETECTION };
-
-	public Rss() {
-	}
+	final private static ParserField[] FIELDS = { CHANNEL_TITLE,
+			CHANNEL_LINK,
+			CHANNEL_DESCRIPTION,
+			CHANNEL_CATEGORY,
+			CHANNEL_AUTHOR_NAME,
+			CHANNEL_AUTHOR_EMAIL,
+			CHANNEL_CONTRIBUTOR_NAME,
+			CHANNEL_CONTRIBUTOR_EMAIL,
+			CHANNEL_PUBLISHED_DATE,
+			ATOM_TITLE,
+			ATOM_LINK,
+			ATOM_DESCRIPTION,
+			ATOM_AUTHOR_NAME,
+			ATOM_AUTHOR_EMAIL,
+			ATOM_CONTRIBUTOR_NAME,
+			ATOM_CONTRIBUTOR_EMAIL,
+			ATOM_PUBLISHED_DATE,
+			ATOM_UPDATED_DATE,
+			LANG_DETECTION };
 
 	@Override
-	protected ParserField[] getParameters() {
+	public ParserField[] getParameters() {
 		return null;
 	}
 
 	@Override
-	protected ParserField[] getFields() {
+	public ParserField[] getFields() {
 		return FIELDS;
 	}
 
 	@Override
-	protected String[] getDefaultExtensions() {
+	public String[] getDefaultExtensions() {
 		return DEFAULT_EXTENSIONS;
 	}
 
 	@Override
-	protected String[] getDefaultMimeTypes() {
+	public String[] getDefaultMimeTypes() {
 		return DEFAULT_MIMETYPES;
 	}
 
 	private void addPersons(ParserField nameField, ParserField emailField, List<SyndPerson> persons,
-			ParserDocument parserDocument) {
+			ParserFieldsBuilder parserDocument) {
 		if (persons == null)
 			return;
 		for (SyndPerson person : persons) {
@@ -128,7 +143,7 @@ public class Rss extends ParserAbstract {
 	}
 
 	private void addLinks(final ParserField linkField, final List<SyndLink> links,
-			final ParserDocument parserDocument) {
+			final ParserFieldsBuilder parserDocument) {
 		if (links == null)
 			return;
 		for (SyndLink link : links)
@@ -136,14 +151,15 @@ public class Rss extends ParserAbstract {
 	}
 
 	private void addCategories(final ParserField categoryField, final List<SyndCategory> categories,
-			final ParserDocument parserDocument) {
+			final ParserFieldsBuilder parserDocument) {
 		if (categories == null)
 			return;
 		for (SyndCategory category : categories)
 			parserDocument.add(categoryField, category.getName());
 	}
 
-	private void addContent(final ParserField atomDescription, final SyndContent content, final ParserDocument result) {
+	private void addContent(final ParserField atomDescription, final SyndContent content,
+			final ParserFieldsBuilder result) {
 		if (content == null)
 			return;
 		final String value = content.getValue();
@@ -153,45 +169,48 @@ public class Rss extends ParserAbstract {
 	}
 
 	@Override
-	protected void parseContent(InputStream inputStream, String extension, String mimeType) throws Exception {
+	public void parseContent(final MultivaluedMap<String, String> parameters, final InputStream inputStream,
+			String extension, final String mimeType, final ParserResultBuilder resultBuilder) throws Exception {
 
-		SyndFeedInput input = new SyndFeedInput();
-		XmlReader reader = new XmlReader(inputStream);
-		SyndFeed feed = input.build(reader);
-		if (feed == null)
-			return;
+		final SyndFeedInput input = new SyndFeedInput();
+		try (final XmlReader reader = new XmlReader(inputStream)) {
+			SyndFeed feed = input.build(reader);
+			if (feed == null)
+				return;
 
-		metas.add(CHANNEL_TITLE, feed.getTitle());
-		metas.add(CHANNEL_DESCRIPTION, feed.getDescription());
+			final ParserFieldsBuilder metas = resultBuilder.metas();
 
-		addPersons(CHANNEL_AUTHOR_NAME, CHANNEL_AUTHOR_EMAIL, feed.getAuthors(), metas);
-		addPersons(CHANNEL_CONTRIBUTOR_NAME, CHANNEL_CONTRIBUTOR_EMAIL, feed.getContributors(), metas);
-		addLinks(CHANNEL_LINK, feed.getLinks(), metas);
-		addCategories(CHANNEL_CATEGORY, feed.getCategories(), metas);
+			metas.add(CHANNEL_TITLE, feed.getTitle());
+			metas.add(CHANNEL_DESCRIPTION, feed.getDescription());
 
-		metas.add(CHANNEL_PUBLISHED_DATE, feed.getPublishedDate());
+			addPersons(CHANNEL_AUTHOR_NAME, CHANNEL_AUTHOR_EMAIL, feed.getAuthors(), metas);
+			addPersons(CHANNEL_CONTRIBUTOR_NAME, CHANNEL_CONTRIBUTOR_EMAIL, feed.getContributors(), metas);
+			addLinks(CHANNEL_LINK, feed.getLinks(), metas);
+			addCategories(CHANNEL_CATEGORY, feed.getCategories(), metas);
 
-		List<SyndEntry> entries = feed.getEntries();
-		if (entries == null)
-			return;
+			metas.add(CHANNEL_PUBLISHED_DATE, feed.getPublishedDate());
 
-		for (SyndEntry entry : entries) {
+			List<SyndEntry> entries = feed.getEntries();
+			if (entries == null)
+				return;
 
-			final ParserDocument result = getNewParserDocument();
+			for (SyndEntry entry : entries) {
 
-			result.add(ATOM_TITLE, entry.getTitle());
-			addContent(ATOM_DESCRIPTION, entry.getDescription(), result);
-			addPersons(ATOM_AUTHOR_NAME, ATOM_AUTHOR_EMAIL, entry.getAuthors(), result);
-			addPersons(ATOM_CONTRIBUTOR_NAME, ATOM_CONTRIBUTOR_EMAIL, entry.getContributors(), result);
-			addLinks(ATOM_LINK, entry.getLinks(), result);
-			result.add(ATOM_LINK, entry.getLink());
-			addCategories(ATOM_CATEGORY, entry.getCategories(), result);
-			result.add(ATOM_PUBLISHED_DATE, entry.getPublishedDate());
-			result.add(ATOM_UPDATED_DATE, entry.getUpdatedDate());
-			// Apply the language detection
-			result.add(LANG_DETECTION, languageDetection(ATOM_DESCRIPTION, 10000));
+				final ParserFieldsBuilder result = resultBuilder.newDocument();
+
+				result.add(ATOM_TITLE, entry.getTitle());
+				addContent(ATOM_DESCRIPTION, entry.getDescription(), result);
+				addPersons(ATOM_AUTHOR_NAME, ATOM_AUTHOR_EMAIL, entry.getAuthors(), result);
+				addPersons(ATOM_CONTRIBUTOR_NAME, ATOM_CONTRIBUTOR_EMAIL, entry.getContributors(), result);
+				addLinks(ATOM_LINK, entry.getLinks(), result);
+				result.add(ATOM_LINK, entry.getLink());
+				addCategories(ATOM_CATEGORY, entry.getCategories(), result);
+				result.add(ATOM_PUBLISHED_DATE, entry.getPublishedDate());
+				result.add(ATOM_UPDATED_DATE, entry.getUpdatedDate());
+				// Apply the language detection
+				result.add(LANG_DETECTION, languageDetection(result, ATOM_DESCRIPTION, 10000));
+			}
 		}
-
 	}
 
 }
