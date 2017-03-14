@@ -50,7 +50,7 @@ public class ExtractorManager {
 
 	private final ClassLoaderManager classLoaderManager;
 
-	ExtractorManager(final ClassLoaderManager classLoaderManager) {
+	public ExtractorManager(final ClassLoaderManager classLoaderManager) {
 
 		this.classLoaderManager = classLoaderManager;
 
