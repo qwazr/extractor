@@ -19,7 +19,6 @@ import com.qwazr.extractor.parser.Audio;
 import com.qwazr.extractor.parser.Eml;
 import com.qwazr.extractor.parser.Html;
 import com.qwazr.extractor.parser.Image;
-import com.qwazr.extractor.parser.Markdown;
 import com.qwazr.extractor.parser.Ocr;
 import com.qwazr.extractor.parser.Odf;
 import com.qwazr.extractor.parser.PdfBox;
@@ -171,11 +170,6 @@ public class AllTest extends ParserTest {
 	//TODO tiff disabled
 	public void testImageTiff() throws Exception {
 		doTest(Image.class, "file.tiff", DEFAULT_TEST_STRING);
-	}
-
-	@Test
-	public void testMarkdown() throws Exception {
-		doTest(Markdown.class, "file.md", "extract data to be indexed");
 	}
 
 	@Test

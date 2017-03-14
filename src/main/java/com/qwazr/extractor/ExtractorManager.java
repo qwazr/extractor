@@ -20,7 +20,6 @@ import com.qwazr.extractor.parser.Audio;
 import com.qwazr.extractor.parser.Eml;
 import com.qwazr.extractor.parser.Html;
 import com.qwazr.extractor.parser.Image;
-import com.qwazr.extractor.parser.Markdown;
 import com.qwazr.extractor.parser.Ocr;
 import com.qwazr.extractor.parser.Odf;
 import com.qwazr.extractor.parser.PdfBox;
@@ -62,7 +61,6 @@ public class ExtractorManager {
 		register(Eml.class);
 		register(Html.class);
 		register(Image.class);
-		register(Markdown.class);
 		register(Ocr.class);
 		register(Odf.class);
 		register(PdfBox.class);

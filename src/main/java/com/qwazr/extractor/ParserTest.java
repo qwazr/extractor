@@ -58,7 +58,7 @@ public class ParserTest {
 	}
 
 	protected InputStream getStream(String fileName) {
-		InputStream inputStream = ParserTest.class.getResourceAsStream(fileName);
+		InputStream inputStream = getClass().getResourceAsStream(fileName);
 		assert (inputStream != null);
 		return inputStream;
 	}
