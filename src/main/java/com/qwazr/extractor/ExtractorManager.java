@@ -17,7 +17,6 @@ package com.qwazr.extractor;
 
 import com.qwazr.classloader.ClassLoaderManager;
 import com.qwazr.extractor.parser.Audio;
-import com.qwazr.extractor.parser.Eml;
 import com.qwazr.extractor.parser.Html;
 import com.qwazr.extractor.parser.Image;
 import com.qwazr.extractor.parser.Ocr;
@@ -58,7 +57,6 @@ public class ExtractorManager {
 		extensionsMap = new MultivaluedHashMap<>();
 
 		register(Audio.class);
-		register(Eml.class);
 		register(Html.class);
 		register(Image.class);
 		register(Ocr.class);

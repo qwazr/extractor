@@ -16,7 +16,6 @@
 package com.qwazr.extractor;
 
 import com.qwazr.extractor.parser.Audio;
-import com.qwazr.extractor.parser.Eml;
 import com.qwazr.extractor.parser.Html;
 import com.qwazr.extractor.parser.Image;
 import com.qwazr.extractor.parser.Ocr;
@@ -84,23 +83,6 @@ public class AllTest extends ParserTest {
 	@Test
 	public void testAudioWma() throws Exception {
 		doTest(Audio.class, "file.wma", AUDIO_TEST_STRING, "format", "wma");
-	}
-
-	/*
-	@Test
-	public void testDoc() throws Exception {
-		doTest(Doc.class, "file.doc", DEFAULT_TEST_STRING);
-	}
-
-	@Test
-	public void testDocx() throws Exception {
-		doTest(Docx.class, "file.docx", DEFAULT_TEST_STRING);
-	}
-	*/
-
-	@Test
-	public void testEml() throws Exception {
-		doTest(Eml.class, "file.eml", "Maximum actions in one visit");
 	}
 
 	@Test
@@ -206,18 +188,6 @@ public class AllTest extends ParserTest {
 		doTest(Odf.class, "file.odp", DEFAULT_TEST_STRING);
 	}
 
-	/*
-	@Test
-	public void testPpt() throws Exception {
-		doTest(Ppt.class, "file.ppt", DEFAULT_TEST_STRING);
-	}
-
-	@Test
-	public void testPptx() throws Exception {
-		doTest(Pptx.class, "file.pptx", DEFAULT_TEST_STRING);
-	}
-*/
-
 	@Test
 	public void testRss() throws Exception {
 		doTest(Rss.class, "file.rss", "oss-text-extractor");
@@ -232,17 +202,5 @@ public class AllTest extends ParserTest {
 	public void testText() throws Exception {
 		doTest(Text.class, "file.txt", DEFAULT_TEST_STRING);
 	}
-
-	/*
-	@Test
-	public void testXls() throws Exception {
-		doTest(Xls.class, "file.xls", DEFAULT_TEST_STRING);
-	}
-
-	@Test
-	public void testXlsx() throws Exception {
-		doTest(Xlsx.class, "file.xlsx", DEFAULT_TEST_STRING);
-	}
-	*/
 
 }
