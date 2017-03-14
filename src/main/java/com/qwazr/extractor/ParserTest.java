@@ -31,7 +31,7 @@ import java.util.Map;
 public class ParserTest {
 
 	static final Logger LOGGER = LoggerFactory.getLogger(ParserTest.class);
-	
+
 	protected final ExtractorManager manager;
 	protected final ExtractorServiceInterface service;
 
