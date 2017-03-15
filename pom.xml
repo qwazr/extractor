@@ -17,7 +17,6 @@
         <connection>scm:git:git@github.com:qwazr/extractor.git</connection>
         <developerConnection>scm:git:git@github.com:qwazr/extractor.git</developerConnection>
         <url>git@github.com:qwazr/extractor.git</url>
-        <tag>HEAD</tag>
     </scm>
 
     <properties>
