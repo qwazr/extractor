@@ -1,0 +1,11 @@
+[
+  "com.qwazr.extractor.parser.Audio",
+  "com.qwazr.extractor.parser.Html",
+  "com.qwazr.extractor.parser.Image",
+  "com.qwazr.extractor.parser.Ocr",
+  "com.qwazr.extractor.parser.Odf",
+  "com.qwazr.extractor.parser.PdfBox",
+  "com.qwazr.extractor.parser.Rss",
+  "com.qwazr.extractor.parser.Rtf",
+  "com.qwazr.extractor.parser.Text"
+]

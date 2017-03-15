@@ -45,8 +45,9 @@ public class AllTest extends ParserTest {
 	static ExtractorManager manager;
 
 	@BeforeClass
-	public static void init() throws IOException {
+	public static void init() throws IOException, ClassNotFoundException {
 		manager = new ExtractorManager(null);
+		manager.registerByJsonResources();
 	}
 
 	public AllTest() {
@@ -54,6 +55,11 @@ public class AllTest extends ParserTest {
 	}
 
 	final String AUDIO_TEST_STRING = "opensearchserver";
+
+	@Test
+	public void numberOfParsers() {
+		Assert.assertEquals(9, manager.getList().size());
+	}
 
 	@Test
 	public void testAudioFlag() throws Exception {

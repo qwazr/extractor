@@ -15,26 +15,30 @@
  */
 package com.qwazr.extractor;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.qwazr.classloader.ClassLoaderManager;
-import com.qwazr.extractor.parser.Audio;
-import com.qwazr.extractor.parser.Html;
-import com.qwazr.extractor.parser.Image;
-import com.qwazr.extractor.parser.Ocr;
-import com.qwazr.extractor.parser.Odf;
-import com.qwazr.extractor.parser.PdfBox;
-import com.qwazr.extractor.parser.Rss;
-import com.qwazr.extractor.parser.Rtf;
-import com.qwazr.extractor.parser.Text;
 import com.qwazr.server.GenericServer;
+import com.qwazr.utils.json.JsonMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.core.MultivaluedHashMap;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Enumeration;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class ExtractorManager {
+
+	public final static String PARSER_JSON_RESOURCE_PATH = "com/qwazr/extractor/parsers.json";
+
+	private final static Logger LOGGER = LoggerFactory.getLogger(ExtractorManager.class);
 
 	private final ReadWriteLock rwl = new ReentrantReadWriteLock();
 
@@ -48,7 +52,7 @@ public class ExtractorManager {
 
 	private final ClassLoaderManager classLoaderManager;
 
-	public ExtractorManager(final ClassLoaderManager classLoaderManager) {
+	public ExtractorManager(final ClassLoaderManager classLoaderManager) throws IOException {
 
 		this.classLoaderManager = classLoaderManager;
 
@@ -56,18 +60,38 @@ public class ExtractorManager {
 		mimeTypesMap = new MultivaluedHashMap<>();
 		extensionsMap = new MultivaluedHashMap<>();
 
-		register(Audio.class);
-		register(Html.class);
-		register(Image.class);
-		register(Ocr.class);
-		register(Odf.class);
-		register(PdfBox.class);
-		register(Rss.class);
-		register(Rtf.class);
-		register(Text.class);
-
 		service = new ExtractorServiceImpl(this);
 
+	}
+
+	private final static TypeReference<List<String>> ListStringTypeRef = new TypeReference<List<String>>() {
+	};
+
+	public int registerByJsonResources(String... resourcePathes) throws IOException, ClassNotFoundException {
+		if (resourcePathes == null || resourcePathes.length == 0)
+			resourcePathes = new String[] { PARSER_JSON_RESOURCE_PATH };
+		final ClassLoader classLoader =
+				classLoaderManager == null ? getClass().getClassLoader() : classLoaderManager.getClassLoader();
+		int count = 0;
+		for (String resourcePath : resourcePathes) {
+			final Enumeration<URL> parsersJson = classLoader.getResources(resourcePath);
+			if (parsersJson == null)
+				return 0;
+			while (parsersJson.hasMoreElements()) {
+				final URL parserJsonUrl = parsersJson.nextElement();
+				LOGGER.info("Loading parser resource: {}", parserJsonUrl);
+				try (final InputStream in = parserJsonUrl.openStream()) {
+					final List<String> list = JsonMapper.MAPPER.readValue(in, ListStringTypeRef);
+					if (list == null)
+						continue;
+					for (String className : list) {
+						register(className);
+						count++;
+					}
+				}
+			}
+		}
+		return count;
 	}
 
 	public ExtractorManager registerContextAttribute(final GenericServer.Builder builder) {
@@ -88,13 +112,14 @@ public class ExtractorManager {
 		Lock l = rwl.writeLock();
 		l.lock();
 		try {
-			ParserInterface parser = parserClass.newInstance();
+			LOGGER.info("Registering {}", parserClass);
+			final ParserInterface parser = parserClass.newInstance();
 			namesMap.put(parser.getName(), parserClass);
-			String[] extensions = parser.getDefaultExtensions();
+			final String[] extensions = parser.getDefaultExtensions();
 			if (extensions != null)
 				for (String extension : extensions)
 					extensionsMap.add(extension.intern(), parserClass);
-			String[] mimeTypes = parser.getDefaultMimeTypes();
+			final String[] mimeTypes = parser.getDefaultMimeTypes();
 			if (mimeTypes != null)
 				for (String mimeType : mimeTypes)
 					mimeTypesMap.add(mimeType.intern(), parserClass);

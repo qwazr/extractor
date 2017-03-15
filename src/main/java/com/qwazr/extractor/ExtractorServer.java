@@ -32,7 +32,8 @@ public class ExtractorServer implements BaseServer {
 	private final GenericServer server;
 	private final ExtractorManager extractorManager;
 
-	private ExtractorServer(final ServerConfiguration configuration) throws IOException, URISyntaxException {
+	private ExtractorServer(final ServerConfiguration configuration)
+			throws IOException, URISyntaxException, ClassNotFoundException {
 		final ExecutorService executorService = Executors.newCachedThreadPool();
 		final GenericServer.Builder builder =
 				GenericServer.of(configuration, executorService).webService(WelcomeShutdownService.class);
@@ -42,6 +43,7 @@ public class ExtractorServer implements BaseServer {
 		final ClassLoaderManager classLoaderManager =
 				new ClassLoaderManager(configuration.dataDirectory, Thread.currentThread());
 		extractorManager = new ExtractorManager(classLoaderManager).registerWebService(builder);
+		extractorManager.registerByJsonResources();
 		server = builder.build();
 	}
 
