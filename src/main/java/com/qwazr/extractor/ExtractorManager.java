@@ -67,31 +67,28 @@ public class ExtractorManager {
 	private final static TypeReference<List<String>> ListStringTypeRef = new TypeReference<List<String>>() {
 	};
 
-	public int registerByJsonResources(String... resourcePathes) throws IOException, ClassNotFoundException {
+	public ExtractorManager registerByJsonResources(String... resourcePathes)
+			throws IOException, ClassNotFoundException {
 		if (resourcePathes == null || resourcePathes.length == 0)
 			resourcePathes = new String[] { PARSER_JSON_RESOURCE_PATH };
 		final ClassLoader classLoader =
 				classLoaderManager == null ? getClass().getClassLoader() : classLoaderManager.getClassLoader();
-		int count = 0;
-		for (String resourcePath : resourcePathes) {
+		for (final String resourcePath : resourcePathes) {
 			final Enumeration<URL> parsersJson = classLoader.getResources(resourcePath);
 			if (parsersJson == null)
-				return 0;
+				continue;
 			while (parsersJson.hasMoreElements()) {
 				final URL parserJsonUrl = parsersJson.nextElement();
 				LOGGER.info("Loading parser resource: {}", parserJsonUrl);
 				try (final InputStream in = parserJsonUrl.openStream()) {
 					final List<String> list = JsonMapper.MAPPER.readValue(in, ListStringTypeRef);
-					if (list == null)
-						continue;
-					for (String className : list) {
-						register(className);
-						count++;
-					}
+					if (list != null)
+						for (String className : list)
+							register(className);
 				}
 			}
 		}
-		return count;
+		return this;
 	}
 
 	public ExtractorManager registerContextAttribute(final GenericServer.Builder builder) {
