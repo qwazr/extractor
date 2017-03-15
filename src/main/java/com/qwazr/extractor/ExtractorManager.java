@@ -52,7 +52,7 @@ public class ExtractorManager {
 
 	private final ClassLoaderManager classLoaderManager;
 
-	public ExtractorManager(final ClassLoaderManager classLoaderManager) throws IOException {
+	public ExtractorManager(final ClassLoaderManager classLoaderManager) {
 
 		this.classLoaderManager = classLoaderManager;
 
