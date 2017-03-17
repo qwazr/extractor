@@ -18,7 +18,6 @@ package com.qwazr.extractor;
 import com.qwazr.extractor.parser.Audio;
 import com.qwazr.extractor.parser.Image;
 import com.qwazr.extractor.parser.Odf;
-import com.qwazr.extractor.parser.Rss;
 import com.qwazr.extractor.parser.Rtf;
 import com.qwazr.extractor.parser.Text;
 import org.junit.Assert;
@@ -27,11 +26,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 
 public class AllTest extends ParserTest {
 
@@ -55,7 +50,7 @@ public class AllTest extends ParserTest {
 
 	@Test
 	public void numberOfParsers() {
-		Assert.assertEquals(6, manager.getList().size());
+		Assert.assertEquals(5, manager.getList().size());
 	}
 
 	@Test
@@ -86,50 +81,6 @@ public class AllTest extends ParserTest {
 	@Test
 	public void testAudioWma() throws Exception {
 		doTest(Audio.class, "file.wma", AUDIO_TEST_STRING, "format", "wma");
-	}
-
-	private void testSelector(String[] names, String[] selectors, String param, String[] selectorResults) {
-		final MultivaluedMap map = new MultivaluedHashMap<>();
-		map.addAll(param, selectors);
-		if (names != null)
-			map.addAll(param + "_name", names);
-
-		ParserResult parserResult = service.extract("html", map, null, getStream("file.html"));
-		Assert.assertNotNull(parserResult);
-		Map<String, List<String>> results =
-				(Map<String, List<String>>) parserResult.getDocumentFieldValue(0, "selectors", 0);
-		Assert.assertNotNull(results);
-		Assert.assertEquals(selectorResults.length, results.size());
-		int i = 0;
-		for (String selectorResult : selectorResults) {
-			String key = names == null ? Integer.toString(i) : names[i];
-			String result = results.get(key).get(0);
-			Assert.assertNotNull(result);
-			Assert.assertEquals(selectorResult, result);
-			i++;
-		}
-	}
-
-	private final static String[] XPATH_NAMES = { "xp1", "xp2" };
-	private final static String[] XPATH_SELECTORS =
-			{ "//*[@id=\"crawl\"]/ul/li[1]/strong", "//*[@id=\"download\"]/div/div[2]/div/h3" };
-	private final static String[] XPATH_RESULTS = { "web crawler", "Documentation" };
-
-	@Test
-	public void testHtmlXPath() {
-		testSelector(null, XPATH_SELECTORS, "xpath", XPATH_RESULTS);
-		testSelector(XPATH_NAMES, XPATH_SELECTORS, "xpath", XPATH_RESULTS);
-	}
-
-	private final static String[] CSS_NAMES = { "css1", "css2" };
-	private final static String[] CSS_SELECTORS =
-			{ "#crawl > ul > li:nth-child(1) > strong", "#download > div > div:nth-child(2) > div > h3" };
-	private final static String[] CSS_RESULTS = { "web crawler", "Documentation" };
-
-	@Test
-	public void testHtmlCSS() {
-		testSelector(null, CSS_SELECTORS, "css", CSS_RESULTS);
-		testSelector(CSS_NAMES, CSS_SELECTORS, "css", CSS_RESULTS);
 	}
 
 	@Test
@@ -165,11 +116,6 @@ public class AllTest extends ParserTest {
 	@Test
 	public void testOdp() throws Exception {
 		doTest(Odf.class, "file.odp", DEFAULT_TEST_STRING);
-	}
-
-	@Test
-	public void testRss() throws Exception {
-		doTest(Rss.class, "file.rss", "oss-text-extractor");
 	}
 
 	@Test

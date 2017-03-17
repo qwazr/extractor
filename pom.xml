@@ -56,16 +56,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.rometools</groupId>
-            <artifactId>rome</artifactId>
-            <version>1.7.1</version>
-        </dependency>
-        <dependency>
-            <groupId>xml-apis</groupId>
-            <artifactId>xml-apis</artifactId>
-            <version>1.4.01</version>
-        </dependency>
-        <dependency>
             <groupId>net.sf.jmimemagic</groupId>
             <artifactId>jmimemagic</artifactId>
             <version>0.1.4</version>

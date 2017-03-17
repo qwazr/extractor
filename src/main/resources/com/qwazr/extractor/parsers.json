@@ -2,7 +2,6 @@
   "com.qwazr.extractor.parser.Audio",
   "com.qwazr.extractor.parser.Image",
   "com.qwazr.extractor.parser.Odf",
-  "com.qwazr.extractor.parser.Rss",
   "com.qwazr.extractor.parser.Rtf",
   "com.qwazr.extractor.parser.Text"
 ]
