@@ -18,7 +18,6 @@ package com.qwazr.extractor;
 import com.qwazr.extractor.parser.Audio;
 import com.qwazr.extractor.parser.Html;
 import com.qwazr.extractor.parser.Image;
-import com.qwazr.extractor.parser.Ocr;
 import com.qwazr.extractor.parser.Odf;
 import com.qwazr.extractor.parser.Rss;
 import com.qwazr.extractor.parser.Rtf;
@@ -57,7 +56,7 @@ public class AllTest extends ParserTest {
 
 	@Test
 	public void numberOfParsers() {
-		Assert.assertEquals(9, manager.getList().size());
+		Assert.assertEquals(7, manager.getList().size());
 	}
 
 	@Test
@@ -157,15 +156,6 @@ public class AllTest extends ParserTest {
 	//TODO tiff disabled
 	public void testImageTiff() throws Exception {
 		doTest(Image.class, "file.tiff", DEFAULT_TEST_STRING);
-	}
-
-	@Test
-	public void testOcr() throws Exception {
-		try {
-			doTest(Ocr.class, "file.pdf", DEFAULT_TEST_STRING);
-		} catch (UnsatisfiedLinkError e) {
-			LOGGER.warn("OCR skipped: no TESSDATA_PREFIX", e);
-		}
 	}
 
 	@Test
