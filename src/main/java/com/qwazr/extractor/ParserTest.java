@@ -150,6 +150,10 @@ public class ParserTest {
 		assert (parserResult != null);
 		checkContainsText(parserResult, testString);
 
+		// No magic to test if the parser doesn't support detection
+		if (parser.getDefaultMimeTypes() == null && parser.getDefaultExtensions() == null)
+			return;
+
 		// Test stream with magic mime service
 		parserResult = service.putMagic(uriInfo, fileName, null, null, getStream(fileName));
 		assert (parserResult != null);
