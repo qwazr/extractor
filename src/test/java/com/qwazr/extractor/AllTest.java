@@ -20,7 +20,6 @@ import com.qwazr.extractor.parser.Html;
 import com.qwazr.extractor.parser.Image;
 import com.qwazr.extractor.parser.Ocr;
 import com.qwazr.extractor.parser.Odf;
-import com.qwazr.extractor.parser.PdfBox;
 import com.qwazr.extractor.parser.Rss;
 import com.qwazr.extractor.parser.Rtf;
 import com.qwazr.extractor.parser.Text;
@@ -161,22 +160,12 @@ public class AllTest extends ParserTest {
 	}
 
 	@Test
-	public void testPdf() throws Exception {
-		doTest(PdfBox.class, "file.pdf", DEFAULT_TEST_STRING);
-	}
-
-	@Test
 	public void testOcr() throws Exception {
 		try {
 			doTest(Ocr.class, "file.pdf", DEFAULT_TEST_STRING);
 		} catch (UnsatisfiedLinkError e) {
 			LOGGER.warn("OCR skipped: no TESSDATA_PREFIX", e);
 		}
-	}
-
-	@Test
-	public void testPwdPdf() throws Exception {
-		doTest(PdfBox.class, "file-pass.pdf", DEFAULT_TEST_STRING, "password", "1234");
 	}
 
 	@Test
