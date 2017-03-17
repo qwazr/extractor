@@ -16,7 +16,6 @@
 package com.qwazr.extractor;
 
 import com.qwazr.extractor.parser.Audio;
-import com.qwazr.extractor.parser.Html;
 import com.qwazr.extractor.parser.Image;
 import com.qwazr.extractor.parser.Odf;
 import com.qwazr.extractor.parser.Rss;
@@ -56,7 +55,7 @@ public class AllTest extends ParserTest {
 
 	@Test
 	public void numberOfParsers() {
-		Assert.assertEquals(7, manager.getList().size());
+		Assert.assertEquals(6, manager.getList().size());
 	}
 
 	@Test
@@ -87,11 +86,6 @@ public class AllTest extends ParserTest {
 	@Test
 	public void testAudioWma() throws Exception {
 		doTest(Audio.class, "file.wma", AUDIO_TEST_STRING, "format", "wma");
-	}
-
-	@Test
-	public void testHtml() throws Exception {
-		doTest(Html.class, "file.html", "search engine software");
 	}
 
 	private void testSelector(String[] names, String[] selectors, String param, String[] selectorResults) {
