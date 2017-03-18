@@ -96,7 +96,37 @@
                         <dependencies>
                             <dependency>
                                 <groupId>com.qwazr</groupId>
+                                <artifactId>qwazr-library-audio</artifactId>
+                                <version>${project.version}</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>com.qwazr</groupId>
+                                <artifactId>qwazr-library-csv</artifactId>
+                                <version>${project.version}</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>com.qwazr</groupId>
                                 <artifactId>qwazr-library-email</artifactId>
+                                <version>${project.version}</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>com.qwazr</groupId>
+                                <artifactId>qwazr-library-html</artifactId>
+                                <version>${project.version}</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>com.qwazr</groupId>
+                                <artifactId>qwazr-library-markdown</artifactId>
+                                <version>${project.version}</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>com.qwazr</groupId>
+                                <artifactId>qwazr-library-odf</artifactId>
+                                <version>${project.version}</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>com.qwazr</groupId>
+                                <artifactId>qwazr-library-pdfbox</artifactId>
                                 <version>${project.version}</version>
                             </dependency>
                             <dependency>
@@ -106,7 +136,12 @@
                             </dependency>
                             <dependency>
                                 <groupId>com.qwazr</groupId>
-                                <artifactId>qwazr-library-markdown</artifactId>
+                                <artifactId>qwazr-library-rss</artifactId>
+                                <version>${project.version}</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>com.qwazr</groupId>
+                                <artifactId>qwazr-library-tess4j</artifactId>
                                 <version>${project.version}</version>
                             </dependency>
                         </dependencies>
