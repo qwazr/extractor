@@ -15,6 +15,7 @@
  */
 package com.qwazr.extractor;
 
+import com.qwazr.utils.StringUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -131,6 +132,9 @@ public class ParserTest {
 		LOGGER.info("Testing " + className);
 
 		final UriInfo uriInfo = new UriInfoMock(keyValueParams);
+
+		// Test service name
+		assert service.list().contains(StringUtils.removeEnd(className.getSimpleName(), "Parser").toLowerCase());
 
 		File tempFile = getTempFile(fileName);
 
