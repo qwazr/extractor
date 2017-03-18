@@ -31,7 +31,7 @@ public abstract class ParserAbstract implements ParserInterface {
 	private final String name;
 
 	protected ParserAbstract() {
-		name = StringUtils.removeEnd(this.getClass().getSimpleName().toLowerCase(), "Parser");
+		name = StringUtils.removeEnd(this.getClass().getSimpleName(), "Parser").toLowerCase();
 	}
 
 	protected String getParameterValue(final MultivaluedMap<String, String> parameters, final ParserField param,

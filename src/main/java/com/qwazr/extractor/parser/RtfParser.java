@@ -15,35 +15,28 @@
  */
 package com.qwazr.extractor.parser;
 
-import com.ibm.icu.text.CharsetDetector;
-import com.ibm.icu.text.CharsetMatch;
 import com.qwazr.extractor.ParserAbstract;
 import com.qwazr.extractor.ParserField;
 import com.qwazr.extractor.ParserFieldsBuilder;
 import com.qwazr.extractor.ParserResultBuilder;
-import org.apache.commons.io.IOUtils;
 
+import javax.swing.text.Document;
+import javax.swing.text.rtf.RTFEditorKit;
 import javax.ws.rs.core.MultivaluedMap;
-import java.io.BufferedInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 
-public class Text extends ParserAbstract {
+public class RtfParser extends ParserAbstract {
 
-	private static final String[] DEFAULT_MIMETYPES = { "text/plain" };
+	private static final String[] DEFAULT_MIMETYPES = { "application/rtf", "text/richtext" };
 
-	private static final String[] DEFAULT_EXTENSIONS = { "txt" };
+	private static final String[] DEFAULT_EXTENSIONS = { "rtf", "rtx" };
 
 	final private static ParserField CONTENT = ParserField.newString("content", "The content of the document");
 
 	final private static ParserField LANG_DETECTION =
 			ParserField.newString("lang_detection", "Detection of the language");
 
-	final private static ParserField CHARSET_DETECTION =
-			ParserField.newString("charset_detection", "Detection of the charset");
-
-	final private static ParserField[] FIELDS = { CONTENT, LANG_DETECTION, CHARSET_DETECTION };
+	final private static ParserField[] FIELDS = { CONTENT, LANG_DETECTION };
 
 	@Override
 	public ParserField[] getParameters() {
@@ -67,26 +60,22 @@ public class Text extends ParserAbstract {
 
 	@Override
 	public void parseContent(final MultivaluedMap<String, String> parameters, final InputStream inputStream,
-			String extension, final String mimeType, final ParserResultBuilder resultBuilder) throws IOException {
+			String extension, final String mimeType, final ParserResultBuilder resultBuilder) throws Exception {
 
-		// Trying to detect the CHARSET of the stream
-		final CharsetDetector detector = new CharsetDetector();
+		// Extract the text data
+		final RTFEditorKit rtf = new RTFEditorKit();
+		final Document doc = rtf.createDefaultDocument();
+		rtf.read(inputStream, doc, 0);
 
-		try (BufferedInputStream bis = new BufferedInputStream(inputStream)) {
-			detector.setText(bis);
-			final CharsetMatch match = detector.detect();
-			final ParserFieldsBuilder result = resultBuilder.newDocument();
-			final String content;
-			if (match != null) {
-				content = match.getString();
-				result.add(CHARSET_DETECTION, match.getName());
-			} else {
-				bis.reset();
-				content = IOUtils.toString(bis, Charset.defaultCharset());
-			}
-			result.add(CONTENT, content);
-			result.add(LANG_DETECTION, languageDetection(result, CONTENT, 10000));
-		}
+		// Obtain a new parser document.
+		final ParserFieldsBuilder result = resultBuilder.newDocument();
+
+		// Fill the field of the ParserDocument
+		result.add(CONTENT, doc.getText(0, doc.getLength()));
+
+		// Apply the language detection
+		result.add(LANG_DETECTION, languageDetection(result, CONTENT, 10000));
+
 	}
 
 }

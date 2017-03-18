@@ -32,7 +32,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.Iterator;
 
-public class Image extends ParserAbstract {
+public class ImageParser extends ParserAbstract {
 
 	private static final String[] DEFAULT_MIMETYPES;
 

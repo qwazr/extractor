@@ -18,6 +18,7 @@ package com.qwazr.extractor;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.qwazr.classloader.ClassLoaderManager;
 import com.qwazr.server.GenericServer;
+import com.qwazr.utils.StringUtils;
 import com.qwazr.utils.json.JsonMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

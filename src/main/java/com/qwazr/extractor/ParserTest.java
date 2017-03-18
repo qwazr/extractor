@@ -53,7 +53,7 @@ public class ParserTest {
 	protected ParserInterface createRegisterInstance(Class<? extends ParserAbstract> className)
 			throws InstantiationException, IllegalAccessException, IOException {
 		Class<? extends ParserInterface> parserClass =
-				manager.findParserClassByName(className.getSimpleName().toLowerCase());
+				manager.findParserClassByName(StringUtils.removeEnd(className.getSimpleName(), "Parser").toLowerCase());
 		assert (parserClass != null);
 		return parserClass.newInstance();
 	}
