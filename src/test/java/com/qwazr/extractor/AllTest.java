@@ -33,7 +33,7 @@ public class AllTest extends ParserTest {
 	@BeforeClass
 	public static void init() throws IOException, ClassNotFoundException {
 		manager = new ExtractorManager(null);
-		manager.registerByJsonResources();
+		manager.registerServices();
 	}
 
 	public AllTest() {

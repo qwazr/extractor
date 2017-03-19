@@ -43,7 +43,7 @@ public class ExtractorServer implements BaseServer {
 		final ClassLoaderManager classLoaderManager =
 				new ClassLoaderManager(configuration.dataDirectory, Thread.currentThread());
 		extractorManager = new ExtractorManager(classLoaderManager).registerWebService(builder);
-		extractorManager.registerByJsonResources();
+		extractorManager.registerServices();
 		server = builder.build();
 	}
 

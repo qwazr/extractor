@@ -17,26 +17,19 @@ package com.qwazr.extractor;
 
 import com.qwazr.classloader.ClassLoaderManager;
 import com.qwazr.server.GenericServer;
-import com.qwazr.utils.CharsetUtils;
-import com.qwazr.utils.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.core.MultivaluedHashMap;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Enumeration;
 import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class ExtractorManager {
-
-	public final static String PARSER_LIST_RESOURCE_PATH = "com/qwazr/extractor/parsers.list";
 
 	private final static Logger LOGGER = LoggerFactory.getLogger(ExtractorManager.class);
 
@@ -64,27 +57,10 @@ public class ExtractorManager {
 
 	}
 
-	public ExtractorManager registerByJsonResources(String... resourcePathes)
-			throws IOException, ClassNotFoundException {
-		if (resourcePathes == null || resourcePathes.length == 0)
-			resourcePathes = new String[] { PARSER_LIST_RESOURCE_PATH };
+	public ExtractorManager registerServices() throws IOException, ClassNotFoundException {
 		final ClassLoader classLoader =
 				classLoaderManager == null ? getClass().getClassLoader() : classLoaderManager.getClassLoader();
-		for (final String resourcePath : resourcePathes) {
-			final Enumeration<URL> parsersJson = classLoader.getResources(resourcePath);
-			if (parsersJson == null)
-				continue;
-			while (parsersJson.hasMoreElements()) {
-				final URL parserJsonUrl = parsersJson.nextElement();
-				LOGGER.info("Loading parser resource: {}", parserJsonUrl);
-				try (final InputStream in = parserJsonUrl.openStream()) {
-					final List<String> list = IOUtils.readLines(in, CharsetUtils.CharsetUTF8);
-					if (list != null)
-						for (String className : list)
-							register(className);
-				}
-			}
-		}
+		ServiceLoader.load(ParserInterface.class, classLoader).forEach(this::register);
 		return this;
 	}
 
@@ -102,12 +78,12 @@ public class ExtractorManager {
 		return service;
 	}
 
-	final public void register(Class<? extends ParserInterface> parserClass) {
+	private void register(final ParserInterface parser) {
 		Lock l = rwl.writeLock();
 		l.lock();
 		try {
+			final Class<? extends ParserInterface> parserClass = parser.getClass();
 			LOGGER.info("Registering {}", parserClass);
-			final ParserInterface parser = parserClass.newInstance();
 			namesMap.put(parser.getName(), parserClass);
 			final String[] extensions = parser.getDefaultExtensions();
 			if (extensions != null)
@@ -117,10 +93,16 @@ public class ExtractorManager {
 			if (mimeTypes != null)
 				for (String mimeType : mimeTypes)
 					mimeTypesMap.add(mimeType.intern(), parserClass);
-		} catch (InstantiationException | IllegalAccessException e) {
-			throw new RuntimeException(e);
 		} finally {
 			l.unlock();
+		}
+	}
+
+	final public void register(Class<? extends ParserInterface> parserClass) {
+		try {
+			register(parserClass.newInstance());
+		} catch (InstantiationException | IllegalAccessException e) {
+			throw new RuntimeException(e);
 		}
 	}
 
