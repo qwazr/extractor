@@ -79,6 +79,10 @@
                                                 </Specification-Version>
                                             </manifestEntries>
                                         </transformer>
+                                        <transformer
+                                                implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                            <resource>com/qwazr/extractor/parsers.list</resource>
+                                        </transformer>
                                     </transformers>
                                     <filters>
                                         <filter>

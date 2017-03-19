@@ -15,11 +15,10 @@
  */
 package com.qwazr.extractor;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.qwazr.classloader.ClassLoaderManager;
 import com.qwazr.server.GenericServer;
-import com.qwazr.utils.StringUtils;
-import com.qwazr.utils.json.JsonMapper;
+import com.qwazr.utils.CharsetUtils;
+import com.qwazr.utils.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +36,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class ExtractorManager {
 
-	public final static String PARSER_JSON_RESOURCE_PATH = "com/qwazr/extractor/parsers.json";
+	public final static String PARSER_LIST_RESOURCE_PATH = "com/qwazr/extractor/parsers.list";
 
 	private final static Logger LOGGER = LoggerFactory.getLogger(ExtractorManager.class);
 
@@ -65,13 +64,10 @@ public class ExtractorManager {
 
 	}
 
-	private final static TypeReference<List<String>> ListStringTypeRef = new TypeReference<List<String>>() {
-	};
-
 	public ExtractorManager registerByJsonResources(String... resourcePathes)
 			throws IOException, ClassNotFoundException {
 		if (resourcePathes == null || resourcePathes.length == 0)
-			resourcePathes = new String[] { PARSER_JSON_RESOURCE_PATH };
+			resourcePathes = new String[] { PARSER_LIST_RESOURCE_PATH };
 		final ClassLoader classLoader =
 				classLoaderManager == null ? getClass().getClassLoader() : classLoaderManager.getClassLoader();
 		for (final String resourcePath : resourcePathes) {
@@ -82,7 +78,7 @@ public class ExtractorManager {
 				final URL parserJsonUrl = parsersJson.nextElement();
 				LOGGER.info("Loading parser resource: {}", parserJsonUrl);
 				try (final InputStream in = parserJsonUrl.openStream()) {
-					final List<String> list = JsonMapper.MAPPER.readValue(in, ListStringTypeRef);
+					final List<String> list = IOUtils.readLines(in, CharsetUtils.CharsetUTF8);
 					if (list != null)
 						for (String className : list)
 							register(className);
