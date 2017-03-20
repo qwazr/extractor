@@ -34,11 +34,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.ibm.icu</groupId>
-            <artifactId>icu4j</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>net.sf.jmimemagic</groupId>
             <artifactId>jmimemagic</artifactId>
             <version>0.1.4</version>
@@ -46,6 +41,14 @@
                 <exclusion>
                     <artifactId>log4j</artifactId>
                     <groupId>log4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-io</artifactId>
+                    <groupId>commons-io</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-logging</artifactId>
+                    <groupId>commons-logging</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -60,6 +63,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-shade-plugin</artifactId>
+                        <version>${shade.version}</version>
                         <executions>
                             <execution>
                                 <goals>
