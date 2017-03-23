@@ -35,13 +35,14 @@ public class ExtractorServer implements BaseServer {
 	private ExtractorServer(final ServerConfiguration configuration)
 			throws IOException, URISyntaxException, ClassNotFoundException {
 		final ExecutorService executorService = Executors.newCachedThreadPool();
+		final ClassLoaderManager classLoaderManager =
+				new ClassLoaderManager(configuration.dataDirectory, Thread.currentThread());
 		final GenericServer.Builder builder =
-				GenericServer.of(configuration, executorService).webService(WelcomeShutdownService.class);
+				GenericServer.of(configuration, executorService, classLoaderManager.getClassLoader())
+						.webService(WelcomeShutdownService.class);
 		new ClusterManager(executorService, configuration).registerHttpClientMonitoringThread(builder)
 				.registerProtocolListener(builder)
 				.registerWebService(builder);
-		final ClassLoaderManager classLoaderManager =
-				new ClassLoaderManager(configuration.dataDirectory, Thread.currentThread());
 		extractorManager = new ExtractorManager(classLoaderManager).registerWebService(builder);
 		extractorManager.registerServices();
 		server = builder.build();
