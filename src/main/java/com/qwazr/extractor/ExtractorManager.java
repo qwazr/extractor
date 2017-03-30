@@ -15,8 +15,8 @@
  */
 package com.qwazr.extractor;
 
-import com.qwazr.classloader.ClassLoaderManager;
 import com.qwazr.server.GenericServer;
+import com.qwazr.utils.ClassLoaderUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,11 +43,7 @@ public class ExtractorManager {
 
 	private final ExtractorServiceInterface service;
 
-	private final ClassLoaderManager classLoaderManager;
-
-	public ExtractorManager(final ClassLoaderManager classLoaderManager) {
-
-		this.classLoaderManager = classLoaderManager;
+	public ExtractorManager() {
 
 		namesMap = new LinkedHashMap<>();
 		mimeTypesMap = new MultivaluedHashMap<>();
@@ -58,9 +54,8 @@ public class ExtractorManager {
 	}
 
 	public ExtractorManager registerServices() throws IOException, ClassNotFoundException {
-		final ClassLoader classLoader =
-				classLoaderManager == null ? getClass().getClassLoader() : classLoaderManager.getClassLoader();
-		ServiceLoader.load(ParserInterface.class, classLoader).forEach(this::register);
+		ServiceLoader.load(ParserInterface.class, Thread.currentThread().getContextClassLoader())
+				.forEach(this::register);
 		return this;
 	}
 
@@ -107,9 +102,7 @@ public class ExtractorManager {
 	}
 
 	final public void register(String className) throws ClassNotFoundException {
-		register((Class<? extends ParserInterface>) (classLoaderManager == null ?
-				Class.forName(className) :
-				classLoaderManager.findClass(className)));
+		register(ClassLoaderUtils.findClass(className));
 	}
 
 	final public Class<? extends ParserInterface> findParserClassByName(String parserName) {

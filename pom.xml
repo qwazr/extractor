@@ -28,12 +28,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.qwazr</groupId>
-            <artifactId>qwazr-compiler</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>xml-apis</groupId>
             <artifactId>xml-apis</artifactId>
             <version>1.4.01</version>
