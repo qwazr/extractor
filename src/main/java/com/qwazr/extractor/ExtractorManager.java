@@ -65,7 +65,7 @@ public class ExtractorManager {
 	}
 
 	public ExtractorManager registerWebService(final GenericServer.Builder builder) {
-		builder.webService(ExtractorServiceImpl.class);
+		builder.singletons(service);
 		return registerContextAttribute(builder);
 	}
 
