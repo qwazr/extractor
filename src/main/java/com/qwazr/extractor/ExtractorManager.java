@@ -15,6 +15,7 @@
  */
 package com.qwazr.extractor;
 
+import com.qwazr.server.ApplicationBuilder;
 import com.qwazr.server.GenericServer;
 import com.qwazr.utils.ClassLoaderUtils;
 import org.slf4j.Logger;
@@ -64,9 +65,9 @@ public class ExtractorManager {
 		return this;
 	}
 
-	public ExtractorManager registerWebService(final GenericServer.Builder builder) {
+	public ExtractorManager registerWebService(final ApplicationBuilder builder) {
 		builder.singletons(service);
-		return registerContextAttribute(builder);
+		return this;
 	}
 
 	public ExtractorServiceInterface getService() {
