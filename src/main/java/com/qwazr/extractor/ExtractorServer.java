@@ -48,11 +48,10 @@ public class ExtractorServer implements BaseServer {
 		final ApplicationBuilder webServices = ApplicationBuilder.of("/*").classes(RestApplication.JSON_CLASSES).
 				singletons(new WelcomeShutdownService());
 
-		final ClusterManager clusterManager =
-				new ClusterManager(executorService, configuration).registerHttpClientMonitoringThread(builder)
-						.registerProtocolListener(builder, services)
-						.registerContextAttribute(builder)
-						.registerWebService(webServices);
+		new ClusterManager(executorService, configuration).registerHttpClientMonitoringThread(builder)
+				.registerProtocolListener(builder, services)
+				.registerContextAttribute(builder)
+				.registerWebService(webServices);
 
 		extractorManager = new ExtractorManager().registerContextAttribute(builder).registerWebService(webServices);
 		extractorManager.registerServices();
