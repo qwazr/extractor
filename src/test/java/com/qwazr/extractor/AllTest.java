@@ -42,7 +42,7 @@ public class AllTest extends ParserTest {
 
 	@Test
 	public void numberOfParsers() {
-		Assert.assertEquals(3, manager.getList().size());
+		Assert.assertFalse(manager.getList().isEmpty());
 	}
 
 	@Test
