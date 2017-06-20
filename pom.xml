@@ -1,30 +1,30 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>qwazr-extractor</artifactId>
-    <version>1.2.0-SNAPSHOT</version>
+    <version>1.2.0</version>
     <name>QWAZR Extractor</name>
     <packaging>jar</packaging>
 
     <parent>
         <groupId>com.qwazr</groupId>
         <artifactId>qwazr-parent</artifactId>
-        <version>1.2.0-SNAPSHOT</version>
+        <version>1.2.0</version>
     </parent>
 
     <scm>
         <connection>scm:git:git@github.com:qwazr/extractor.git</connection>
         <developerConnection>scm:git:git@github.com:qwazr/extractor.git</developerConnection>
         <url>git@github.com:qwazr/extractor.git</url>
-    </scm>
+      <tag>v1.2.0</tag>
+  </scm>
 
     <dependencies>
 
         <dependency>
             <groupId>com.qwazr</groupId>
             <artifactId>qwazr-cluster</artifactId>
-            <version>${project.version}</version>
+            <version>1.2.0</version>
         </dependency>
 
         <dependency>
@@ -93,8 +93,7 @@
                                     <shadedArtifactAttached>true</shadedArtifactAttached>
                                     <shadedClassifierName>exec</shadedClassifierName>
                                     <transformers>
-                                        <transformer
-                                                implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                             <manifestEntries>
                                                 <Main-Class>com.qwazr.extractor.ExtractorServer</Main-Class>
                                                 <Implementation-Version>${project.version}-${buildNumber}
@@ -103,8 +102,7 @@
                                                 </Specification-Version>
                                             </manifestEntries>
                                         </transformer>
-                                        <transformer
-                                                implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
                                     </transformers>
                                     <filters>
                                         <filter>
