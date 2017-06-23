@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2015-2017 Emmanuel Keller / QWAZR
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,8 +18,7 @@ package com.qwazr.extractor;
 import com.qwazr.server.ApplicationBuilder;
 import com.qwazr.server.GenericServer;
 import com.qwazr.utils.ClassLoaderUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.qwazr.utils.LoggerUtils;
 
 import javax.ws.rs.core.MultivaluedHashMap;
 import java.io.IOException;
@@ -29,10 +28,11 @@ import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.logging.Logger;
 
 public class ExtractorManager {
 
-	private final static Logger LOGGER = LoggerFactory.getLogger(ExtractorManager.class);
+	private final static Logger LOGGER = LoggerUtils.getLogger(ExtractorManager.class);
 
 	private final ReadWriteLock rwl = new ReentrantReadWriteLock();
 
@@ -55,8 +55,8 @@ public class ExtractorManager {
 	}
 
 	public ExtractorManager registerServices() throws IOException, ClassNotFoundException {
-		ServiceLoader.load(ParserInterface.class, Thread.currentThread().getContextClassLoader())
-				.forEach(this::register);
+		ServiceLoader.load(ParserInterface.class, Thread.currentThread().getContextClassLoader()).forEach(
+				this::register);
 		return this;
 	}
 
@@ -79,7 +79,7 @@ public class ExtractorManager {
 		l.lock();
 		try {
 			final Class<? extends ParserInterface> parserClass = parser.getClass();
-			LOGGER.info("Registering {}", parserClass);
+			LOGGER.info(() -> "Registering " + parserClass);
 			namesMap.put(parser.getName(), parserClass);
 			final String[] extensions = parser.getDefaultExtensions();
 			if (extensions != null)

@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>qwazr-extractor</artifactId>
@@ -16,8 +17,8 @@
         <connection>scm:git:git@github.com:qwazr/extractor.git</connection>
         <developerConnection>scm:git:git@github.com:qwazr/extractor.git</developerConnection>
         <url>git@github.com:qwazr/extractor.git</url>
-      <tag>HEAD</tag>
-  </scm>
+        <tag>HEAD</tag>
+    </scm>
 
     <dependencies>
 
@@ -48,7 +49,7 @@
         <dependency>
             <groupId>net.sf.jmimemagic</groupId>
             <artifactId>jmimemagic</artifactId>
-            <version>0.1.4</version>
+            <version>0.1.5</version>
             <exclusions>
                 <exclusion>
                     <artifactId>log4j</artifactId>
@@ -93,7 +94,8 @@
                                     <shadedArtifactAttached>true</shadedArtifactAttached>
                                     <shadedClassifierName>exec</shadedClassifierName>
                                     <transformers>
-                                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                        <transformer
+                                                implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                             <manifestEntries>
                                                 <Main-Class>com.qwazr.extractor.ExtractorServer</Main-Class>
                                                 <Implementation-Version>${project.version}-${buildNumber}
@@ -102,7 +104,8 @@
                                                 </Specification-Version>
                                             </manifestEntries>
                                         </transformer>
-                                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+                                        <transformer
+                                                implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                                     </transformers>
                                     <filters>
                                         <filter>

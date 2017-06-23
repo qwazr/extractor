@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2015-2017 Emmanuel Keller / QWAZR
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +18,7 @@ package com.qwazr.extractor;
 import com.qwazr.server.AbstractServiceImpl;
 import com.qwazr.server.ServerException;
 import com.qwazr.utils.IOUtils;
+import com.qwazr.utils.LoggerUtils;
 import com.qwazr.utils.StringUtils;
 import net.sf.jmimemagic.Magic;
 import net.sf.jmimemagic.MagicException;
@@ -25,8 +26,6 @@ import net.sf.jmimemagic.MagicMatch;
 import net.sf.jmimemagic.MagicMatchNotFoundException;
 import net.sf.jmimemagic.MagicParseException;
 import org.apache.commons.io.FilenameUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.ws.rs.core.MultivaluedMap;
@@ -36,10 +35,11 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.logging.Logger;
 
 final class ExtractorServiceImpl extends AbstractServiceImpl implements ExtractorServiceInterface {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ExtractorServiceImpl.class);
+	private static final Logger LOGGER = LoggerUtils.getLogger(ExtractorServiceImpl.class);
 
 	private volatile ExtractorManager extractorManager;
 

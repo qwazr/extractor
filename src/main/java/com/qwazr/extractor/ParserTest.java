@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2015-2017 Emmanuel Keller
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,11 +15,10 @@
  */
 package com.qwazr.extractor;
 
+import com.qwazr.utils.LoggerUtils;
 import com.qwazr.utils.StringUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.core.UriInfo;
 import java.io.File;
@@ -28,10 +27,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Map;
+import java.util.logging.Logger;
 
 public class ParserTest {
 
-	static final Logger LOGGER = LoggerFactory.getLogger(ParserTest.class);
+	static final Logger LOGGER = LoggerUtils.getLogger(ParserTest.class);
 
 	protected final ExtractorManager manager;
 	protected final ExtractorServiceInterface service;
@@ -52,8 +52,8 @@ public class ParserTest {
 	 */
 	protected ParserInterface createRegisterInstance(Class<? extends ParserAbstract> className)
 			throws InstantiationException, IllegalAccessException, IOException {
-		Class<? extends ParserInterface> parserClass =
-				manager.findParserClassByName(StringUtils.removeEnd(className.getSimpleName(), "Parser").toLowerCase());
+		Class<? extends ParserInterface> parserClass = manager.findParserClassByName(
+				StringUtils.removeEnd(className.getSimpleName(), "Parser").toLowerCase());
 		assert (parserClass != null);
 		return parserClass.newInstance();
 	}
