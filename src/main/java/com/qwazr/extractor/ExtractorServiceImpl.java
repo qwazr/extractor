@@ -27,7 +27,6 @@ import net.sf.jmimemagic.MagicMatchNotFoundException;
 import net.sf.jmimemagic.MagicParseException;
 import org.apache.commons.io.FilenameUtils;
 
-import javax.annotation.PostConstruct;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
@@ -41,19 +40,10 @@ final class ExtractorServiceImpl extends AbstractServiceImpl implements Extracto
 
 	private static final Logger LOGGER = LoggerUtils.getLogger(ExtractorServiceImpl.class);
 
-	private volatile ExtractorManager extractorManager;
+	private final ExtractorManager extractorManager;
 
 	ExtractorServiceImpl(ExtractorManager extractorManager) {
 		this.extractorManager = extractorManager;
-	}
-
-	public ExtractorServiceImpl() {
-		this(null);
-	}
-
-	@PostConstruct
-	public void init() {
-		extractorManager = getContextAttribute(ExtractorManager.class);
 	}
 
 	@Override
@@ -67,7 +57,7 @@ final class ExtractorServiceImpl extends AbstractServiceImpl implements Extracto
 				throw new ServerException(Status.NOT_FOUND, "No parser found.");
 			return parserClass.newInstance();
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | SecurityException e) {
-			throw new ServerException(e);
+			throw ServerException.of(e);
 		}
 	}
 
