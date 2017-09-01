@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2015-2017 Emmanuel Keller / QWAZR
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -48,8 +48,7 @@ public class ExtractorServer implements BaseServer {
 		final ApplicationBuilder webServices = ApplicationBuilder.of("/*").classes(RestApplication.JSON_CLASSES).
 				singletons(new WelcomeShutdownService());
 
-		new ClusterManager(executorService, configuration).registerHttpClientMonitoringThread(builder)
-				.registerProtocolListener(builder, services)
+		new ClusterManager(executorService, configuration).registerProtocolListener(builder, services)
 				.registerContextAttribute(builder)
 				.registerWebService(webServices);
 
