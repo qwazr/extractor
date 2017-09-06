@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2015-2017 Emmanuel Keller / QWAZR
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,12 +31,14 @@ public class RtfParser extends ParserAbstract {
 
 	private static final String[] DEFAULT_EXTENSIONS = { "rtf", "rtx" };
 
+	final private static ParserField TITLE = ParserField.newString("title", "The optional title of the document");
+
 	final private static ParserField CONTENT = ParserField.newString("content", "The content of the document");
 
 	final private static ParserField LANG_DETECTION =
 			ParserField.newString("lang_detection", "Detection of the language");
 
-	final private static ParserField[] FIELDS = { CONTENT, LANG_DETECTION };
+	final private static ParserField[] FIELDS = { TITLE, CONTENT, LANG_DETECTION };
 
 	@Override
 	public ParserField[] getParameters() {
@@ -69,6 +71,8 @@ public class RtfParser extends ParserAbstract {
 
 		// Obtain a new parser document.
 		final ParserFieldsBuilder result = resultBuilder.newDocument();
+
+		result.add(TITLE, doc.getProperty(Document.TitleProperty));
 
 		// Fill the field of the ParserDocument
 		result.add(CONTENT, doc.getText(0, doc.getLength()));

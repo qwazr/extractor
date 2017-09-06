@@ -52,8 +52,8 @@ public class ParserTest {
 	 */
 	protected ParserInterface createRegisterInstance(Class<? extends ParserAbstract> className)
 			throws InstantiationException, IllegalAccessException, IOException {
-		Class<? extends ParserInterface> parserClass = manager.findParserClassByName(
-				StringUtils.removeEnd(className.getSimpleName(), "Parser").toLowerCase());
+		Class<? extends ParserInterface> parserClass =
+				manager.findParserClassByName(StringUtils.removeEnd(className.getSimpleName(), "Parser").toLowerCase());
 		assert (parserClass != null);
 		return parserClass.newInstance();
 	}
@@ -127,7 +127,7 @@ public class ParserTest {
 	 * @param keyValueParams
 	 * @throws Exception
 	 */
-	protected void doTest(Class<? extends ParserAbstract> className, String fileName, String testString,
+	protected ParserResult doTest(Class<? extends ParserAbstract> className, String fileName, String testString,
 			String... keyValueParams) throws Exception {
 		LOGGER.info("Testing " + className);
 
@@ -156,7 +156,7 @@ public class ParserTest {
 
 		// No magic to test if the parser doesn't support detection
 		if (parser.getDefaultMimeTypes() == null && parser.getDefaultExtensions() == null)
-			return;
+			return parserResult;
 
 		// Test stream with magic mime service
 		parserResult = service.putMagic(uriInfo, fileName, null, null, getStream(fileName));
@@ -167,6 +167,8 @@ public class ParserTest {
 		parserResult = service.putMagic(uriInfo, fileName, tempFile.getAbsolutePath(), null, null);
 		assert (parserResult != null);
 		checkContainsText(parserResult, testString);
+
+		return parserResult;
 	}
 
 }

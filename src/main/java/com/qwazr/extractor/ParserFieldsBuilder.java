@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2015-2017 Emmanuel Keller
  * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,29 +16,13 @@
 package com.qwazr.extractor;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 
 final public class ParserFieldsBuilder {
 
 	LinkedHashMap<String, Object> fields;
-
-	private void checkFields() {
-		if (fields == null)
-			fields = new LinkedHashMap<>();
-	}
-
-	private List<Object> getList(final ParserField field, final Object value) {
-		if (value == null || field == null)
-			return null;
-		checkFields();
-		List<Object> values = (ArrayList<Object>) fields.get(field.name);
-		if (values == null) {
-			values = new ArrayList<>(1);
-			fields.put(field.name, values);
-		}
-		return values;
-	}
 
 	/**
 	 * Add a field/value pair to the document
@@ -47,10 +31,15 @@ final public class ParserFieldsBuilder {
 	 * @param value any value
 	 */
 	public void add(final ParserField field, final Object value) {
-		final List<Object> values = getList(field, value);
-		if (values == null)
+		if (value == null)
 			return;
-		values.add(value);
+		if (fields == null)
+			fields = new LinkedHashMap<>();
+		final List<Object> values = (List<Object>) fields.computeIfAbsent(field.name, f -> new ArrayList<>(1));
+		if (value instanceof Collection)
+			values.addAll((Collection) value);
+		else
+			values.add(value);
 	}
 
 	/**
@@ -60,8 +49,9 @@ final public class ParserFieldsBuilder {
 	 * @param value any value
 	 */
 	public void set(final ParserField field, final Object value) {
-		checkFields();
+		if (fields == null)
+			fields = new LinkedHashMap<>();
 		fields.put(field.name, value);
 	}
-	
+
 }

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2015-2017 Emmanuel Keller
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,32 +15,37 @@
  */
 package com.qwazr.extractor;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonInclude(Include.NON_EMPTY)
 public class ParserDefinition {
 
 	public final ParserField[] returnedFields;
 
-	public final String[] file_extensions;
+	public final String[] fileExtensions;
 
-	public final String[] mime_types;
+	public final String[] mimeTypes;
 
-	public ParserDefinition() {
-		returnedFields = null;
-		file_extensions = null;
-		mime_types = null;
+	@JsonCreator
+	ParserDefinition(@JsonProperty("returned_fields") final ParserField[] returnedFields,
+			@JsonProperty("file_extensions") final String[] fileExtensions,
+			@JsonProperty("mime_types") final String[] mimeTypes) {
+		this.returnedFields = returnedFields;
+		this.fileExtensions = fileExtensions;
+		this.mimeTypes = mimeTypes;
 	}
 
 	public ParserDefinition(ParserInterface parser) {
-		ParserField[] parameters = parser.getParameters();
-		ParserField[] getParserFields = new ParserField[parameters == null ? 1 : 1 + parameters.length];
+		final ParserField[] parameters = parser.getParameters();
+		final ParserField[] getParserFields = new ParserField[parameters == null ? 1 : 1 + parameters.length];
 		getParserFields[0] = ParserField.newString("path", "path to the local file");
 		if (parameters != null)
 			System.arraycopy(parameters, 0, getParserFields, 1, parameters.length);
 		returnedFields = parser.getFields();
-		file_extensions = parser.getDefaultExtensions();
-		mime_types = parser.getDefaultMimeTypes();
+		fileExtensions = parser.getDefaultExtensions();
+		mimeTypes = parser.getDefaultMimeTypes();
 	}
 }
