@@ -16,7 +16,7 @@
 package com.qwazr.extractor;
 
 import com.qwazr.server.ApplicationBuilder;
-import com.qwazr.server.GenericServer;
+import com.qwazr.server.GenericServerBuilder;
 import com.qwazr.utils.ClassLoaderUtils;
 import com.qwazr.utils.LoggerUtils;
 
@@ -55,12 +55,12 @@ public class ExtractorManager {
 	}
 
 	public ExtractorManager registerServices() throws IOException, ClassNotFoundException {
-		ServiceLoader.load(ParserInterface.class, Thread.currentThread().getContextClassLoader()).forEach(
-				this::register);
+		ServiceLoader.load(ParserInterface.class, Thread.currentThread().getContextClassLoader())
+				.forEach(this::register);
 		return this;
 	}
 
-	public ExtractorManager registerContextAttribute(final GenericServer.Builder builder) {
+	public ExtractorManager registerContextAttribute(final GenericServerBuilder builder) {
 		builder.contextAttribute(this);
 		return this;
 	}
