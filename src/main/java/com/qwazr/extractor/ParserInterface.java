@@ -18,9 +18,10 @@ package com.qwazr.extractor;
 import org.apache.commons.io.FilenameUtils;
 
 import javax.ws.rs.core.MultivaluedMap;
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.BufferedInputStream;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public interface ParserInterface {
 
@@ -74,18 +75,19 @@ public interface ParserInterface {
 	 * Read a document and fill the resultBuilder.
 	 *
 	 * @param parameters    The optional parameters of the parser
-	 * @param file          the file instance of the document to parse
+	 * @param filePath      the path of the file instance of the document to parse
 	 * @param extension     an optional extension of the file
 	 * @param mimeType      an optional mime type of the file
 	 * @param resultBuilder the result builder to fill
 	 * @throws Exception if any error occurs
 	 */
-	default void parseContent(final MultivaluedMap<String, String> parameters, final File file, String extension,
+	default void parseContent(final MultivaluedMap<String, String> parameters, final Path filePath, String extension,
 			final String mimeType, final ParserResultBuilder resultBuilder) throws Exception {
 		if (extension == null)
-			extension = FilenameUtils.getExtension(file.getName());
-		try (final InputStream is = new FileInputStream(file)) {
-			parseContent(parameters, is, extension, mimeType, resultBuilder);
+			extension = FilenameUtils.getExtension(filePath.getFileName().toString());
+		try (final InputStream in = Files.newInputStream(filePath);
+				final BufferedInputStream bIn = new BufferedInputStream(in);) {
+			parseContent(parameters, bIn, extension, mimeType, resultBuilder);
 		}
 	}
 

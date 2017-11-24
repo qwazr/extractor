@@ -20,10 +20,12 @@ import com.qwazr.utils.StringUtils;
 import org.apache.commons.io.IOUtils;
 
 import javax.ws.rs.core.MultivaluedMap;
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 public abstract class ParserAbstract implements ParserInterface {
@@ -51,11 +53,12 @@ public abstract class ParserAbstract implements ParserInterface {
 		return name;
 	}
 
-	protected static File createTempFile(final InputStream inputStream, final String extension) throws IOException {
-		final File tempFile = File.createTempFile("oss-extractor", extension);
-		try (final FileOutputStream fos = new FileOutputStream(tempFile)) {
-			IOUtils.copy(inputStream, fos);
-			fos.close();
+	protected static Path createTempFile(final InputStream inputStream, final String extension) throws IOException {
+		final Path tempFile = Files.createTempFile("oss-extractor", extension);
+		try (final OutputStream out = Files.newOutputStream(tempFile);
+				final BufferedOutputStream bOut = new BufferedOutputStream(out);) {
+			IOUtils.copy(inputStream, bOut);
+			bOut.close();
 			return tempFile;
 		}
 	}

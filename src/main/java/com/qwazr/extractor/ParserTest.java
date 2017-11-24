@@ -21,10 +21,12 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 
 import javax.ws.rs.core.UriInfo;
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -64,11 +66,13 @@ public class ParserTest {
 		return inputStream;
 	}
 
-	protected File getTempFile(String fileName) throws IOException {
-		File tempFile = File.createTempFile("oss_extractor", "." + FilenameUtils.getExtension(fileName));
-		FileOutputStream fos = new FileOutputStream(tempFile);
-		InputStream inputStream = getStream(fileName);
-		IOUtils.copy(inputStream, fos);
+	protected Path getTempFile(String fileName) throws IOException {
+		Path tempFile = Files.createTempFile("oss_extractor", "." + FilenameUtils.getExtension(fileName));
+		try (final OutputStream out = Files.newOutputStream(tempFile);
+				final BufferedOutputStream bOut = new BufferedOutputStream(out);) {
+			InputStream inputStream = getStream(fileName);
+			IOUtils.copy(inputStream, bOut);
+		}
 		return tempFile;
 	}
 
@@ -136,7 +140,7 @@ public class ParserTest {
 		// Test service name
 		assert service.list().contains(StringUtils.removeEnd(className.getSimpleName(), "Parser").toLowerCase());
 
-		File tempFile = getTempFile(fileName);
+		Path tempFile = getTempFile(fileName);
 
 		// Test stream
 		ParserInterface parser = createRegisterInstance(className);
@@ -164,7 +168,7 @@ public class ParserTest {
 		checkContainsText(parserResult, testString);
 
 		// Test path with magic mime service
-		parserResult = service.putMagic(uriInfo, fileName, tempFile.getAbsolutePath(), null, null);
+		parserResult = service.putMagic(uriInfo, fileName, tempFile.toAbsolutePath().toString(), null, null);
 		assert (parserResult != null);
 		checkContainsText(parserResult, testString);
 

@@ -1,5 +1,5 @@
-/**
- * Copyright 2014-2016 Emmanuel Keller / QWAZR
+/*
+ * Copyright 2014-2017 Emmanuel Keller / QWAZR
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,9 @@ import javax.imageio.ImageReader;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.stream.ImageInputStream;
 import javax.ws.rs.core.MultivaluedMap;
-import java.io.File;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Iterator;
 
 public class ImageParser extends ParserAbstract {
@@ -99,10 +100,10 @@ public class ImageParser extends ParserAbstract {
 	}
 
 	@Override
-	public void parseContent(final MultivaluedMap<String, String> parameters, final File file, final String extension,
+	public void parseContent(final MultivaluedMap<String, String> parameters, final Path path, final String extension,
 			final String mimeType, final ParserResultBuilder resultBuilder) throws Exception {
 		final ImagePHash imgPhash = new ImagePHash();
-		try (final ImageInputStream in = ImageIO.createImageInputStream(file)) {
+		try (final ImageInputStream in = ImageIO.createImageInputStream(path.toFile())) {
 			final Iterator<ImageReader> readers = ImageIO.getImageReaders(in);
 			if (readers.hasNext()) {
 				ParserFieldsBuilder result = resultBuilder.newDocument();
@@ -130,11 +131,11 @@ public class ImageParser extends ParserAbstract {
 	@Override
 	public void parseContent(final MultivaluedMap<String, String> parameters, final InputStream inputStream,
 			final String extension, final String mimeType, final ParserResultBuilder resultBuilder) throws Exception {
-		File tempFile = ParserAbstract.createTempFile(inputStream, extension == null ? "image" : "." + extension);
+		final Path tempFile = ParserAbstract.createTempFile(inputStream, extension == null ? "image" : "." + extension);
 		try {
 			parseContent(parameters, tempFile, extension, mimeType, resultBuilder);
 		} finally {
-			tempFile.delete();
+			Files.deleteIfExists(tempFile);
 		}
 	}
 }
