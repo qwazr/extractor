@@ -94,7 +94,7 @@ public class ParserResult {
 	public Object getDocumentFieldValues(int documentPos, String fieldName) {
 		if (documents == null || documentPos >= documents.size())
 			return null;
-		LinkedHashMap<String, Object> fields = documents.get(documentPos);
+		final LinkedHashMap<String, Object> fields = documents.get(documentPos);
 		return fields == null ? null : fields.get(fieldName);
 	}
 }

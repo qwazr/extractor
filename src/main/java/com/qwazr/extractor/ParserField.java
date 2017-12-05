@@ -1,5 +1,5 @@
-/**
- * Copyright 2014-2016 Emmanuel Keller / QWAZR
+/*
+ * Copyright 2014-2017 Emmanuel Keller / QWAZR
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import java.io.Serializable;
-import java.util.Comparator;
 
 @JsonInclude(Include.NON_EMPTY)
 public class ParserField implements Serializable {
@@ -65,16 +64,4 @@ public class ParserField implements Serializable {
 		STRING, INTEGER, DATE, MAP
 	}
 
-	private static class ParserFieldComparator implements Comparator<ParserField> {
-
-		@Override
-		public int compare(ParserField o1, ParserField o2) {
-			return o1.name.compareTo(o2.name);
-		}
-	}
-
-	/*
-	 * Use to sort the field by name
-	 */
-	public final static ParserFieldComparator COMPARATOR = new ParserFieldComparator();
 }

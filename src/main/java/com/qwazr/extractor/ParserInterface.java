@@ -25,6 +25,14 @@ import java.nio.file.Path;
 
 public interface ParserInterface {
 
+	ParserField TITLE = ParserField.newString("title", "The optional title of the document");
+
+	ParserField CONTENT = ParserField.newString("content", "The content of the document");
+
+	ParserField LANG_DETECTION = ParserField.newString("lang_detection", "Detection of the language");
+
+	ParserField MIME_TYPE = ParserField.newString("mime_type", "The mime type of the file");
+
 	/**
 	 * @return the parser name
 	 */

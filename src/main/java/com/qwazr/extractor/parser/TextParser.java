@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2015-2017 Emmanuel Keller / QWAZR
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,11 +35,6 @@ public class TextParser extends ParserAbstract {
 
 	private static final String[] DEFAULT_EXTENSIONS = { "txt" };
 
-	final private static ParserField CONTENT = ParserField.newString("content", "The content of the document");
-
-	final private static ParserField LANG_DETECTION =
-			ParserField.newString("lang_detection", "Detection of the language");
-
 	final private static ParserField CHARSET_DETECTION =
 			ParserField.newString("charset_detection", "Detection of the charset");
 
@@ -68,6 +63,8 @@ public class TextParser extends ParserAbstract {
 	@Override
 	public void parseContent(final MultivaluedMap<String, String> parameters, final InputStream inputStream,
 			String extension, final String mimeType, final ParserResultBuilder resultBuilder) throws IOException {
+
+		resultBuilder.metas().set(MIME_TYPE, DEFAULT_MIMETYPES[0]);
 
 		// Trying to detect the CHARSET of the stream
 		final CharsetDetector detector = new CharsetDetector();

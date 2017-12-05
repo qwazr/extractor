@@ -102,12 +102,14 @@ public class ImageParser extends ParserAbstract {
 	@Override
 	public void parseContent(final MultivaluedMap<String, String> parameters, final Path path, final String extension,
 			final String mimeType, final ParserResultBuilder resultBuilder) throws Exception {
+
 		final ImagePHash imgPhash = new ImagePHash();
 		try (final ImageInputStream in = ImageIO.createImageInputStream(path.toFile())) {
 			final Iterator<ImageReader> readers = ImageIO.getImageReaders(in);
 			if (readers.hasNext()) {
 				ParserFieldsBuilder result = resultBuilder.newDocument();
 				ImageReader reader = readers.next();
+				resultBuilder.metas().set(MIME_TYPE, "image/" + reader.getFormatName().toLowerCase());
 				try {
 					reader.setInput(in);
 					result.add(WIDTH, reader.getWidth(0));

@@ -123,6 +123,14 @@ public class ParserTest {
 		assert false;
 	}
 
+	protected void checkIsMimeType(ParserResult result, String expectedMimeType) {
+		assert result != null;
+		assert result.metas != null;
+		final Object mimeType = result.metas.get("mime_type");
+		assert mimeType != null;
+		assert mimeType.equals(expectedMimeType);
+	}
+
 	/**
 	 * Test inputstream and file parsing
 	 *
@@ -131,8 +139,8 @@ public class ParserTest {
 	 * @param keyValueParams
 	 * @throws Exception
 	 */
-	protected ParserResult doTest(Class<? extends ParserAbstract> className, String fileName, String testString,
-			String... keyValueParams) throws Exception {
+	protected ParserResult doTest(Class<? extends ParserAbstract> className, String fileName, String expectedMimeType,
+			String testString, String... keyValueParams) throws Exception {
 		LOGGER.info("Testing " + className);
 
 		final UriInfo uriInfo = new UriInfoMock(keyValueParams);
@@ -149,6 +157,9 @@ public class ParserTest {
 				null, resultBuilder);
 		ParserResult parserResult = resultBuilder.build();
 		assert (parserResult != null);
+
+		checkIsMimeType(parserResult, expectedMimeType);
+
 		checkContainsText(parserResult, testString);
 
 		// Test file

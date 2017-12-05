@@ -47,32 +47,32 @@ public class AllTest extends ParserTest {
 
 	@Test
 	public void testImageGif() throws Exception {
-		doTest(ImageParser.class, "file.gif", DEFAULT_TEST_STRING);
+		doTest(ImageParser.class, "file.gif", "image/gif", DEFAULT_TEST_STRING);
 	}
 
 	@Test
 	public void testImageJpg() throws Exception {
-		doTest(ImageParser.class, "file.jpg", DEFAULT_TEST_STRING);
+		doTest(ImageParser.class, "file.jpg", "image/jpeg", DEFAULT_TEST_STRING);
 	}
 
 	@Test
 	public void testImagePng() throws Exception {
-		doTest(ImageParser.class, "file.png", DEFAULT_TEST_STRING);
+		doTest(ImageParser.class, "file.png", "image/png", DEFAULT_TEST_STRING);
 	}
 
 	//TODO tiff disabled
 	public void testImageTiff() throws Exception {
-		doTest(ImageParser.class, "file.tiff", DEFAULT_TEST_STRING);
+		doTest(ImageParser.class, "file.tiff", "image/tif", DEFAULT_TEST_STRING);
 	}
 
 	@Test
 	public void testRtf() throws Exception {
-		doTest(RtfParser.class, "file.rtf", DEFAULT_TEST_STRING);
+		doTest(RtfParser.class, "file.rtf", "application/rtf", DEFAULT_TEST_STRING);
 	}
 
 	@Test
 	public void testText() throws Exception {
-		doTest(TextParser.class, "file.txt", DEFAULT_TEST_STRING);
+		doTest(TextParser.class, "file.txt", "text/plain", DEFAULT_TEST_STRING);
 	}
 
 }

@@ -31,13 +31,6 @@ public class RtfParser extends ParserAbstract {
 
 	private static final String[] DEFAULT_EXTENSIONS = { "rtf", "rtx" };
 
-	final private static ParserField TITLE = ParserField.newString("title", "The optional title of the document");
-
-	final private static ParserField CONTENT = ParserField.newString("content", "The content of the document");
-
-	final private static ParserField LANG_DETECTION =
-			ParserField.newString("lang_detection", "Detection of the language");
-
 	final private static ParserField[] FIELDS = { TITLE, CONTENT, LANG_DETECTION };
 
 	@Override
@@ -68,6 +61,8 @@ public class RtfParser extends ParserAbstract {
 		final RTFEditorKit rtf = new RTFEditorKit();
 		final Document doc = rtf.createDefaultDocument();
 		rtf.read(inputStream, doc, 0);
+
+		resultBuilder.metas().set(MIME_TYPE, DEFAULT_MIMETYPES[0]);
 
 		// Obtain a new parser document.
 		final ParserFieldsBuilder result = resultBuilder.newDocument();
