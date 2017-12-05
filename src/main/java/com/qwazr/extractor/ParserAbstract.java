@@ -27,6 +27,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.function.Function;
 
 public abstract class ParserAbstract implements ParserInterface {
 
@@ -34,6 +35,30 @@ public abstract class ParserAbstract implements ParserInterface {
 
 	protected ParserAbstract() {
 		name = StringUtils.removeEnd(this.getClass().getSimpleName(), "Parser").toLowerCase();
+	}
+
+	protected String findMimeType(final String extension, final String mimeType,
+			final Function<String, String> extensionToMimeType) {
+		if (mimeType != null)
+			return mimeType;
+		if (extension == null)
+			return null;
+		return extensionToMimeType.apply(extension);
+	}
+
+	protected String findMimeTypeUsingDefault(String extension) {
+		final String[] extensions = getDefaultExtensions();
+		final String[] mimeTypes = getDefaultMimeTypes();
+		if (extension == null || mimeTypes == null || extensions.length != mimeTypes.length)
+			return null;
+		int i = 0;
+		for (String ext : extensions) {
+			if (extension.equals(ext))
+				return mimeTypes[i];
+			else
+				i++;
+		}
+		return null;
 	}
 
 	protected String getParameterValue(final MultivaluedMap<String, String> parameters, final ParserField param,

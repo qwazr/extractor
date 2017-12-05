@@ -62,7 +62,7 @@ public class RtfParser extends ParserAbstract {
 		final Document doc = rtf.createDefaultDocument();
 		rtf.read(inputStream, doc, 0);
 
-		resultBuilder.metas().set(MIME_TYPE, DEFAULT_MIMETYPES[0]);
+		resultBuilder.metas().set(MIME_TYPE, findMimeType(extension, mimeType, this::findMimeTypeUsingDefault));
 
 		// Obtain a new parser document.
 		final ParserFieldsBuilder result = resultBuilder.newDocument();

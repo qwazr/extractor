@@ -64,7 +64,7 @@ public class TextParser extends ParserAbstract {
 	public void parseContent(final MultivaluedMap<String, String> parameters, final InputStream inputStream,
 			String extension, final String mimeType, final ParserResultBuilder resultBuilder) throws IOException {
 
-		resultBuilder.metas().set(MIME_TYPE, DEFAULT_MIMETYPES[0]);
+		resultBuilder.metas().set(MIME_TYPE, findMimeType(extension, mimeType, this::findMimeTypeUsingDefault));
 
 		// Trying to detect the CHARSET of the stream
 		final CharsetDetector detector = new CharsetDetector();
