@@ -92,6 +92,8 @@ public abstract class ParserAbstract implements ParserInterface {
 			final StringBuilder sb) {
 		if (sb.length() >= maxLength)
 			return;
+		if (document == null || document.fields == null)
+			return;
 		final Object value = document.fields.get(source.name);
 		if (value == null)
 			return;
