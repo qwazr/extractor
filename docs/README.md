@@ -4,6 +4,7 @@ QWAZR Extractor
 [![Build Status](https://travis-ci.org/qwazr/extractor.svg?branch=master)](https://travis-ci.org/qwazr/extractor)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.qwazr/qwazr-profiler/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.qwazr/qwazr-extractor)
 [![Coverage Status](https://coveralls.io/repos/github/qwazr/extractor/badge.svg?branch=master)](https://coveralls.io/github/qwazr/extractor?branch=master)
+[![Join the chat at https://gitter.im/qwazr/QWAZR](https://badges.gitter.im/qwazr/QWAZR.svg)](https://gitter.im/qwazr/QWAZR)
 
 Text and meta-data extraction service.
 The extractor module exposes a JSON web service for text and meta-data extraction.
