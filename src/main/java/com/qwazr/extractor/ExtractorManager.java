@@ -1,11 +1,10 @@
 /*
- * Copyright 2015-2017 Emmanuel Keller / QWAZR
+ * Copyright 2015-2018 Emmanuel Keller / QWAZR
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>¬org/licenses/LICENSE-2.0
  * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,13 +14,10 @@
  */
 package com.qwazr.extractor;
 
-import com.qwazr.server.ApplicationBuilder;
-import com.qwazr.server.GenericServerBuilder;
 import com.qwazr.utils.ClassLoaderUtils;
 import com.qwazr.utils.LoggerUtils;
 
 import javax.ws.rs.core.MultivaluedHashMap;
-import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.ServiceLoader;
 import java.util.Set;
@@ -54,19 +50,9 @@ public class ExtractorManager {
 
 	}
 
-	public ExtractorManager registerServices() throws IOException, ClassNotFoundException {
+	public ExtractorManager registerServices() {
 		ServiceLoader.load(ParserInterface.class, Thread.currentThread().getContextClassLoader())
 				.forEach(this::register);
-		return this;
-	}
-
-	public ExtractorManager registerContextAttribute(final GenericServerBuilder builder) {
-		builder.contextAttribute(this);
-		return this;
-	}
-
-	public ExtractorManager registerWebService(final ApplicationBuilder builder) {
-		builder.singletons(service);
 		return this;
 	}
 

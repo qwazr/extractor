@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017 Emmanuel Keller / QWAZR
+ * Copyright 2015-2018 Emmanuel Keller / QWAZR
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import com.qwazr.server.WelcomeShutdownService;
 import com.qwazr.server.configuration.ServerConfiguration;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -35,10 +34,8 @@ import java.util.concurrent.Executors;
 public class ExtractorServer implements BaseServer {
 
 	private final GenericServer server;
-	private final ExtractorManager extractorManager;
 
-	private ExtractorServer(final ServerConfiguration configuration)
-			throws IOException, URISyntaxException, ClassNotFoundException {
+	private ExtractorServer(final ServerConfiguration configuration) throws IOException {
 		final ExecutorService executorService = Executors.newCachedThreadPool();
 		final GenericServerBuilder builder = GenericServer.of(configuration, executorService);
 
@@ -49,12 +46,12 @@ public class ExtractorServer implements BaseServer {
 		final ApplicationBuilder webServices = ApplicationBuilder.of("/*").classes(RestApplication.JSON_CLASSES).
 				singletons(new WelcomeShutdownService());
 
-		new ClusterManager(executorService, configuration).registerProtocolListener(builder, services)
-				.registerContextAttribute(builder)
-				.registerWebService(webServices);
+		final ClusterManager clusterManager =
+				new ClusterManager(executorService, configuration).registerProtocolListener(builder, services);
+		webServices.singletons(clusterManager.getService());
 
-		extractorManager = new ExtractorManager().registerContextAttribute(builder).registerWebService(webServices);
-		extractorManager.registerServices();
+		final ExtractorManager extractorManager = new ExtractorManager().registerServices();
+		webServices.singletons(extractorManager.getService());
 
 		builder.getWebServiceContext().jaxrs(webServices);
 		server = builder.build();
@@ -63,10 +60,6 @@ public class ExtractorServer implements BaseServer {
 	@Override
 	public GenericServer getServer() {
 		return server;
-	}
-
-	public ExtractorServiceInterface getService() {
-		return extractorManager.getService();
 	}
 
 	public static void main(final String... args) throws Exception {
