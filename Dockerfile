@@ -4,7 +4,9 @@ MAINTAINER Emmanuel Keller
 
 RUN apt-get update \
  && apt-get install -y \
-          openjdk-8-jre-headless ca-certificates-java ghostscript tesseract-ocr tesseract-ocr-* \
+          openjdk-8-jre-headless ca-certificates-java \
+          ghostscript tesseract-ocr tesseract-ocr-* \
+          libwpd-tools \
  && rm -rf /var/lib/apt/lists/*
 
 ENV LANG C.UTF-8

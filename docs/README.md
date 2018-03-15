@@ -10,13 +10,33 @@ Text and meta-data extraction service.
 The extractor module exposes a JSON web service for text and meta-data extraction.
 Here is the list of supported binary formats. Click on the link to see the description of the returned informations.
 
-- Word processor: [doc](extractor/doc.md), [docx](extractor/docx.md), [odt](extractor/odt.md), [rtf](extractor/rtf.md)
-- Spreadsheet: [xls](extractor/xls.md), [xlsx](extractor/xlsx.md), [ods](extractor/odf.md)
-- Presentation: [ppt](extractor/ppt.md), [pptx](extractor/pptx.md), [odp](extractor/odf.md)
-- Publishing: [pdf](extractor/pdfbox.md), [pub](extractor/publisher.md)
-- Web: [rss](extractor/rss.md), [html/xhtml](extractor/html.md)
-- Medias: [audio](extractor/audio.md), [images](extractor/image.md)
-- Others: [vsd](extractor/visio.md), [text](extractor/text.md), [markdown](extractor/markdown.md)
+- Word processor:
+    - [doc](extractor/doc.md),
+    - [docx](extractor/docx.md),
+    - [odt](extractor/odt.md),
+    - [rtf](extractor/rtf.md),
+    - [wdp](extractor/wdp.md)
+- Spreadsheet:
+    - [xls](extractor/xls.md),
+    - [xlsx](extractor/xlsx.md),
+    - [ods](extractor/odf.md)
+- Presentation:
+    - [ppt](extractor/ppt.md),
+    - [pptx](extractor/pptx.md),
+    - [odp](extractor/odf.md)
+- Publishing:
+    - [pdf](extractor/pdfbox.md),
+    - [pub](extractor/publisher.md)
+- Web:
+    -[rss](extractor/rss.md),
+    - [html/xhtml](extractor/html.md)
+- Medias:
+    - [audio](extractor/audio.md),
+    - [images](extractor/image.md)
+- Others:
+    - [vsd](extractor/visio.md),
+    - [text](extractor/text.md),
+    - [markdown](extractor/markdown.md)
 
 Usage
 =====
@@ -58,7 +78,8 @@ The function returns the list of available parsers.
 "text",
 "visio",
 "xls",
-"xlsx"
+"xlsx",
+"wdp"
 ]
 ```
 

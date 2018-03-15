@@ -162,6 +162,11 @@
                     <artifactId>qwazr-library-tess4j</artifactId>
                     <version>${project.version}</version>
                 </dependency>
+                <dependency>
+                    <groupId>com.qwazr</groupId>
+                    <artifactId>qwazr-library-wpd</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
             </dependencies>
         </profile>
     </profiles>
