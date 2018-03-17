@@ -130,10 +130,12 @@ public class UriInfoImpl implements UriInfo {
 		final String[] queryParts = StringUtils.split(query, '&');
 		final MultivaluedMap<String, String> multivaluedMap = new MultivaluedHashMap<>();
 		for (String queryPart : queryParts) {
-			final String[] keyValue = StringUtils.split(queryPart, '=');
-			final String key = keyValue[0];
-			for (int i = 1; i < keyValue.length; i++)
-				multivaluedMap.add(key, keyValue[i]);
+			final int sepPos = queryPart.indexOf('=');
+			if (sepPos == -1)
+				continue;
+			final String key = queryPart.substring(0, sepPos);
+			final String value = queryPart.substring(sepPos + 1);
+			multivaluedMap.add(key, value);
 		}
 		return multivaluedMap;
 	}
