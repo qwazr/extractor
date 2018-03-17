@@ -62,8 +62,23 @@ public class ExtractorServer implements BaseServer {
 		return server;
 	}
 
-	public static void main(final String... args) throws Exception {
-		new ExtractorServer(new ServerConfiguration(args)).start();
+	private static ExtractorServer INSTANCE;
+
+	public static ExtractorServer getInstance() {
+		return INSTANCE;
+	}
+
+	public synchronized static void shutdown() {
+		if (INSTANCE != null) {
+			INSTANCE.getServer().stopAll();
+			INSTANCE = null;
+		}
+	}
+
+	public synchronized static void main(final String... args) throws Exception {
+		shutdown();
+		INSTANCE = new ExtractorServer(new ServerConfiguration(args));
+		INSTANCE.start();
 	}
 
 }

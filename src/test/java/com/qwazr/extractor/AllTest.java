@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017 Emmanuel Keller
+ * Copyright 2015-2018 Emmanuel Keller
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,6 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.IOException;
-
 public class AllTest extends ParserTest {
 
 	static final String DEFAULT_TEST_STRING = "osstextextractor";
@@ -31,7 +29,7 @@ public class AllTest extends ParserTest {
 	static ExtractorManager manager;
 
 	@BeforeClass
-	public static void init() throws IOException, ClassNotFoundException {
+	public static void init() {
 		manager = new ExtractorManager();
 		manager.registerServices();
 	}
@@ -47,32 +45,32 @@ public class AllTest extends ParserTest {
 
 	@Test
 	public void testImageGif() throws Exception {
-		doTest(ImageParser.class, "file.gif", "image/gif", DEFAULT_TEST_STRING);
+		doTest(ImageParser.class, "file.gif", "image/gif", null, DEFAULT_TEST_STRING);
 	}
 
 	@Test
 	public void testImageJpg() throws Exception {
-		doTest(ImageParser.class, "file.jpg", "image/jpeg", DEFAULT_TEST_STRING);
+		doTest(ImageParser.class, "file.jpg", "image/jpeg", null, DEFAULT_TEST_STRING);
 	}
 
 	@Test
 	public void testImagePng() throws Exception {
-		doTest(ImageParser.class, "file.png", "image/png", DEFAULT_TEST_STRING);
+		doTest(ImageParser.class, "file.png", "image/png", null, DEFAULT_TEST_STRING);
 	}
 
 	//TODO tiff disabled
 	public void testImageTiff() throws Exception {
-		doTest(ImageParser.class, "file.tiff", "image/tif", DEFAULT_TEST_STRING);
+		doTest(ImageParser.class, "file.tiff", "image/tif", null, DEFAULT_TEST_STRING);
 	}
 
 	@Test
 	public void testRtf() throws Exception {
-		doTest(RtfParser.class, "file.rtf", "application/rtf", DEFAULT_TEST_STRING);
+		doTest(RtfParser.class, "file.rtf", "application/rtf", "content", DEFAULT_TEST_STRING);
 	}
 
 	@Test
 	public void testText() throws Exception {
-		doTest(TextParser.class, "file.txt", "text/plain", DEFAULT_TEST_STRING);
+		doTest(TextParser.class, "file.txt", "text/plain", "content", DEFAULT_TEST_STRING);
 	}
 
 }

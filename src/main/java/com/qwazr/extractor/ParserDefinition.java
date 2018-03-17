@@ -15,12 +15,20 @@
  */
 package com.qwazr.extractor;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Objects;
+
 @JsonInclude(Include.NON_EMPTY)
+@JsonAutoDetect(setterVisibility = JsonAutoDetect.Visibility.NONE,
+		getterVisibility = JsonAutoDetect.Visibility.NONE,
+		isGetterVisibility = JsonAutoDetect.Visibility.NONE,
+		fieldVisibility = JsonAutoDetect.Visibility.PUBLIC_ONLY,
+		creatorVisibility = JsonAutoDetect.Visibility.NONE)
 public class ParserDefinition {
 
 	public final ParserField[] returnedFields;
@@ -38,7 +46,7 @@ public class ParserDefinition {
 		this.mimeTypes = mimeTypes;
 	}
 
-	public ParserDefinition(ParserInterface parser) {
+	ParserDefinition(final ParserInterface parser) {
 		final ParserField[] parameters = parser.getParameters();
 		final ParserField[] getParserFields = new ParserField[parameters == null ? 1 : 1 + parameters.length];
 		getParserFields[0] = ParserField.newString("path", "path to the local file");
@@ -47,5 +55,16 @@ public class ParserDefinition {
 		returnedFields = parser.getFields();
 		fileExtensions = parser.getDefaultExtensions();
 		mimeTypes = parser.getDefaultMimeTypes();
+	}
+
+	@Override
+	public boolean equals(final Object o) {
+		if (o == null || !(o instanceof ParserDefinition))
+			return false;
+		if (o == this)
+			return true;
+		final ParserDefinition p = (ParserDefinition) o;
+		return Objects.deepEquals(returnedFields, p.returnedFields) &&
+				Objects.deepEquals(fileExtensions, p.fileExtensions) && Objects.deepEquals(mimeTypes, p.mimeTypes);
 	}
 }

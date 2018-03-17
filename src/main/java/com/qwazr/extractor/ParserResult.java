@@ -1,5 +1,5 @@
-/**
- * Copyright 2014-2016 Emmanuel Keller / QWAZR
+/*
+ * Copyright 2014-2018 Emmanuel Keller / QWAZR
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,43 +15,52 @@
  */
 package com.qwazr.extractor;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 
 @JsonInclude(Include.NON_EMPTY)
-@XmlRootElement
-@XmlAccessorType(XmlAccessType.PUBLIC_MEMBER)
+@JsonAutoDetect(setterVisibility = JsonAutoDetect.Visibility.NONE,
+		getterVisibility = JsonAutoDetect.Visibility.NONE,
+		isGetterVisibility = JsonAutoDetect.Visibility.NONE,
+		fieldVisibility = JsonAutoDetect.Visibility.PUBLIC_ONLY,
+		creatorVisibility = JsonAutoDetect.Visibility.NONE)
 public class ParserResult {
 
-	final public String parser_name;
+	@JsonProperty("parser_name")
+	final public String parserName;
 
-	final public Long time_elapsed;
+	@JsonProperty("time_elapsed")
+	final public Long timeElapsed;
 
 	final public LinkedHashMap<String, Object> metas;
 
 	final public List<LinkedHashMap<String, Object>> documents;
 
-	ParserResult() {
-		time_elapsed = null;
-		documents = null;
-		metas = null;
-		parser_name = null;
+	@JsonCreator
+	ParserResult(@JsonProperty("parser_name") final String parserName,
+			@JsonProperty("time_elapsed") final Long timeElapsed,
+			@JsonProperty("metas") LinkedHashMap<String, Object> metas,
+			@JsonProperty("documents") List<LinkedHashMap<String, Object>> documents) {
+		this.parserName = parserName;
+		this.timeElapsed = timeElapsed;
+		this.metas = metas;
+		this.documents = documents;
 	}
 
 	ParserResult(final ParserResultBuilder builder) {
-		parser_name = builder.parserName;
+		parserName = builder.parserName;
 
 		// Calculate the time elapsed
-		time_elapsed = System.currentTimeMillis() - builder.startTime;
+		timeElapsed = System.currentTimeMillis() - builder.startTime;
 
 		// Extract the metas
 		metas = builder.metasBuilder == null ? null : builder.metasBuilder.fields;
