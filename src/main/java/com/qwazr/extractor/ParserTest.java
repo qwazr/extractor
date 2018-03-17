@@ -141,7 +141,8 @@ public class ParserTest {
 		final Object mimeType = result.metas.get("mime_type");
 		assert mimeType != null;
 		assert mimeType.equals(expectedMimeType);
-		assert Arrays.asList(parser.getDefaultMimeTypes()).contains(expectedMimeType);
+		if (parser.getDefaultMimeTypes() != null)
+			assert Arrays.asList(parser.getDefaultMimeTypes()).contains(expectedMimeType);
 	}
 
 	/**
