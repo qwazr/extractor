@@ -170,7 +170,7 @@ public class ParserTest {
 		// Check ParserDefinition
 		final ParserDefinition parserDefinition = (ParserDefinition) service.get(uriInfo, parserName, null);
 		assert parserDefinition != null;
-		if (expectedMimeType != null)
+		if (expectedMimeType != null && parserDefinition.mimeTypes != null)
 			assert Arrays.asList(parserDefinition.mimeTypes).contains(expectedMimeType);
 
 		final ParserDefinition serialParserDefinition =
