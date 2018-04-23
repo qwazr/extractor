@@ -2,14 +2,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>qwazr-extractor</artifactId>
-    <version>1.4.0</version>
+    <version>1.4.1-SNAPSHOT</version>
     <name>QWAZR Extractor</name>
     <packaging>jar</packaging>
 
     <parent>
         <groupId>com.qwazr</groupId>
         <artifactId>qwazr-parent</artifactId>
-        <version>1.4.0</version>
+        <version>1.4.1-SNAPSHOT</version>
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
 
@@ -17,7 +17,7 @@
         <connection>scm:git:git@github.com:qwazr/extractor.git</connection>
         <developerConnection>scm:git:git@github.com:qwazr/extractor.git</developerConnection>
         <url>git@github.com:qwazr/extractor.git</url>
-        <tag>v1.4.0</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <dependencies>
@@ -25,7 +25,7 @@
         <dependency>
             <groupId>com.qwazr</groupId>
             <artifactId>qwazr-cluster</artifactId>
-            <version>1.4.0</version>
+            <version>1.4.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>
