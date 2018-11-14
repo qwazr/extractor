@@ -26,64 +26,69 @@ import java.util.Objects;
 
 @JsonInclude(Include.NON_EMPTY)
 @JsonAutoDetect(setterVisibility = JsonAutoDetect.Visibility.NONE,
-		getterVisibility = JsonAutoDetect.Visibility.NONE,
-		isGetterVisibility = JsonAutoDetect.Visibility.NONE,
-		fieldVisibility = JsonAutoDetect.Visibility.PUBLIC_ONLY,
-		creatorVisibility = JsonAutoDetect.Visibility.NONE)
+        getterVisibility = JsonAutoDetect.Visibility.NONE,
+        isGetterVisibility = JsonAutoDetect.Visibility.NONE,
+        fieldVisibility = JsonAutoDetect.Visibility.PUBLIC_ONLY,
+        creatorVisibility = JsonAutoDetect.Visibility.NONE)
 public class ParserField implements Serializable {
 
-	/**
-	 * The internal name of the field.
-	 */
-	public final String name;
+    /**
+     * The internal name of the field.
+     */
+    public final String name;
 
-	/**
-	 * The type of the data
-	 */
-	public final Type type;
+    /**
+     * The type of the data
+     */
+    public final Type type;
 
-	/**
-	 * An optional description of the field.
-	 */
-	public final String description;
+    /**
+     * An optional description of the field.
+     */
+    public final String description;
 
-	@JsonCreator
-	ParserField(@JsonProperty("name") final String name, @JsonProperty("type") final Type type,
-			@JsonProperty("description") final String description) {
-		this.name = name;
-		this.type = type;
-		this.description = description;
-	}
+    @JsonCreator
+    ParserField(@JsonProperty("name") final String name, @JsonProperty("type") final Type type,
+                @JsonProperty("description") final String description) {
+        this.name = name;
+        this.type = type;
+        this.description = description;
+    }
 
-	@Override
-	public boolean equals(final Object o) {
-		if (o == null || !(o instanceof ParserField))
-			return false;
-		if (o == this)
-			return true;
-		final ParserField f = (ParserField) o;
-		return Objects.equals(name, f.name) && Objects.equals(type, f.type) &&
-				Objects.equals(description, f.description);
-	}
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, type, description);
+    }
 
-	public static ParserField newString(String name, String description) {
-		return new ParserField(name, Type.STRING, description);
-	}
+    @Override
+    public boolean equals(final Object o) {
+        if (!(o instanceof ParserField))
+            return false;
+        if (o == this)
+            return true;
+        final ParserField f = (ParserField) o;
+        return Objects.equals(name, f.name) && Objects.equals(type, f.type) &&
+                Objects.equals(description, f.description);
+    }
 
-	public static ParserField newInteger(String name, String description) {
-		return new ParserField(name, Type.INTEGER, description);
-	}
+    public static ParserField newString(String name, String description) {
+        return new ParserField(name, Type.STRING, description);
+    }
 
-	public static ParserField newDate(String name, String description) {
-		return new ParserField(name, Type.DATE, description);
-	}
+    public static ParserField newInteger(String name, String description) {
+        return new ParserField(name, Type.INTEGER, description);
+    }
 
-	public static ParserField newMap(String name, String description) {
-		return new ParserField(name, Type.MAP, description);
-	}
+    public static ParserField newDate(String name, String description) {
+        return new ParserField(name, Type.DATE, description);
+    }
 
-	public enum Type {
-		STRING, INTEGER, DATE, MAP
-	}
+    public static ParserField newMap(String name, String description) {
+        return new ParserField(name, Type.MAP, description);
+    }
+
+    public enum Type {
+        STRING, INTEGER, DATE, MAP
+    }
 
 }

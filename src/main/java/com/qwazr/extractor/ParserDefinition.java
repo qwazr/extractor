@@ -21,50 +21,59 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 @JsonInclude(Include.NON_EMPTY)
 @JsonAutoDetect(setterVisibility = JsonAutoDetect.Visibility.NONE,
-		getterVisibility = JsonAutoDetect.Visibility.NONE,
-		isGetterVisibility = JsonAutoDetect.Visibility.NONE,
-		fieldVisibility = JsonAutoDetect.Visibility.PUBLIC_ONLY,
-		creatorVisibility = JsonAutoDetect.Visibility.NONE)
+        getterVisibility = JsonAutoDetect.Visibility.NONE,
+        isGetterVisibility = JsonAutoDetect.Visibility.NONE,
+        fieldVisibility = JsonAutoDetect.Visibility.PUBLIC_ONLY,
+        creatorVisibility = JsonAutoDetect.Visibility.NONE)
 public class ParserDefinition {
 
-	public final ParserField[] returnedFields;
+    public final ParserField[] returnedFields;
 
-	public final String[] fileExtensions;
+    public final String[] fileExtensions;
 
-	public final String[] mimeTypes;
+    public final String[] mimeTypes;
 
-	@JsonCreator
-	ParserDefinition(@JsonProperty("returned_fields") final ParserField[] returnedFields,
-			@JsonProperty("file_extensions") final String[] fileExtensions,
-			@JsonProperty("mime_types") final String[] mimeTypes) {
-		this.returnedFields = returnedFields;
-		this.fileExtensions = fileExtensions;
-		this.mimeTypes = mimeTypes;
-	}
+    @JsonCreator
+    ParserDefinition(@JsonProperty("returned_fields") final ParserField[] returnedFields,
+                     @JsonProperty("file_extensions") final String[] fileExtensions,
+                     @JsonProperty("mime_types") final String[] mimeTypes) {
+        this.returnedFields = returnedFields;
+        this.fileExtensions = fileExtensions;
+        this.mimeTypes = mimeTypes;
+    }
 
-	ParserDefinition(final ParserInterface parser) {
-		final ParserField[] parameters = parser.getParameters();
-		final ParserField[] getParserFields = new ParserField[parameters == null ? 1 : 1 + parameters.length];
-		getParserFields[0] = ParserField.newString("path", "path to the local file");
-		if (parameters != null)
-			System.arraycopy(parameters, 0, getParserFields, 1, parameters.length);
-		returnedFields = parser.getFields();
-		fileExtensions = parser.getDefaultExtensions();
-		mimeTypes = parser.getDefaultMimeTypes();
-	}
+    ParserDefinition(final ParserInterface parser) {
+        final ParserField[] parameters = parser.getParameters();
+        final ParserField[] getParserFields = new ParserField[parameters == null ? 1 : 1 + parameters.length];
+        getParserFields[0] = ParserField.newString("path", "path to the local file");
+        if (parameters != null)
+            System.arraycopy(parameters, 0, getParserFields, 1, parameters.length);
+        returnedFields = parser.getFields();
+        fileExtensions = parser.getDefaultExtensions();
+        mimeTypes = parser.getDefaultMimeTypes();
+    }
 
-	@Override
-	public boolean equals(final Object o) {
-		if (o == null || !(o instanceof ParserDefinition))
-			return false;
-		if (o == this)
-			return true;
-		final ParserDefinition p = (ParserDefinition) o;
-		return Objects.deepEquals(returnedFields, p.returnedFields) &&
-				Objects.deepEquals(fileExtensions, p.fileExtensions) && Objects.deepEquals(mimeTypes, p.mimeTypes);
-	}
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 31 * hash + Arrays.hashCode(returnedFields);
+        hash = 31 * hash + Arrays.hashCode(fileExtensions);
+        return 31 * hash + Arrays.hashCode(mimeTypes);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (!(o instanceof ParserDefinition))
+            return false;
+        if (o == this)
+            return true;
+        final ParserDefinition p = (ParserDefinition) o;
+        return Objects.deepEquals(returnedFields, p.returnedFields) &&
+                Objects.deepEquals(fileExtensions, p.fileExtensions) && Objects.deepEquals(mimeTypes, p.mimeTypes);
+    }
 }

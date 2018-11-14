@@ -20,6 +20,7 @@ import com.qwazr.extractor.ParserField;
 import com.qwazr.extractor.ParserFieldsBuilder;
 import com.qwazr.extractor.ParserResultBuilder;
 import com.qwazr.extractor.util.ImagePHash;
+import org.apache.commons.lang3.NotImplementedException;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
@@ -35,109 +36,111 @@ import java.util.Iterator;
 
 public class ImageParser extends ParserAbstract {
 
-	private static final String[] DEFAULT_MIMETYPES;
+    private static final String[] DEFAULT_MIMETYPES;
 
-	private static final String[] DEFAULT_EXTENSIONS;
+    private static final String[] DEFAULT_EXTENSIONS;
 
-	static {
-		DEFAULT_MIMETYPES = ImageIO.getReaderMIMETypes();
-		DEFAULT_EXTENSIONS = ImageIO.getReaderFileSuffixes();
-	}
+    static {
+        DEFAULT_MIMETYPES = ImageIO.getReaderMIMETypes();
+        DEFAULT_EXTENSIONS = ImageIO.getReaderFileSuffixes();
+    }
 
-	final private static ParserField WIDTH = ParserField.newInteger("width", "Width of the image in pixels");
+    final private static ParserField WIDTH = ParserField.newInteger("width", "Width of the image in pixels");
 
-	final private static ParserField HEIGHT = ParserField.newInteger("height", "Height of the image in pixels");
+    final private static ParserField HEIGHT = ParserField.newInteger("height", "Height of the image in pixels");
 
-	final private static ParserField FORMAT = ParserField.newString("format", "The detected format");
+    final private static ParserField FORMAT = ParserField.newString("format", "The detected format");
 
-	final private static ParserField PHASH = ParserField.newString("phash", "Perceptual Hash");
+    final private static ParserField PHASH = ParserField.newString("phash", "Perceptual Hash");
 
-	final private static ParserField[] FIELDS = { WIDTH, HEIGHT, FORMAT, PHASH };
+    final private static ParserField[] FIELDS = {WIDTH, HEIGHT, FORMAT, PHASH};
 
-	@Override
-	public ParserField[] getParameters() {
-		return null;
-	}
+    @Override
+    public ParserField[] getParameters() {
+        return null;
+    }
 
-	@Override
-	public ParserField[] getFields() {
-		return FIELDS;
-	}
+    @Override
+    public ParserField[] getFields() {
+        return FIELDS;
+    }
 
-	@Override
-	public String[] getDefaultExtensions() {
-		return DEFAULT_EXTENSIONS;
-	}
+    @Override
+    public String[] getDefaultExtensions() {
+        return DEFAULT_EXTENSIONS;
+    }
 
-	@Override
-	public String[] getDefaultMimeTypes() {
-		return DEFAULT_MIMETYPES;
-	}
+    @Override
+    public String[] getDefaultMimeTypes() {
+        return DEFAULT_MIMETYPES;
+    }
 
-	private void browseNodes(String path, final Node root, final ParserFieldsBuilder result) {
-		if (root == null)
-			return;
-		switch (root.getNodeType()) {
-		case Node.TEXT_NODE:
-			result.add(ParserField.newString(path, null), root.getNodeValue());
-			break;
-		case Node.ELEMENT_NODE:
-			final NamedNodeMap nnm = root.getAttributes();
-			if (nnm != null)
-				for (int i = 0; i < nnm.getLength(); i++)
-					browseNodes(path, nnm.item(i), result);
-			Node child = root.getFirstChild();
-			while (child != null) {
-				browseNodes(path + "/" + child.getNodeName(), child, result);
-				child = child.getNextSibling();
-			}
-			break;
-		case Node.ATTRIBUTE_NODE:
-			path = path + "#" + root.getNodeName();
-			result.add(ParserField.newString(path, null), root.getNodeValue());
-			break;
-		}
-	}
+    private void browseNodes(String path, final Node root, final ParserFieldsBuilder result) {
+        if (root == null)
+            return;
+        switch (root.getNodeType()) {
+            case Node.TEXT_NODE:
+                result.add(ParserField.newString(path, null), root.getNodeValue());
+                break;
+            case Node.ELEMENT_NODE:
+                final NamedNodeMap nnm = root.getAttributes();
+                if (nnm != null)
+                    for (int i = 0; i < nnm.getLength(); i++)
+                        browseNodes(path, nnm.item(i), result);
+                Node child = root.getFirstChild();
+                while (child != null) {
+                    browseNodes(path + "/" + child.getNodeName(), child, result);
+                    child = child.getNextSibling();
+                }
+                break;
+            case Node.ATTRIBUTE_NODE:
+                path = path + "#" + root.getNodeName();
+                result.add(ParserField.newString(path, null), root.getNodeValue());
+                break;
+            default:
+                throw new NotImplementedException("Unknown attribute: " + root.getNodeType());
+        }
+    }
 
-	@Override
-	public void parseContent(final MultivaluedMap<String, String> parameters, final Path path, final String extension,
-			final String mimeType, final ParserResultBuilder resultBuilder) throws Exception {
+    @Override
+    public void parseContent(final MultivaluedMap<String, String> parameters, final Path path, final String extension,
+                             final String mimeType, final ParserResultBuilder resultBuilder) throws Exception {
 
-		final ImagePHash imgPhash = new ImagePHash();
-		try (final ImageInputStream in = ImageIO.createImageInputStream(path.toFile())) {
-			final Iterator<ImageReader> readers = ImageIO.getImageReaders(in);
-			if (readers.hasNext()) {
-				ParserFieldsBuilder result = resultBuilder.newDocument();
-				ImageReader reader = readers.next();
-				resultBuilder.metas().set(MIME_TYPE, "image/" + reader.getFormatName().toLowerCase());
-				try {
-					reader.setInput(in);
-					result.add(WIDTH, reader.getWidth(0));
-					result.add(HEIGHT, reader.getHeight(0));
-					result.add(FORMAT, reader.getFormatName());
-					result.add(PHASH, imgPhash.getHash(reader.read(0)));
-					IIOMetadata metadata = reader.getImageMetadata(0);
-					if (metadata != null) {
-						String[] names = metadata.getMetadataFormatNames();
-						if (names != null)
-							for (String name : names)
-								browseNodes("META", metadata.getAsTree(name), result);
-					}
-				} finally {
-					reader.dispose();
-				}
-			}
-		}
-	}
+        final ImagePHash imgPhash = new ImagePHash();
+        try (final ImageInputStream in = ImageIO.createImageInputStream(path.toFile())) {
+            final Iterator<ImageReader> readers = ImageIO.getImageReaders(in);
+            if (readers.hasNext()) {
+                ParserFieldsBuilder result = resultBuilder.newDocument();
+                ImageReader reader = readers.next();
+                resultBuilder.metas().set(MIME_TYPE, "image/" + reader.getFormatName().toLowerCase());
+                try {
+                    reader.setInput(in);
+                    result.add(WIDTH, reader.getWidth(0));
+                    result.add(HEIGHT, reader.getHeight(0));
+                    result.add(FORMAT, reader.getFormatName());
+                    result.add(PHASH, imgPhash.getHash(reader.read(0)));
+                    IIOMetadata metadata = reader.getImageMetadata(0);
+                    if (metadata != null) {
+                        String[] names = metadata.getMetadataFormatNames();
+                        if (names != null)
+                            for (String name : names)
+                                browseNodes("META", metadata.getAsTree(name), result);
+                    }
+                } finally {
+                    reader.dispose();
+                }
+            }
+        }
+    }
 
-	@Override
-	public void parseContent(final MultivaluedMap<String, String> parameters, final InputStream inputStream,
-			final String extension, final String mimeType, final ParserResultBuilder resultBuilder) throws Exception {
-		final Path tempFile = ParserAbstract.createTempFile(inputStream, extension == null ? "image" : "." + extension);
-		try {
-			parseContent(parameters, tempFile, extension, mimeType, resultBuilder);
-		} finally {
-			Files.deleteIfExists(tempFile);
-		}
-	}
+    @Override
+    public void parseContent(final MultivaluedMap<String, String> parameters, final InputStream inputStream,
+                             final String extension, final String mimeType, final ParserResultBuilder resultBuilder) throws Exception {
+        final Path tempFile = ParserAbstract.createTempFile(inputStream, extension == null ? "image" : "." + extension);
+        try {
+            parseContent(parameters, tempFile, extension, mimeType, resultBuilder);
+        } finally {
+            Files.deleteIfExists(tempFile);
+        }
+    }
 }

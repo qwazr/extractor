@@ -33,180 +33,180 @@ import java.util.List;
 
 public class UriInfoImpl implements UriInfo {
 
-	private final URI baseUri;
-	private final URI absoluteUri;
-	private final URI relativeUri;
+    private final URI baseUri;
+    private final URI absoluteUri;
+    private final URI relativeUri;
 
-	private volatile URI absolutePath;
-	private volatile List<PathSegment> rawPathSegments;
-	private volatile List<PathSegment> decodedPathSegments;
-	private volatile MultivaluedMap<String, String> rawParameters;
-	private volatile MultivaluedMap<String, String> decodedParameters;
+    private volatile URI absolutePath;
+    private volatile List<PathSegment> rawPathSegments;
+    private volatile List<PathSegment> decodedPathSegments;
+    private volatile MultivaluedMap<String, String> rawParameters;
+    private volatile MultivaluedMap<String, String> decodedParameters;
 
-	public UriInfoImpl(final URI base, final URI child) {
-		baseUri = base;
-		absoluteUri = child.isAbsolute() ? child : base.resolve(child);
-		relativeUri = base.relativize(child);
-	}
+    public UriInfoImpl(final URI base, final URI child) {
+        baseUri = base;
+        absoluteUri = child.isAbsolute() ? child : base.resolve(child);
+        relativeUri = base.relativize(child);
+    }
 
-	public UriInfoImpl(final String base, final String child) throws URISyntaxException {
-		this(new URI(base), new URI(child));
-	}
+    public UriInfoImpl(final String base, final String child) throws URISyntaxException {
+        this(new URI(base), new URI(child));
+    }
 
-	@Override
-	public String getPath() {
-		return relativeUri.getPath();
-	}
+    @Override
+    public String getPath() {
+        return relativeUri.getPath();
+    }
 
-	@Override
-	public String getPath(boolean decode) {
-		return decode ? getPath() : relativeUri.getRawPath();
-	}
+    @Override
+    public String getPath(boolean decode) {
+        return decode ? getPath() : relativeUri.getRawPath();
+    }
 
-	@Override
-	public synchronized List<PathSegment> getPathSegments() {
-		if (decodedPathSegments == null)
-			decodedPathSegments = pathSegments(relativeUri.getPath());
-		return decodedPathSegments;
-	}
+    @Override
+    public synchronized List<PathSegment> getPathSegments() {
+        if (decodedPathSegments == null)
+            decodedPathSegments = pathSegments(relativeUri.getPath());
+        return decodedPathSegments;
+    }
 
-	@Override
-	public synchronized List<PathSegment> getPathSegments(boolean decode) {
-		if (decode)
-			return getPathSegments();
-		if (rawPathSegments == null)
-			rawPathSegments = pathSegments(relativeUri.getRawPath());
-		return rawPathSegments;
-	}
+    @Override
+    public synchronized List<PathSegment> getPathSegments(boolean decode) {
+        if (decode)
+            return getPathSegments();
+        if (rawPathSegments == null)
+            rawPathSegments = pathSegments(relativeUri.getRawPath());
+        return rawPathSegments;
+    }
 
-	@Override
-	public URI getRequestUri() {
-		return absoluteUri;
-	}
+    @Override
+    public URI getRequestUri() {
+        return absoluteUri;
+    }
 
-	@Override
-	public UriBuilder getRequestUriBuilder() {
-		return new JerseyUriBuilder().uri(absoluteUri);
-	}
+    @Override
+    public UriBuilder getRequestUriBuilder() {
+        return new JerseyUriBuilder().uri(absoluteUri);
+    }
 
-	@Override
-	public synchronized URI getAbsolutePath() {
-		if (absolutePath == null)
-			absolutePath = baseUri.resolve(getPath(false));
-		return absolutePath;
-	}
+    @Override
+    public synchronized URI getAbsolutePath() {
+        if (absolutePath == null)
+            absolutePath = baseUri.resolve(getPath(false));
+        return absolutePath;
+    }
 
-	@Override
-	public UriBuilder getAbsolutePathBuilder() {
-		return new JerseyUriBuilder().uri(getAbsolutePath());
-	}
+    @Override
+    public UriBuilder getAbsolutePathBuilder() {
+        return new JerseyUriBuilder().uri(getAbsolutePath());
+    }
 
-	@Override
-	public URI getBaseUri() {
-		return baseUri;
-	}
+    @Override
+    public URI getBaseUri() {
+        return baseUri;
+    }
 
-	@Override
-	public UriBuilder getBaseUriBuilder() {
-		return new JerseyUriBuilder().uri(baseUri);
-	}
+    @Override
+    public UriBuilder getBaseUriBuilder() {
+        return new JerseyUriBuilder().uri(baseUri);
+    }
 
-	@Override
-	public MultivaluedMap<String, String> getPathParameters() {
-		return getPathParameters(true);
-	}
+    @Override
+    public MultivaluedMap<String, String> getPathParameters() {
+        return getPathParameters(true);
+    }
 
-	@Override
-	public MultivaluedMap<String, String> getPathParameters(boolean decode) {
-		throw new IllegalStateException("Not implemented");
-	}
+    @Override
+    public MultivaluedMap<String, String> getPathParameters(boolean decode) {
+        throw new IllegalStateException("Not implemented");
+    }
 
-	private final static MultivaluedMap<String, String> EMPTY =
-			new ImmutableMultivaluedMap<>(new MultivaluedHashMap<>());
+    private final static MultivaluedMap<String, String> EMPTY =
+            new ImmutableMultivaluedMap<>(new MultivaluedHashMap<>());
 
-	private MultivaluedMap<String, String> queryParameters(final String query) {
-		if (query == null)
-			return EMPTY;
-		final String[] queryParts = StringUtils.split(query, '&');
-		final MultivaluedMap<String, String> multivaluedMap = new MultivaluedHashMap<>();
-		for (String queryPart : queryParts) {
-			final int sepPos = queryPart.indexOf('=');
-			if (sepPos == -1)
-				continue;
-			final String key = queryPart.substring(0, sepPos);
-			final String value = queryPart.substring(sepPos + 1);
-			multivaluedMap.add(key, value);
-		}
-		return multivaluedMap;
-	}
+    private MultivaluedMap<String, String> queryParameters(final String query) {
+        if (query == null)
+            return EMPTY;
+        final String[] queryParts = StringUtils.split(query, '&');
+        final MultivaluedMap<String, String> multivaluedMap = new MultivaluedHashMap<>();
+        for (String queryPart : queryParts) {
+            final int sepPos = queryPart.indexOf('=');
+            if (sepPos == -1)
+                continue;
+            final String key = queryPart.substring(0, sepPos);
+            final String value = queryPart.substring(sepPos + 1);
+            multivaluedMap.add(key, value);
+        }
+        return multivaluedMap;
+    }
 
-	@Override
-	public synchronized MultivaluedMap<String, String> getQueryParameters() {
-		if (decodedParameters == null)
-			decodedParameters = queryParameters(relativeUri.getQuery());
-		return decodedParameters;
-	}
+    @Override
+    public synchronized MultivaluedMap<String, String> getQueryParameters() {
+        if (decodedParameters == null)
+            decodedParameters = queryParameters(relativeUri.getQuery());
+        return decodedParameters;
+    }
 
-	@Override
-	public synchronized MultivaluedMap<String, String> getQueryParameters(boolean decode) {
-		if (decode)
-			return getQueryParameters();
-		if (rawParameters == null)
-			rawParameters = queryParameters(relativeUri.getRawQuery());
-		return rawParameters;
-	}
+    @Override
+    public synchronized MultivaluedMap<String, String> getQueryParameters(boolean decode) {
+        if (decode)
+            return getQueryParameters();
+        if (rawParameters == null)
+            rawParameters = queryParameters(relativeUri.getRawQuery());
+        return rawParameters;
+    }
 
-	@Override
-	public List<String> getMatchedURIs() {
-		throw new NotImplementedException("Not implemented");
-	}
+    @Override
+    public List<String> getMatchedURIs() {
+        throw new NotImplementedException("Not implemented");
+    }
 
-	@Override
-	public List<String> getMatchedURIs(boolean decode) {
-		throw new NotImplementedException("Not implemented");
-	}
+    @Override
+    public List<String> getMatchedURIs(boolean decode) {
+        throw new NotImplementedException("Not implemented");
+    }
 
-	@Override
-	public List<Object> getMatchedResources() {
-		throw new NotImplementedException("Not implemented");
-	}
+    @Override
+    public List<Object> getMatchedResources() {
+        throw new NotImplementedException("Not implemented");
+    }
 
-	@Override
-	public URI resolve(URI uri) {
-		return baseUri.resolve(uri).normalize();
-	}
+    @Override
+    public URI resolve(URI uri) {
+        return baseUri.resolve(uri).normalize();
+    }
 
-	@Override
-	public URI relativize(final URI uri) {
-		return absolutePath.relativize(uri);
-	}
+    @Override
+    public URI relativize(final URI uri) {
+        return absolutePath.relativize(uri);
+    }
 
-	private List<PathSegment> pathSegments(final String path) {
-		if (path == null || path.isEmpty())
-			return Collections.emptyList();
-		final String[] pathParts = StringUtils.split(path, '/');
-		final List<PathSegment> pathSegments = new ArrayList<>(pathParts.length);
-		for (String pathPart : pathParts)
-			pathSegments.add(new PathSegmentImpl(pathPart));
-		return pathSegments;
-	}
+    private List<PathSegment> pathSegments(final String path) {
+        if (path == null || path.isEmpty())
+            return Collections.emptyList();
+        final String[] pathParts = StringUtils.split(path, '/');
+        final List<PathSegment> pathSegments = new ArrayList<>(pathParts.length);
+        for (String pathPart : pathParts)
+            pathSegments.add(new PathSegmentImpl(pathPart));
+        return pathSegments;
+    }
 
-	private final class PathSegmentImpl implements PathSegment {
+    private static final class PathSegmentImpl implements PathSegment {
 
-		private final String path;
+        private final String path;
 
-		private PathSegmentImpl(final String path) {
-			this.path = path;
-		}
+        private PathSegmentImpl(final String path) {
+            this.path = path;
+        }
 
-		@Override
-		public String getPath() {
-			return path;
-		}
+        @Override
+        public String getPath() {
+            return path;
+        }
 
-		@Override
-		public MultivaluedMap<String, String> getMatrixParameters() {
-			throw new NotImplementedException("Not implemented");
-		}
-	}
+        @Override
+        public MultivaluedMap<String, String> getMatrixParameters() {
+            throw new NotImplementedException("Not implemented");
+        }
+    }
 }
