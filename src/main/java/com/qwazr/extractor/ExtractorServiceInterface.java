@@ -34,31 +34,46 @@ import java.util.Set;
 @Path("/" + ExtractorServiceInterface.SERVICE_NAME)
 public interface ExtractorServiceInterface extends ServiceInterface {
 
-	String SERVICE_NAME = "extractor";
+    String SERVICE_NAME = "extractor";
 
-	@GET
-	@Path("/")
-	@Produces(ServiceInterface.APPLICATION_JSON_UTF8)
-	Set<String> list();
+    @GET
+    @Path("/")
+    @Produces(ServiceInterface.APPLICATION_JSON_UTF8)
+    Set<String> list();
 
-	@GET
-	@Path("/{name}")
-	@Produces(ServiceInterface.APPLICATION_JSON_UTF8)
-	Object get(@Context UriInfo uriInfo, @PathParam("name") String parserName, @QueryParam("path") String path);
+    @GET
+    @Path("/{name}")
+    @Produces(ServiceInterface.APPLICATION_JSON_UTF8)
+    Object get(@Context UriInfo uriInfo,
+               @PathParam("name") String parserName,
+               @QueryParam("path") String path);
 
-	@PUT
-	@Path("/{name}")
-	@Produces(ServiceInterface.APPLICATION_JSON_UTF8)
-	ParserResult put(@Context UriInfo uriInfo, @PathParam("name") String parserName,
-			@QueryParam("path") String filePath, InputStream inputStream);
+    @PUT
+    @Path("/{name}")
+    @Produces(ServiceInterface.APPLICATION_JSON_UTF8)
+    ParserResult put(@Context UriInfo uriInfo,
+                     @PathParam("name") String parserName,
+                     @QueryParam("path") String filePath,
+                     InputStream inputStream);
 
-	ParserResult extract(String parserName, MultivaluedMap<String, String> parameters, String filePath,
-			InputStream inputStream);
+    ParserResult extract(String parserName,
+                         MultivaluedMap<String, String> parameters,
+                         String filePath,
+                         InputStream inputStream);
 
-	@PUT
-	@Path("/")
-	@Produces(ServiceInterface.APPLICATION_JSON_UTF8)
-	ParserResult putMagic(@Context UriInfo uriInfo, @QueryParam("name") String fileName,
-			@QueryParam("path") String filePath, @QueryParam("type") String mimeType, InputStream inputStream);
+    @PUT
+    @Path("/")
+    @Produces(ServiceInterface.APPLICATION_JSON_UTF8)
+    ParserResult putMagic(@Context UriInfo uriInfo,
+                          @QueryParam("name") String fileName,
+                          @QueryParam("path") String filePath,
+                          @QueryParam("type") String mimeType,
+                          InputStream inputStream);
+
+    ParserResult extractMagic(MultivaluedMap<String, String> parameters,
+                              String fileName,
+                              String filePath,
+                              String mimeType,
+                              InputStream inputStream);
 
 }
