@@ -22,36 +22,36 @@ import java.util.List;
 
 final public class ParserFieldsBuilder {
 
-	LinkedHashMap<String, Object> fields;
+    LinkedHashMap<String, Object> fields;
 
-	/**
-	 * Add a field/value pair to the document
-	 *
-	 * @param field the name of the field
-	 * @param value any value
-	 */
-	public void add(final ParserField field, final Object value) {
-		if (value == null)
-			return;
-		if (fields == null)
-			fields = new LinkedHashMap<>();
-		final List<Object> values = (List<Object>) fields.computeIfAbsent(field.name, f -> new ArrayList<>(1));
-		if (value instanceof Collection)
-			values.addAll((Collection) value);
-		else
-			values.add(value);
-	}
+    /**
+     * Add a field/value pair to the document
+     *
+     * @param field the name of the field
+     * @param value any value
+     */
+    public void add(final ParserField field, final Object value) {
+        if (value == null)
+            return;
+        if (fields == null)
+            fields = new LinkedHashMap<>();
+        final List values = (List) fields.computeIfAbsent(field.name, f -> new ArrayList<>(1));
+        if (value instanceof Collection)
+            values.addAll((Collection) value);
+        else
+            values.add(value);
+    }
 
-	/**
-	 * Set the unique field/value to the document
-	 *
-	 * @param field the name of the field
-	 * @param value any value
-	 */
-	public void set(final ParserField field, final Object value) {
-		if (fields == null)
-			fields = new LinkedHashMap<>();
-		fields.put(field.name, value);
-	}
+    /**
+     * Set the unique field/value to the document
+     *
+     * @param field the name of the field
+     * @param value any value
+     */
+    public void set(final ParserField field, final Object value) {
+        if (fields == null)
+            fields = new LinkedHashMap<>();
+        fields.put(field.name, value);
+    }
 
 }

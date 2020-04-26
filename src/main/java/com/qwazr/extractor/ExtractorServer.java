@@ -33,52 +33,52 @@ import java.util.concurrent.Executors;
 
 public class ExtractorServer implements BaseServer {
 
-	private final GenericServer server;
+    private final GenericServer server;
 
-	private ExtractorServer(final ServerConfiguration configuration) throws IOException {
-		final ExecutorService executorService = Executors.newCachedThreadPool();
-		final GenericServerBuilder builder = GenericServer.of(configuration, executorService);
+    private ExtractorServer(final ServerConfiguration configuration) throws IOException {
+        final ExecutorService executorService = Executors.newCachedThreadPool();
+        final GenericServerBuilder builder = GenericServer.of(configuration, executorService);
 
-		final Set<String> services = new HashSet<>();
-		services.add(ClusterServiceInterface.SERVICE_NAME);
-		services.add(ExtractorServiceInterface.SERVICE_NAME);
+        final Set<String> services = new HashSet<>();
+        services.add(ClusterServiceInterface.SERVICE_NAME);
+        services.add(ExtractorServiceInterface.SERVICE_NAME);
 
-		final ApplicationBuilder webServices = ApplicationBuilder.of("/*").classes(RestApplication.JSON_CLASSES).
-				singletons(new WelcomeShutdownService());
+        final ApplicationBuilder webServices = ApplicationBuilder.of("/*").classes(RestApplication.JSON_CLASSES).
+                singletons(new WelcomeShutdownService());
 
-		final ClusterManager clusterManager =
-				new ClusterManager(executorService, configuration).registerProtocolListener(builder, services);
-		webServices.singletons(clusterManager.getService());
+        final ClusterManager clusterManager =
+                new ClusterManager(executorService, configuration).registerProtocolListener(builder, services);
+        webServices.singletons(clusterManager.getService());
 
-		final ExtractorManager extractorManager = new ExtractorManager().registerServices();
-		webServices.singletons(extractorManager.getService());
+        final ExtractorManager extractorManager = new ExtractorManager().registerServices();
+        webServices.singletons(extractorManager.getService());
 
-		builder.getWebServiceContext().jaxrs(webServices);
-		server = builder.build();
-	}
+        builder.getWebServiceContext().jaxrs(webServices);
+        server = builder.build();
+    }
 
-	@Override
-	public GenericServer getServer() {
-		return server;
-	}
+    @Override
+    public GenericServer getServer() {
+        return server;
+    }
 
-	private static ExtractorServer INSTANCE;
+    private static ExtractorServer INSTANCE;
 
-	public static ExtractorServer getInstance() {
-		return INSTANCE;
-	}
+    public static ExtractorServer getInstance() {
+        return INSTANCE;
+    }
 
-	public synchronized static void shutdown() {
-		if (INSTANCE != null) {
-			INSTANCE.getServer().stopAll();
-			INSTANCE = null;
-		}
-	}
+    public synchronized static void shutdown() {
+        if (INSTANCE != null) {
+            INSTANCE.getServer().close();
+            INSTANCE = null;
+        }
+    }
 
-	public synchronized static void main(final String... args) throws Exception {
-		shutdown();
-		INSTANCE = new ExtractorServer(new ServerConfiguration(args));
-		INSTANCE.start();
-	}
+    public synchronized static void main(final String... args) throws Exception {
+        shutdown();
+        INSTANCE = new ExtractorServer(new ServerConfiguration(args));
+        INSTANCE.start();
+    }
 
 }
