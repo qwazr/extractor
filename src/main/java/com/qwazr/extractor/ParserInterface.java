@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.function.Supplier;
 
 public interface ParserInterface {
 
@@ -99,21 +100,21 @@ public interface ParserInterface {
             parseContent(parameters, bIn, extension, mimeType, resultBuilder);
         }
         catch (IOException e) {
-            throw convertIOException(e);
+            throw convertIOException(() -> "Error with " + filePath.toAbsolutePath(), e);
         }
     }
 
-    default WebApplicationException convertException(final Exception e) {
-        if (e instanceof IOException)
-            return convertIOException(((IOException) e));
-        else if (e instanceof WebApplicationException)
-            return (WebApplicationException) e;
+    default WebApplicationException convertException(final Supplier<String> message, final Exception cause) {
+        if (cause instanceof IOException)
+            return convertIOException(message, ((IOException) cause));
+        else if (cause instanceof WebApplicationException)
+            return (WebApplicationException) cause;
         else
-            return new InternalServerErrorException("An unknown error occurred: " + e.getMessage(), e);
+            return new InternalServerErrorException(message.get(), cause);
     }
 
-    default WebApplicationException convertIOException(final IOException e) {
-        return new InternalServerErrorException("An I/O error occurred: " + e.getMessage(), e);
+    default WebApplicationException convertIOException(final Supplier<String> message, final IOException cause) {
+        return new InternalServerErrorException(message.get(), cause);
     }
 
 }

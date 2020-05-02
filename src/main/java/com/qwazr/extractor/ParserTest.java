@@ -153,6 +153,8 @@ public class ParserTest {
      * @param fileName         the filename of the file to extract
      * @param keyValueParams   the parameters to apply
      * @return the ParserResult
+     * @throws URISyntaxException if any URL syntax error occurs
+     * @throws IOException        if any I/O error occurs
      */
     protected ParserResult doTest(Class<? extends ParserAbstract> className, String fileName, String expectedMimeType,
                                   String expectedField, String expectedText, String... keyValueParams) throws URISyntaxException, IOException {

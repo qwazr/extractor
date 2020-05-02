@@ -80,10 +80,10 @@ public class RtfParser extends ParserAbstract {
 
         }
         catch (IOException e) {
-            throw convertIOException(e);
+            throw convertIOException(e::getMessage, e);
         }
         catch (BadLocationException e) {
-            throw convertException(e);
+            throw convertException(e::getMessage, e);
         }
 
     }

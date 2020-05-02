@@ -85,7 +85,7 @@ public class TextParser extends ParserAbstract {
             result.add(LANG_DETECTION, languageDetection(result, CONTENT, 10000));
         }
         catch (IOException e) {
-            throw convertIOException(e);
+            throw convertIOException(e::getMessage, e);
         }
     }
 

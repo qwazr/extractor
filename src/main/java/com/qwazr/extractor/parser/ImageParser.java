@@ -139,7 +139,7 @@ public class ImageParser extends ParserAbstract {
             }
         }
         catch (IOException e) {
-            throw convertIOException(e);
+            throw convertIOException(() -> "Error with " + path.toAbsolutePath(), e);
         }
     }
 
@@ -152,7 +152,7 @@ public class ImageParser extends ParserAbstract {
             parseContent(parameters, a.get(), extension, mimeType, resultBuilder);
         }
         catch (IOException e) {
-            throw convertIOException(e);
+            throw convertIOException(e::getMessage, e);
         }
     }
 }
