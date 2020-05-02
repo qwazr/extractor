@@ -20,6 +20,8 @@ import com.qwazr.extractor.ParserField;
 import com.qwazr.extractor.ParserFieldsBuilder;
 import com.qwazr.extractor.ParserResultBuilder;
 import com.qwazr.extractor.util.ImagePHash;
+import com.qwazr.utils.AutoCloseWrapper;
+import com.qwazr.utils.LoggerUtils;
 import org.apache.commons.lang3.NotImplementedException;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -34,8 +36,11 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Iterator;
+import java.util.logging.Logger;
 
 public class ImageParser extends ParserAbstract {
+
+    private final static Logger LOGGER = LoggerUtils.getLogger(ImageParser.class);
 
     private static final String[] DEFAULT_MIMETYPES;
 
@@ -141,14 +146,10 @@ public class ImageParser extends ParserAbstract {
     @Override
     public void parseContent(final MultivaluedMap<String, String> parameters, final InputStream inputStream,
                              final String extension, final String mimeType, final ParserResultBuilder resultBuilder) {
-        try {
-            final Path tempFile = ParserAbstract.createTempFile(inputStream, extension == null ? "image" : "." + extension);
-            try {
-                parseContent(parameters, tempFile, extension, mimeType, resultBuilder);
-            }
-            finally {
-                Files.deleteIfExists(tempFile);
-            }
+        try (final AutoCloseWrapper<Path> a = AutoCloseWrapper.of(
+                ParserAbstract.createTempFile(inputStream, extension == null ? "image" : "." + extension),
+                LOGGER, Files::deleteIfExists)) {
+            parseContent(parameters, a.get(), extension, mimeType, resultBuilder);
         }
         catch (IOException e) {
             throw convertIOException(e);
