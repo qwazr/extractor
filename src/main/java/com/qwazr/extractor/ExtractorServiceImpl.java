@@ -27,16 +27,21 @@ import net.sf.jmimemagic.MagicMatchNotFoundException;
 import net.sf.jmimemagic.MagicParseException;
 import org.apache.commons.io.FilenameUtils;
 
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.InternalServerErrorException;
+import javax.ws.rs.NotAcceptableException;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
+import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Supplier;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 final class ExtractorServiceImpl extends AbstractServiceImpl implements ExtractorServiceInterface {
@@ -54,30 +59,29 @@ final class ExtractorServiceImpl extends AbstractServiceImpl implements Extracto
         return new TreeSet<>(extractorManager.getList());
     }
 
+    @NotNull
+    private ParserInterface checkParserNotNull(final ParserInterface parserInterface, final Supplier<String> parserId) {
+        if (parserInterface == null)
+            throw new NotFoundException("Parser not found: " + parserId.get());
+        return parserInterface;
+    }
+
+    @NotNull
     private ParserInterface getParser(final Class<? extends ParserInterface> parserClass) throws ServerException {
-        try {
-            if (parserClass == null)
-                throw new ServerException(Status.NOT_FOUND, "No parser found.");
-            return parserClass.getDeclaredConstructor().newInstance();
-        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-                | SecurityException | NoSuchMethodException | InvocationTargetException e) {
-            throw ServerException.of(e);
-        }
+        return checkParserNotNull(extractorManager.findParserClass(parserClass), parserClass::toString);
     }
 
-    private ParserInterface getParser(String parserName) throws ServerException {
-        final Class<? extends ParserInterface> parserClass = extractorManager.findParserClassByName(parserName);
-        if (parserClass == null)
-            throw new ServerException(Status.NOT_FOUND, "Unknown parser: " + parserName);
-        return getParser(parserClass);
+    @NotNull
+    private ParserInterface getParser(String parserName) {
+        return checkParserNotNull(extractorManager.findParserClassByName(parserName), parserName::toString);
     }
 
-    private Path getFilePath(String path) throws ServerException {
+    private Path getFilePath(final String path) {
         final Path filePath = Paths.get(path);
         if (!Files.exists(filePath))
-            throw new ServerException(Status.NOT_FOUND, "File not found: " + path);
+            throw new NotFoundException("File not found: " + path);
         if (!Files.isRegularFile(filePath))
-            throw new ServerException(Status.NOT_ACCEPTABLE, "The path is not a regular file: " + path);
+            throw new NotAcceptableException("The path is not a regular file: " + path);
         return filePath;
     }
 
@@ -91,48 +95,74 @@ final class ExtractorServiceImpl extends AbstractServiceImpl implements Extracto
             final ParserResultBuilder result = new ParserResultBuilder(parser);
             parser.parseContent(getQueryParameters(uriInfo), filePath, null, null, result);
             return result.build();
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw ServerException.getJsonException(LOGGER, e);
         }
     }
 
-    private boolean checkIsPath(String filePath, InputStream inputStream) throws ServerException {
-        final boolean isPath = !StringUtils.isEmpty(filePath);
-        if (!isPath && inputStream == null)
-            throw new ServerException(Status.NOT_ACCEPTABLE, "Not path and no stream.");
-        return isPath;
+    private Path checkPathIsRegularFile(final Path filePath) throws ServerException {
+        if (filePath == null)
+            throw new NotAcceptableException("The path is missing");
+        if (!Files.isRegularFile(filePath))
+            throw new NotAcceptableException("The path is not a regular file: " + filePath.toAbsolutePath());
+        return filePath;
     }
 
     private MultivaluedMap<String, String> getQueryParameters(UriInfo uriInfo) {
         return uriInfo == null ? null : uriInfo.getQueryParameters();
     }
 
+    private ParserResult extract(final ParserInterface parser,
+                                 final MultivaluedMap<String, String> parameters,
+                                 final InputStream inputStream) {
+        final ParserResultBuilder result = new ParserResultBuilder(parser);
+        parser.parseContent(parameters, inputStream, null, null, result);
+        return result.build();
+    }
+
     @Override
-    public ParserResult extract(final String parserName, MultivaluedMap<String, String> parameters, String filePath,
-                                InputStream inputStream) {
-        try {
-            final ParserInterface parser = getParser(parserName);
-            final ParserResultBuilder result = new ParserResultBuilder(parser);
-            if (checkIsPath(filePath, inputStream))
-                parser.parseContent(parameters, getFilePath(filePath), null, null, result);
-            else
-                parser.parseContent(parameters, inputStream, null, null, result);
-            return result.build();
-        } catch (Exception e) {
-            throw ServerException.getJsonException(LOGGER, e);
-        }
+    public ParserResult extract(final Class<? extends ParserInterface> parserClass,
+                                final MultivaluedMap<String, String> parameters,
+                                final InputStream inputStream) {
+        final ParserInterface parser = getParser(parserClass);
+        return extract(parser, parameters, inputStream);
+    }
+
+    private ParserResult extract(final ParserInterface parser,
+                                 final MultivaluedMap<String, String> parameters,
+                                 final Path filePath) {
+        checkPathIsRegularFile(filePath);
+        final ParserResultBuilder result = new ParserResultBuilder(parser);
+        parser.parseContent(parameters, filePath, null, null, result);
+        return result.build();
+    }
+
+    @Override
+    public ParserResult extract(final Class<? extends ParserInterface> parserClass,
+                                final MultivaluedMap<String, String> parameters,
+                                final Path filePath) {
+        final ParserInterface parser = getParser(parserClass);
+        return extract(parser, parameters, filePath);
     }
 
     @Override
     public ParserResult put(UriInfo uriInfo, String parserName, String filePath, InputStream inputStream) {
-        return extract(parserName, getQueryParameters(uriInfo), filePath, inputStream);
+        final MultivaluedMap<String, String> parameters = getQueryParameters(uriInfo);
+        final ParserInterface parserInterface = extractorManager.findParserClassByName(parserName);
+        if (filePath != null)
+            return extract(parserInterface, parameters, Path.of(filePath));
+        else if (inputStream != null)
+            return extract(parserInterface, parameters, inputStream);
+        else
+            throw new NotAcceptableException("Both the file path and inputstream are null.");
     }
 
-    private Class<? extends ParserInterface> getClassParserExtension(String extension) {
+    private ParserInterface getClassParserExtension(String extension) {
         return StringUtils.isEmpty(extension) ? null : extractorManager.findParserClassByExtensionFirst(extension);
     }
 
-    private Class<? extends ParserInterface> getClassParserMimeType(String mimeType) {
+    private ParserInterface getClassParserMimeType(String mimeType) {
         return StringUtils.isEmpty(mimeType) ? null : extractorManager.findParserClassByMimeTypeFirst(mimeType);
     }
 
@@ -142,78 +172,84 @@ final class ExtractorServiceImpl extends AbstractServiceImpl implements Extracto
             if (match == null)
                 return null;
             return match.getMimeType();
-        } catch (MagicParseException | MagicMatchNotFoundException | MagicException e) {
+        }
+        catch (MagicParseException | MagicMatchNotFoundException | MagicException e) {
             return null;
         }
     }
 
     private ParserResult putMagicPath(final MultivaluedMap<String, String> queryParameters,
                                       final String filePath,
-                                      String mimeType) throws Exception {
+                                      String mimeType) {
 
         final Path path = getFilePath(filePath);
 
         // Find a parser with the extension
         final String extension = FilenameUtils.getExtension(path.getFileName().toString());
-        Class<? extends ParserInterface> parserClass = getClassParserExtension(extension);
+        ParserInterface parserInterface = getClassParserExtension(extension);
 
         // Find a parser with the mimeType
-        if (parserClass == null) {
+        if (parserInterface == null) {
             if (StringUtils.isEmpty(mimeType))
                 mimeType = getMimeMagic(path);
             if (!StringUtils.isEmpty(mimeType))
-                parserClass = getClassParserMimeType(mimeType);
+                parserInterface = getClassParserMimeType(mimeType);
         }
 
         // Do the extraction
-        final ParserInterface parser = getParser(parserClass);
-        final ParserResultBuilder result = new ParserResultBuilder(parser);
-        parser.parseContent(queryParameters, path, extension, mimeType, result);
-        return result.build();
+        return extract(parserInterface, queryParameters, path);
     }
 
     private ParserResult putMagicStream(final MultivaluedMap<String, String> queryParameters,
                                         final String fileName, String mimeType,
-                                        final InputStream inputStream) throws Exception {
+                                        final InputStream inputStream) {
 
         Path tempFile = null;
         try {
-            Class<? extends ParserInterface> parserClass = null;
+            ParserInterface parser = null;
 
             // Find a parser with the extension
             String extension = null;
             if (!StringUtils.isEmpty(fileName)) {
                 extension = FilenameUtils.getExtension(fileName);
-                parserClass = getClassParserExtension(extension);
+                parser = getClassParserExtension(extension);
             }
 
             // Find a parser from the mime type
-            if (parserClass == null) {
+            if (parser == null) {
                 if (StringUtils.isEmpty(mimeType)) {
                     tempFile = Files.createTempFile("textextractor",
                             extension == null ? StringUtils.EMPTY : "." + extension);
                     try {
                         IOUtils.copy(inputStream, tempFile);
-                    } finally {
+                    }
+                    finally {
                         IOUtils.closeQuietly((AutoCloseable) inputStream);
                     }
                     mimeType = getMimeMagic(tempFile);
                 }
                 if (!StringUtils.isEmpty(mimeType))
-                    parserClass = getClassParserMimeType(mimeType);
+                    parser = getClassParserMimeType(mimeType);
             }
 
             // Do the extraction
-            final ParserInterface parser = getParser(parserClass);
-            final ParserResultBuilder result = new ParserResultBuilder(parser);
             if (tempFile != null)
-                parser.parseContent(queryParameters, tempFile, extension, mimeType, result);
+                return extract(parser, queryParameters, tempFile);
             else
-                parser.parseContent(queryParameters, inputStream, extension, mimeType, result);
-            return result.build();
-        } finally {
-            if (tempFile != null)
-                Files.deleteIfExists(tempFile);
+                return extract(parser, queryParameters, inputStream);
+        }
+        catch (IOException e) {
+            throw new InternalServerErrorException("An I/O error occurred: " + e, e);
+        }
+        finally {
+            if (tempFile != null) {
+                try {
+                    Files.deleteIfExists(tempFile);
+                }
+                catch (IOException e) {
+                    LOGGER.log(Level.WARNING, e, e::getMessage);
+                }
+            }
         }
     }
 
@@ -223,14 +259,12 @@ final class ExtractorServiceImpl extends AbstractServiceImpl implements Extracto
                                      final String filePath,
                                      final String mimeType,
                                      final InputStream inputStream) {
-        try {
-            if (checkIsPath(filePath, inputStream))
-                return putMagicPath(parameters, filePath, mimeType);
-            else
-                return putMagicStream(parameters, fileName, mimeType, inputStream);
-        } catch (Exception e) {
-            throw ServerException.getJsonException(LOGGER, e);
-        }
+        if (filePath != null)
+            return putMagicPath(parameters, filePath, mimeType);
+        else if (inputStream != null)
+            return putMagicStream(parameters, fileName, mimeType, inputStream);
+        else
+            throw new NotAcceptableException("Both the file path and inputstream are null.");
     }
 
     @Override

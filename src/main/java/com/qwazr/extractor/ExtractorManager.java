@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2018 Emmanuel Keller / QWAZR
+ * Copyright 2015-2020 Emmanuel Keller / QWAZR
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,38 +17,31 @@ package com.qwazr.extractor;
 import com.qwazr.utils.ClassLoaderUtils;
 import com.qwazr.utils.LoggerUtils;
 
+import javax.ws.rs.InternalServerErrorException;
+import javax.ws.rs.NotAcceptableException;
 import javax.ws.rs.core.MultivaluedHashMap;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.Set;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Logger;
 
 public class ExtractorManager {
 
     private final static Logger LOGGER = LoggerUtils.getLogger(ExtractorManager.class);
 
-    private final ReadWriteLock rwl = new ReentrantReadWriteLock();
+    private final ParserMap parserMap;
 
-    private final LinkedHashMap<String, Class<? extends ParserInterface>> namesMap;
-
-    private final MultivaluedHashMap<String, Class<? extends ParserInterface>> mimeTypesMap;
-
-    private final MultivaluedHashMap<String, Class<? extends ParserInterface>> extensionsMap;
+    private volatile ParserMap volatileParserMap;
 
     private final ExtractorServiceInterface service;
 
     public ExtractorManager() {
-
-        namesMap = new LinkedHashMap<>();
-        mimeTypesMap = new MultivaluedHashMap<>();
-        extensionsMap = new MultivaluedHashMap<>();
-
+        parserMap = new ParserMap();
+        volatileParserMap = new ParserMap(parserMap);
         service = new ExtractorServiceImpl(this);
-
     }
 
     public ExtractorManager registerServices() {
@@ -61,25 +54,8 @@ public class ExtractorManager {
         return service;
     }
 
-    private void register(final ParserInterface parser) {
-        Lock l = rwl.writeLock();
-        l.lock();
-        try {
-            final Class<? extends ParserInterface> parserClass = parser.getClass();
-            LOGGER.info(() -> "Registering " + parserClass);
-            namesMap.put(parser.getName(), parserClass);
-            final String[] extensions = parser.getDefaultExtensions();
-            if (extensions != null)
-                for (String extension : extensions)
-                    extensionsMap.add(extension.intern(), parserClass);
-            final String[] mimeTypes = parser.getDefaultMimeTypes();
-            if (mimeTypes != null)
-                for (String mimeType : mimeTypes)
-                    mimeTypesMap.add(mimeType.intern(), parserClass);
-        }
-        finally {
-            l.unlock();
-        }
+    private synchronized void register(final ParserInterface parser) {
+        volatileParserMap = parserMap.register(parser);
     }
 
     final public void register(Class<? extends ParserInterface> parserClass) {
@@ -87,55 +63,83 @@ public class ExtractorManager {
             register(parserClass.getDeclaredConstructor().newInstance());
         }
         catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-            throw new RuntimeException(e);
+            throw new InternalServerErrorException("Cannot create an instance of " + parserClass, e);
         }
     }
 
     final public void register(String className) throws ClassNotFoundException {
+        if (className == null)
+            throw new NotAcceptableException("The classname is missing");
         register(ClassLoaderUtils.findClass(className));
     }
 
-    final public Class<? extends ParserInterface> findParserClassByName(String parserName) {
-        Lock l = rwl.readLock();
-        l.lock();
-        try {
-            return namesMap.get(parserName);
-        }
-        finally {
-            l.unlock();
-        }
+    final public ParserInterface findParserClass(final Class<? extends ParserInterface> parserClass) {
+        if (parserClass == null)
+            throw new NotAcceptableException("The parserClass is missing");
+        return volatileParserMap.classesMap.get(parserClass);
     }
 
-    final public Class<? extends ParserInterface> findParserClassByMimeTypeFirst(String mimeType) {
-        Lock l = rwl.readLock();
-        l.lock();
-        try {
-            return mimeTypesMap.getFirst(mimeType);
-        }
-        finally {
-            l.unlock();
-        }
+    final public ParserInterface findParserClassByName(String parserName) {
+        if (parserName == null)
+            throw new NotAcceptableException("The parserName is missing");
+        return volatileParserMap.namesMap.get(parserName);
     }
 
-    final public Class<? extends ParserInterface> findParserClassByExtensionFirst(String extension) {
-        Lock l = rwl.readLock();
-        l.lock();
-        try {
-            return extensionsMap.getFirst(extension);
-        }
-        finally {
-            l.unlock();
-        }
+    final public ParserInterface findParserClassByMimeTypeFirst(String mimeType) {
+        if (mimeType == null)
+            throw new NotAcceptableException("The mimeType is missing");
+        return volatileParserMap.mimeTypesMap.getFirst(mimeType);
+    }
+
+    final public ParserInterface findParserClassByExtensionFirst(String extension) {
+        if (extension == null)
+            throw new NotAcceptableException("The extension is missing");
+        return volatileParserMap.extensionsMap.getFirst(extension);
     }
 
     final public Set<String> getList() {
-        Lock l = rwl.readLock();
-        l.lock();
-        try {
-            return namesMap.keySet();
+        return volatileParserMap.namesMap.keySet();
+    }
+
+    private static class ParserMap {
+
+        private final Map<Class<? extends ParserInterface>, ParserInterface> classesMap;
+
+        private final Map<String, ParserInterface> namesMap;
+
+        private final MultivaluedHashMap<String, ParserInterface> mimeTypesMap;
+
+        private final MultivaluedHashMap<String, ParserInterface> extensionsMap;
+
+        private ParserMap() {
+            classesMap = new HashMap<>();
+            namesMap = new LinkedHashMap<>();
+            mimeTypesMap = new MultivaluedHashMap<>();
+            extensionsMap = new MultivaluedHashMap<>();
         }
-        finally {
-            l.unlock();
+
+        private ParserMap(final ParserMap parserMap) {
+            this.classesMap = Map.copyOf(parserMap.classesMap);
+            this.namesMap = Map.copyOf(parserMap.namesMap);
+            this.mimeTypesMap = new MultivaluedHashMap<>(parserMap.mimeTypesMap);
+            this.extensionsMap = new MultivaluedHashMap<>(parserMap.extensionsMap);
+        }
+
+        private synchronized ParserMap register(final ParserInterface parser) {
+            final Class<? extends ParserInterface> parserClass = parser.getClass();
+            final String parserName = parser.getName().intern();
+            LOGGER.info(() -> "Registering " + parserName + " " + parserClass);
+            classesMap.put(parserClass, parser);
+            namesMap.put(parserName, parser);
+            final String[] extensions = parser.getDefaultExtensions();
+            if (extensions != null)
+                for (String extension : extensions)
+                    extensionsMap.add(extension.intern(), parser);
+            final String[] mimeTypes = parser.getDefaultMimeTypes();
+            if (mimeTypes != null)
+                for (String mimeType : mimeTypes)
+                    mimeTypesMap.add(mimeType.intern(), parser);
+            return new ParserMap(this);
         }
     }
 

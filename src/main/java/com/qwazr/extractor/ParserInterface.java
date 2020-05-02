@@ -17,8 +17,11 @@ package com.qwazr.extractor;
 
 import org.apache.commons.io.FilenameUtils;
 
+import javax.ws.rs.InternalServerErrorException;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MultivaluedMap;
 import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -74,10 +77,9 @@ public interface ParserInterface {
      * @param extension     the optional extension of the file
      * @param mimeType      the option mime type of the file
      * @param resultBuilder the result builder to fill
-     * @throws Exception if any error occurs
      */
     void parseContent(final MultivaluedMap<String, String> parameters, final InputStream inputStream,
-                      final String extension, final String mimeType, final ParserResultBuilder resultBuilder) throws Exception;
+                      final String extension, final String mimeType, final ParserResultBuilder resultBuilder);
 
     /**
      * Read a document and fill the resultBuilder.
@@ -87,16 +89,31 @@ public interface ParserInterface {
      * @param extension     an optional extension of the file
      * @param mimeType      an optional mime type of the file
      * @param resultBuilder the result builder to fill
-     * @throws Exception if any error occurs
      */
     default void parseContent(final MultivaluedMap<String, String> parameters, final Path filePath, String extension,
-                              final String mimeType, final ParserResultBuilder resultBuilder) throws Exception {
+                              final String mimeType, final ParserResultBuilder resultBuilder) {
         if (extension == null)
             extension = FilenameUtils.getExtension(filePath.getFileName().toString());
         try (final InputStream in = Files.newInputStream(filePath);
              final BufferedInputStream bIn = new BufferedInputStream(in)) {
             parseContent(parameters, bIn, extension, mimeType, resultBuilder);
         }
+        catch (IOException e) {
+            throw convertIOException(e);
+        }
+    }
+
+    default WebApplicationException convertException(final Exception e) {
+        if (e instanceof IOException)
+            return convertIOException(((IOException) e));
+        else if (e instanceof WebApplicationException)
+            return (WebApplicationException) e;
+        else
+            return new InternalServerErrorException("An unknown error occurred: " + e.getMessage(), e);
+    }
+
+    default WebApplicationException convertIOException(final IOException e) {
+        return new InternalServerErrorException("An I/O error occurred: " + e.getMessage(), e);
     }
 
 }

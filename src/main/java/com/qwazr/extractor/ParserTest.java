@@ -28,8 +28,8 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -53,18 +53,14 @@ public class ParserTest {
     /**
      * Check if the parser has been registered, and create the an instance.
      *
-     * @param className
-     * @return An instance
-     * @throws IllegalAccessException
-     * @throws InstantiationException
-     * @throws IOException
+     * @param className the name of the class to register
+     * @return the singleton instance of the parser
      */
-    protected ParserInterface createRegisterInstance(Class<? extends ParserAbstract> className)
-            throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-        Class<? extends ParserInterface> parserClass =
+    protected ParserInterface createRegisterInstance(Class<? extends ParserAbstract> className) {
+        ParserInterface parser =
                 manager.findParserClassByName(StringUtils.removeEnd(className.getSimpleName(), "Parser").toLowerCase());
-        assert (parserClass != null);
-        return parserClass.getDeclaredConstructor().newInstance();
+        assert (parser != null);
+        return parser;
     }
 
     protected InputStream getStream(String fileName) {
@@ -86,9 +82,9 @@ public class ParserTest {
     /**
      * Check if the given string is present in a map
      *
-     * @param map
-     * @param text
-     * @return
+     * @param map  the map to check
+     * @param text the text to find into the map
+     * @return true if the text is find in the map values
      */
     protected boolean checkMapContainsText(Map<String, Object> map, String text) {
         for (Object value : map.values())
@@ -97,7 +93,7 @@ public class ParserTest {
         return false;
     }
 
-    protected boolean checkCollectionContainsText(Collection<Object> collection, String text) {
+    protected boolean checkCollectionContainsText(Collection<?> collection, String text) {
         for (Object value : collection)
             if (checkContainsTextValue(value, text))
                 return true;
@@ -108,7 +104,7 @@ public class ParserTest {
         if (value == null)
             return false;
         if (value instanceof Collection)
-            return checkCollectionContainsText((Collection) value, text);
+            return checkCollectionContainsText((Collection<?>) value, text);
         if (value instanceof Map)
             return checkMapContainsText((Map) value, text);
         return value.toString().contains(text);
@@ -117,8 +113,9 @@ public class ParserTest {
     /**
      * Check if the given string is present in the result
      *
-     * @param result
-     * @param text
+     * @param result    the ParserResult to check
+     * @param fieldName The field to look at in the ParserResult
+     * @param text      the text to look at
      */
     protected void checkContainsText(ParserResult result, String fieldName, String text) {
         if (text == null)
@@ -149,13 +146,16 @@ public class ParserTest {
     /**
      * Test inputstream and file parsing
      *
-     * @param className
-     * @param fileName
-     * @param keyValueParams
-     * @throws Exception
+     * @param className        the class to test
+     * @param expectedMimeType the expected Mime type to find
+     * @param expectedField    the expected field to find
+     * @param expectedText     the expected text to find
+     * @param fileName         the filename of the file to extract
+     * @param keyValueParams   the parameters to apply
+     * @return the ParserResult
      */
     protected ParserResult doTest(Class<? extends ParserAbstract> className, String fileName, String expectedMimeType,
-                                  String expectedField, String expectedText, String... keyValueParams) throws Exception {
+                                  String expectedField, String expectedText, String... keyValueParams) throws URISyntaxException, IOException {
         LOGGER.info("Testing " + className);
 
         UriBuilder uriBuilder = new JerseyUriBuilder().uri("http://localhost:9090");

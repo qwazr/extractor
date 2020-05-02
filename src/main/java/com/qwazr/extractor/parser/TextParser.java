@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017 Emmanuel Keller / QWAZR
+ * Copyright 2015-2020 Emmanuel Keller / QWAZR
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,59 +31,62 @@ import java.nio.charset.Charset;
 
 public class TextParser extends ParserAbstract {
 
-	private static final String[] DEFAULT_MIMETYPES = { "text/plain" };
+    private static final String[] DEFAULT_MIMETYPES = {"text/plain"};
 
-	private static final String[] DEFAULT_EXTENSIONS = { "txt" };
+    private static final String[] DEFAULT_EXTENSIONS = {"txt"};
 
-	final private static ParserField CHARSET_DETECTION =
-			ParserField.newString("charset_detection", "Detection of the charset");
+    final private static ParserField CHARSET_DETECTION =
+            ParserField.newString("charset_detection", "Detection of the charset");
 
-	final private static ParserField[] FIELDS = { CONTENT, LANG_DETECTION, CHARSET_DETECTION };
+    final private static ParserField[] FIELDS = {CONTENT, LANG_DETECTION, CHARSET_DETECTION};
 
-	@Override
-	public ParserField[] getParameters() {
-		return null;
-	}
+    @Override
+    public ParserField[] getParameters() {
+        return null;
+    }
 
-	@Override
-	public ParserField[] getFields() {
-		return FIELDS;
-	}
+    @Override
+    public ParserField[] getFields() {
+        return FIELDS;
+    }
 
-	@Override
-	public String[] getDefaultExtensions() {
-		return DEFAULT_EXTENSIONS;
-	}
+    @Override
+    public String[] getDefaultExtensions() {
+        return DEFAULT_EXTENSIONS;
+    }
 
-	@Override
-	public String[] getDefaultMimeTypes() {
-		return DEFAULT_MIMETYPES;
-	}
+    @Override
+    public String[] getDefaultMimeTypes() {
+        return DEFAULT_MIMETYPES;
+    }
 
-	@Override
-	public void parseContent(final MultivaluedMap<String, String> parameters, final InputStream inputStream,
-			String extension, final String mimeType, final ParserResultBuilder resultBuilder) throws IOException {
+    @Override
+    public void parseContent(final MultivaluedMap<String, String> parameters, final InputStream inputStream,
+                             String extension, final String mimeType, final ParserResultBuilder resultBuilder) {
 
-		resultBuilder.metas().set(MIME_TYPE, findMimeType(extension, mimeType, this::findMimeTypeUsingDefault));
+        resultBuilder.metas().set(MIME_TYPE, findMimeType(extension, mimeType, this::findMimeTypeUsingDefault));
 
-		// Trying to detect the CHARSET of the stream
-		final CharsetDetector detector = new CharsetDetector();
+        // Trying to detect the CHARSET of the stream
+        final CharsetDetector detector = new CharsetDetector();
 
-		try (BufferedInputStream bis = new BufferedInputStream(inputStream)) {
-			detector.setText(bis);
-			final CharsetMatch match = detector.detect();
-			final ParserFieldsBuilder result = resultBuilder.newDocument();
-			final String content;
-			if (match != null) {
-				content = match.getString();
-				result.add(CHARSET_DETECTION, match.getName());
-			} else {
-				bis.reset();
-				content = IOUtils.toString(bis, Charset.defaultCharset());
-			}
-			result.add(CONTENT, content);
-			result.add(LANG_DETECTION, languageDetection(result, CONTENT, 10000));
-		}
-	}
+        try (final BufferedInputStream bis = new BufferedInputStream(inputStream)) {
+            detector.setText(bis);
+            final CharsetMatch match = detector.detect();
+            final ParserFieldsBuilder result = resultBuilder.newDocument();
+            final String content;
+            if (match != null) {
+                content = match.getString();
+                result.add(CHARSET_DETECTION, match.getName());
+            } else {
+                bis.reset();
+                content = IOUtils.toString(bis, Charset.defaultCharset());
+            }
+            result.add(CONTENT, content);
+            result.add(LANG_DETECTION, languageDetection(result, CONTENT, 10000));
+        }
+        catch (IOException e) {
+            throw convertIOException(e);
+        }
+    }
 
 }

@@ -56,10 +56,13 @@ public interface ExtractorServiceInterface extends ServiceInterface {
                      @QueryParam("path") String filePath,
                      InputStream inputStream);
 
-    ParserResult extract(String parserName,
+    ParserResult extract(Class<? extends ParserInterface> parser,
                          MultivaluedMap<String, String> parameters,
-                         String filePath,
                          InputStream inputStream);
+
+    ParserResult extract(Class<? extends ParserInterface> parser,
+                         MultivaluedMap<String, String> parameters,
+                         java.nio.file.Path path);
 
     @PUT
     @Path("/")
