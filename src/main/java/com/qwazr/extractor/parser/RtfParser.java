@@ -15,60 +15,72 @@
  */
 package com.qwazr.extractor.parser;
 
-import com.qwazr.extractor.ParserAbstract;
+import com.qwazr.extractor.ParserFactory;
 import com.qwazr.extractor.ParserField;
-import com.qwazr.extractor.ParserFieldsBuilder;
-import com.qwazr.extractor.ParserResultBuilder;
-
+import com.qwazr.extractor.ParserInterface;
+import com.qwazr.extractor.ParserResult;
+import com.qwazr.extractor.ParserUtils;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Path;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.rtf.RTFEditorKit;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
-import java.io.IOException;
-import java.io.InputStream;
 
-public class RtfParser extends ParserAbstract {
+public class RtfParser implements ParserFactory, ParserInterface {
 
-    private static final String[] DEFAULT_MIMETYPES = {"application/rtf", "text/richtext"};
+    private final static String NAME = "rtf";
 
-    private static final String[] DEFAULT_EXTENSIONS = {"rtf", "rtx"};
+    private static final Map<String, MediaType> EXT_TYPES = Map.of(
+            "rtf", MediaType.valueOf("application/rtf"),
+            "rtx", MediaType.valueOf("text/richtext"));
 
-    final private static ParserField[] FIELDS = {TITLE, CONTENT, LANG_DETECTION};
+    final private static List<ParserField> FIELDS = List.of(TITLE, CONTENT, LANG_DETECTION);
 
     @Override
-    public ParserField[] getParameters() {
+    public Collection<ParserField> getParameters() {
         return null;
     }
 
     @Override
-    public ParserField[] getFields() {
+    public Collection<ParserField> getFields() {
         return FIELDS;
     }
 
     @Override
-    public String[] getDefaultExtensions() {
-        return DEFAULT_EXTENSIONS;
+    public Collection<String> getSupportedFileExtensions() {
+        return EXT_TYPES.keySet();
     }
 
     @Override
-    public String[] getDefaultMimeTypes() {
-        return DEFAULT_MIMETYPES;
+    public String getName() {
+        return NAME;
     }
 
     @Override
-    public void parseContent(final MultivaluedMap<String, String> parameters, final InputStream inputStream,
-                             String extension, final String mimeType, final ParserResultBuilder resultBuilder) {
+    public ParserInterface createParser() {
+        return this;
+    }
 
+    @Override
+    public Collection<MediaType> getSupportedMimeTypes() {
+        return EXT_TYPES.values();
+    }
+
+    private ParserResult extract(final InputStream inputStream, ParserResult.Builder builder) throws IOException {
         try {
             // Extract the text data
             final RTFEditorKit rtf = new RTFEditorKit();
             final Document doc = rtf.createDefaultDocument();
             rtf.read(inputStream, doc, 0);
 
-            resultBuilder.metas().set(MIME_TYPE, findMimeType(extension, mimeType, this::findMimeTypeUsingDefault));
-
             // Obtain a new parser document.
-            final ParserFieldsBuilder result = resultBuilder.newDocument();
+            final ParserResult.FieldsBuilder result = builder.newDocument();
 
             result.add(TITLE, doc.getProperty(Document.TitleProperty));
 
@@ -76,16 +88,29 @@ public class RtfParser extends ParserAbstract {
             result.add(CONTENT, doc.getText(0, doc.getLength()));
 
             // Apply the language detection
-            result.add(LANG_DETECTION, languageDetection(result, CONTENT, 10000));
+            result.add(LANG_DETECTION, ParserUtils.languageDetection(result, CONTENT, 10000));
 
+            return builder.build();
+        } catch (BadLocationException e) {
+            throw new IOException(e);
         }
-        catch (IOException e) {
-            throw convertIOException(e::getMessage, e);
-        }
-        catch (BadLocationException e) {
-            throw convertException(e::getMessage, e);
-        }
+    }
 
+    @Override
+    public ParserResult extract(final MultivaluedMap<String, String> parameters,
+                                final Path path) throws IOException {
+        final ParserResult.Builder builder = ParserResult.of(NAME);
+        builder.metas().set(MIME_TYPE, EXT_TYPES.get(ParserUtils.getExtension(path)));
+        return ParserUtils.toBufferedStream(path, input -> extract(input, builder));
+    }
+
+    @Override
+    public ParserResult extract(final MultivaluedMap<String, String> parameters,
+                                final InputStream inputStream,
+                                final MediaType mimeType) throws IOException {
+        final ParserResult.Builder builder = ParserResult.of(NAME);
+        builder.metas().set(MIME_TYPE, mimeType.toString());
+        return extract(inputStream, builder);
     }
 
 }

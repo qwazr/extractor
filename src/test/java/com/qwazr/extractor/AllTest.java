@@ -18,59 +18,60 @@ package com.qwazr.extractor;
 import com.qwazr.extractor.parser.ImageParser;
 import com.qwazr.extractor.parser.RtfParser;
 import com.qwazr.extractor.parser.TextParser;
+import javax.ws.rs.core.MediaType;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class AllTest extends ParserTest {
 
-	static final String DEFAULT_TEST_STRING = "osstextextractor";
+    static final String DEFAULT_TEST_STRING = "osstextextractor";
 
-	static ExtractorManager manager;
+    static ExtractorManager manager;
 
-	@BeforeClass
-	public static void init() {
-		manager = new ExtractorManager();
-		manager.registerServices();
-	}
+    @BeforeClass
+    public static void init() {
+        manager = new ExtractorManager();
+        manager.registerServices();
+    }
 
-	public AllTest() {
-		super(manager);
-	}
+    public AllTest() {
+        super(manager);
+    }
 
-	@Test
-	public void numberOfParsers() {
-		Assert.assertFalse(manager.getList().isEmpty());
-	}
+    @Test
+    public void numberOfParsers() {
+        Assert.assertFalse(manager.getParserNames().isEmpty());
+    }
 
-	@Test
-	public void testImageGif() throws Exception {
-		doTest(ImageParser.class, "file.gif", "image/gif", null, DEFAULT_TEST_STRING);
-	}
+    @Test
+    public void testImageGif() throws Exception {
+        doTest(ImageParser.class, "file.gif", MediaType.valueOf("image/gif"), null, DEFAULT_TEST_STRING);
+    }
 
-	@Test
-	public void testImageJpg() throws Exception {
-		doTest(ImageParser.class, "file.jpg", "image/jpeg", null, DEFAULT_TEST_STRING);
-	}
+    @Test
+    public void testImageJpg() throws Exception {
+        doTest(ImageParser.class, "file.jpg", MediaType.valueOf("image/jpeg"), null, DEFAULT_TEST_STRING);
+    }
 
-	@Test
-	public void testImagePng() throws Exception {
-		doTest(ImageParser.class, "file.png", "image/png", null, DEFAULT_TEST_STRING);
-	}
+    @Test
+    public void testImagePng() throws Exception {
+        doTest(ImageParser.class, "file.png", MediaType.valueOf("image/png"), null, DEFAULT_TEST_STRING);
+    }
 
-	//TODO tiff disabled
-	public void testImageTiff() throws Exception {
-		doTest(ImageParser.class, "file.tiff", "image/tif", null, DEFAULT_TEST_STRING);
-	}
+    //TODO tiff disabled
+    public void testImageTiff() throws Exception {
+        doTest(ImageParser.class, "file.tiff", MediaType.valueOf("image/tif"), null, DEFAULT_TEST_STRING);
+    }
 
-	@Test
-	public void testRtf() throws Exception {
-		doTest(RtfParser.class, "file.rtf", "application/rtf", "content", DEFAULT_TEST_STRING);
-	}
+    @Test
+    public void testRtf() throws Exception {
+        doTest(RtfParser.class, "file.rtf", MediaType.valueOf("application/rtf"), "content", DEFAULT_TEST_STRING);
+    }
 
-	@Test
-	public void testText() throws Exception {
-		doTest(TextParser.class, "file.txt", "text/plain", "content", DEFAULT_TEST_STRING);
-	}
+    @Test
+    public void testText() throws Exception {
+        doTest(TextParser.class, "file.txt", MediaType.valueOf("text/plain"), "content", DEFAULT_TEST_STRING);
+    }
 
 }

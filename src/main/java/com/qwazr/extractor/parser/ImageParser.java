@@ -15,40 +15,50 @@
  */
 package com.qwazr.extractor.parser;
 
-import com.qwazr.extractor.ParserAbstract;
+import com.qwazr.extractor.ParserFactory;
 import com.qwazr.extractor.ParserField;
-import com.qwazr.extractor.ParserFieldsBuilder;
-import com.qwazr.extractor.ParserResultBuilder;
+import com.qwazr.extractor.ParserInterface;
+import com.qwazr.extractor.ParserResult;
+import com.qwazr.extractor.ParserUtils;
 import com.qwazr.extractor.util.ImagePHash;
 import com.qwazr.utils.AutoCloseWrapper;
 import com.qwazr.utils.LoggerUtils;
-import org.apache.commons.lang3.NotImplementedException;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-import javax.imageio.metadata.IIOMetadata;
-import javax.imageio.stream.ImageInputStream;
-import javax.ws.rs.core.MultivaluedMap;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.metadata.IIOMetadata;
+import javax.imageio.stream.ImageInputStream;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
+import org.apache.commons.lang3.NotImplementedException;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
 
-public class ImageParser extends ParserAbstract {
+public class ImageParser implements ParserFactory, ParserInterface {
 
     private final static Logger LOGGER = LoggerUtils.getLogger(ImageParser.class);
 
-    private static final String[] DEFAULT_MIMETYPES;
+    private static final String NAME = "Image";
 
-    private static final String[] DEFAULT_EXTENSIONS;
+    private static final List<MediaType> DEFAULT_MIMETYPES;
+
+    private static final List<String> DEFAULT_EXTENSIONS;
 
     static {
-        DEFAULT_MIMETYPES = ImageIO.getReaderMIMETypes();
-        DEFAULT_EXTENSIONS = ImageIO.getReaderFileSuffixes();
+        DEFAULT_EXTENSIONS = Arrays.asList(ImageIO.getReaderFileSuffixes());
+
+        final List<MediaType> types = new ArrayList<>();
+        for (final String type : ImageIO.getReaderMIMETypes())
+            types.add(MediaType.valueOf(type));
+        DEFAULT_MIMETYPES = List.copyOf(types);
     }
 
     final private static ParserField WIDTH = ParserField.newInteger("width", "Width of the image in pixels");
@@ -59,29 +69,39 @@ public class ImageParser extends ParserAbstract {
 
     final private static ParserField PHASH = ParserField.newString("phash", "Perceptual Hash");
 
-    final private static ParserField[] FIELDS = {WIDTH, HEIGHT, FORMAT, PHASH};
+    final private static List<ParserField> FIELDS = List.of(WIDTH, HEIGHT, FORMAT, PHASH);
 
     @Override
-    public ParserField[] getParameters() {
+    public List<ParserField> getParameters() {
         return null;
     }
 
     @Override
-    public ParserField[] getFields() {
+    public List<ParserField> getFields() {
         return FIELDS;
     }
 
     @Override
-    public String[] getDefaultExtensions() {
+    public List<String> getSupportedFileExtensions() {
         return DEFAULT_EXTENSIONS;
     }
 
     @Override
-    public String[] getDefaultMimeTypes() {
+    public String getName() {
+        return NAME;
+    }
+
+    @Override
+    public ParserInterface createParser() {
+        return this;
+    }
+
+    @Override
+    public List<MediaType> getSupportedMimeTypes() {
         return DEFAULT_MIMETYPES;
     }
 
-    private void browseNodes(String path, final Node root, final ParserFieldsBuilder result) {
+    private void browseNodes(String path, final Node root, final ParserResult.FieldsBuilder result) {
         if (root == null)
             return;
         switch (root.getNodeType()) {
@@ -109,14 +129,13 @@ public class ImageParser extends ParserAbstract {
     }
 
     @Override
-    public void parseContent(final MultivaluedMap<String, String> parameters, final Path path, final String extension,
-                             final String mimeType, final ParserResultBuilder resultBuilder) {
-
+    public ParserResult extract(final MultivaluedMap<String, String> parameters, final Path path) throws IOException {
+        final ParserResult.Builder resultBuilder = ParserResult.of(NAME);
         final ImagePHash imgPhash = new ImagePHash();
         try (final ImageInputStream in = ImageIO.createImageInputStream(path.toFile())) {
             final Iterator<ImageReader> readers = ImageIO.getImageReaders(in);
             if (readers.hasNext()) {
-                ParserFieldsBuilder result = resultBuilder.newDocument();
+                ParserResult.FieldsBuilder result = resultBuilder.newDocument();
                 ImageReader reader = readers.next();
                 resultBuilder.metas().set(MIME_TYPE, "image/" + reader.getFormatName().toLowerCase());
                 try {
@@ -132,27 +151,24 @@ public class ImageParser extends ParserAbstract {
                             for (String name : names)
                                 browseNodes("META", metadata.getAsTree(name), result);
                     }
-                }
-                finally {
+                } finally {
                     reader.dispose();
                 }
             }
         }
-        catch (IOException e) {
-            throw convertIOException(() -> "Error with " + path.toAbsolutePath(), e);
-        }
+        return resultBuilder.build();
     }
 
     @Override
-    public void parseContent(final MultivaluedMap<String, String> parameters, final InputStream inputStream,
-                             final String extension, final String mimeType, final ParserResultBuilder resultBuilder) {
+    public ParserResult extract(final MultivaluedMap<String, String> parameters,
+                                final InputStream inputStream,
+                                final MediaType mediaType) throws IOException {
         try (final AutoCloseWrapper<Path> a = AutoCloseWrapper.of(
-                ParserAbstract.createTempFile(inputStream, extension == null ? "image" : "." + extension),
+                ParserUtils.createTempFile(inputStream, "image" + "." + mediaType.getSubtype()),
                 LOGGER, Files::deleteIfExists)) {
-            parseContent(parameters, a.get(), extension, mimeType, resultBuilder);
-        }
-        catch (IOException e) {
-            throw convertIOException(e::getMessage, e);
+            return extract(parameters, a.get());
         }
     }
+
+
 }

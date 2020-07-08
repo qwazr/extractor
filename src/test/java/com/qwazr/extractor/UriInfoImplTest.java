@@ -102,7 +102,7 @@ public class UriInfoImplTest {
 	}
 
 	@Test(expected = NotImplementedException.class)
-	public void getMatriParameters() {
+	public void getMatrixParameters() {
 		uriInfo.getPathSegments().get(0).getMatrixParameters();
 	}
 }

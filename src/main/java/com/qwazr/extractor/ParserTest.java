@@ -17,26 +17,32 @@ package com.qwazr.extractor;
 
 import com.qwazr.utils.LoggerUtils;
 import com.qwazr.utils.ObjectMappers;
-import com.qwazr.utils.StringUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
-import org.glassfish.jersey.uri.internal.JerseyUriBuilder;
-
-import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriInfo;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Logger;
+import javax.ws.rs.core.Cookie;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriInfo;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
+import org.glassfish.jersey.uri.internal.JerseyUriBuilder;
 
 public class ParserTest {
 
@@ -50,18 +56,6 @@ public class ParserTest {
         this.service = manager.getService();
     }
 
-    /**
-     * Check if the parser has been registered, and create the an instance.
-     *
-     * @param className the name of the class to register
-     * @return the singleton instance of the parser
-     */
-    protected ParserInterface createRegisterInstance(Class<? extends ParserAbstract> className) {
-        ParserInterface parser =
-                manager.findParserClassByName(StringUtils.removeEnd(className.getSimpleName(), "Parser").toLowerCase());
-        assert (parser != null);
-        return parser;
-    }
 
     protected InputStream getStream(String fileName) {
         InputStream inputStream = getClass().getResourceAsStream(fileName);
@@ -133,20 +127,21 @@ public class ParserTest {
         assert false;
     }
 
-    protected void checkIsMimeType(ParserInterface parser, ParserResult result, String expectedMimeType) {
+    protected void checkIsMimeType(ParserFactory factory, ParserResult result, MediaType expectedMimeType) {
         assert result != null;
         assert result.metas != null;
         final Object mimeType = result.metas.get("mime_type");
         assert mimeType != null;
-        assert mimeType.equals(expectedMimeType);
-        if (parser.getDefaultMimeTypes() != null)
-            assert Arrays.asList(parser.getDefaultMimeTypes()).contains(expectedMimeType);
+        assert mimeType instanceof String;
+        assert mimeType.equals(expectedMimeType.toString());
+        if (factory.getSupportedMimeTypes() != null)
+            assert factory.getSupportedMimeTypes().contains(expectedMimeType);
     }
 
     /**
      * Test inputstream and file parsing
      *
-     * @param className        the class to test
+     * @param factoryClassName the class to test
      * @param expectedMimeType the expected Mime type to find
      * @param expectedField    the expected field to find
      * @param expectedText     the expected text to find
@@ -156,25 +151,30 @@ public class ParserTest {
      * @throws URISyntaxException if any URL syntax error occurs
      * @throws IOException        if any I/O error occurs
      */
-    protected ParserResult doTest(Class<? extends ParserAbstract> className, String fileName, String expectedMimeType,
-                                  String expectedField, String expectedText, String... keyValueParams) throws URISyntaxException, IOException {
-        LOGGER.info("Testing " + className);
+    protected ParserResult doTest(Class<? extends ParserFactory> factoryClassName,
+                                  String fileName,
+                                  MediaType expectedMimeType,
+                                  String expectedField,
+                                  String expectedText,
+                                  String... keyValueParams) throws URISyntaxException, IOException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        LOGGER.info("Testing " + factoryClassName);
 
         UriBuilder uriBuilder = new JerseyUriBuilder().uri("http://localhost:9090");
         for (int i = 0; i < keyValueParams.length; i += 2)
             uriBuilder.queryParam(keyValueParams[i], keyValueParams[i + 1]);
         final UriInfo uriInfo = new UriInfoImpl(new URI("http://localhost:9090"), uriBuilder.build());
 
-        final String parserName = StringUtils.removeEnd(className.getSimpleName(), "Parser").toLowerCase();
+        final ParserFactory factory = factoryClassName.getConstructor().newInstance();
+        final String parserName = factory.getName();
 
         // Test service name
-        assert service.list().contains(parserName);
+        assert service.getParserNames().contains(factory.getName());
 
         // Check ParserDefinition
-        final ParserDefinition parserDefinition = (ParserDefinition) service.get(uriInfo, parserName, null);
+        final ParserDefinition parserDefinition = service.getParserDefinition(parserName);
         assert parserDefinition != null;
         if (expectedMimeType != null && parserDefinition.mimeTypes != null)
-            assert Arrays.asList(parserDefinition.mimeTypes).contains(expectedMimeType);
+            assert parserDefinition.mimeTypes.contains(expectedMimeType.toString());
 
         final ParserDefinition serialParserDefinition =
                 ObjectMappers.JSON.readValue(ObjectMappers.JSON.writeValueAsString(parserDefinition),
@@ -183,40 +183,42 @@ public class ParserTest {
 
         Path tempFile = getTempFile(fileName);
 
-        // Test stream
-        ParserInterface parser = createRegisterInstance(className);
+        ParserResult parserResult;
 
-        ParserResultBuilder resultBuilder = new ParserResultBuilder(parser);
-        parser.parseContent(uriInfo.getQueryParameters(), getStream(fileName), FilenameUtils.getExtension(fileName),
-                null, resultBuilder);
-        ParserResult parserResult = resultBuilder.build();
-        assert (parserResult != null);
+        {  // Test stream
+            ParserInterface parser = factory.createParser();
+            parserResult = parser.extract(uriInfo.getQueryParameters(), getStream(fileName), expectedMimeType);
+            assert (parserResult != null);
+            checkIsMimeType(factory, parserResult, expectedMimeType);
+            checkContainsText(parserResult, expectedField, expectedText);
+        }
 
-        checkIsMimeType(parser, parserResult, expectedMimeType);
-
-        checkContainsText(parserResult, expectedField, expectedText);
-
-        // Test file
-        parser = createRegisterInstance(className);
-        resultBuilder = new ParserResultBuilder(parser);
-        parser.parseContent(uriInfo.getQueryParameters(), tempFile, null, null, resultBuilder);
-        assert (parserResult != null);
-        checkContainsText(parserResult, expectedField, expectedText);
+        { // Test file
+            ParserInterface parser = factory.createParser();
+            parserResult = parser.extract(uriInfo.getQueryParameters(), tempFile);
+            assert (parserResult != null);
+            checkContainsText(parserResult, expectedField, expectedText);
+        }
 
         // No magic to test if the parser doesn't support detection
-        if (parser.getDefaultMimeTypes() == null && parser.getDefaultExtensions() == null)
+        if (expectedMimeType != null && factory.getSupportedMimeTypes() == null && factory.getSupportedFileExtensions() == null)
             return parserResult;
 
         // Test stream with magic mime service
-        parserResult = service.putMagic(uriInfo, fileName, null, null, getStream(fileName));
+
+        parserResult = service.extractStream(uriInfo,
+                new HttpHeadersImpl(Map.of(HttpHeaders.CONTENT_TYPE, expectedMimeType.toString())),
+                getStream(fileName));
         assert (parserResult != null);
         checkContainsText(parserResult, expectedField, expectedText);
 
         // Test path with magic mime service
-        parserResult = service.putMagic(uriInfo, fileName, tempFile.toAbsolutePath().toString(), null, null);
+        parserResult = service.extractFile(uriInfo, tempFile.toAbsolutePath().toString());
         assert (parserResult != null);
         checkContainsText(parserResult, expectedField, expectedText);
 
         return parserResult;
     }
+
+
 }

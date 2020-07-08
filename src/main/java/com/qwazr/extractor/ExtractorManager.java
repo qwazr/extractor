@@ -14,133 +14,207 @@
  */
 package com.qwazr.extractor;
 
-import com.qwazr.utils.ClassLoaderUtils;
+import com.qwazr.server.ServerException;
 import com.qwazr.utils.LoggerUtils;
-
-import javax.ws.rs.InternalServerErrorException;
-import javax.ws.rs.NotAcceptableException;
-import javax.ws.rs.core.MultivaluedHashMap;
-import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
+import com.qwazr.utils.concurrent.FunctionEx;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.ws.rs.InternalServerErrorException;
+import javax.ws.rs.NotAcceptableException;
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 
-public class ExtractorManager {
+public class ExtractorManager implements ParserInterface, AutoCloseable {
 
     private final static Logger LOGGER = LoggerUtils.getLogger(ExtractorManager.class);
 
-    private final ParserMap parserMap;
-
-    private volatile ParserMap volatileParserMap;
-
     private final ExtractorServiceInterface service;
 
-    public ExtractorManager() {
-        parserMap = new ParserMap();
-        volatileParserMap = new ParserMap(parserMap);
-        service = new ExtractorServiceImpl(this);
-    }
+    private final List<ParserLoader> parserLoaders;
 
-    public ExtractorManager registerServices() {
-        ServiceLoader.load(ParserInterface.class, Thread.currentThread().getContextClassLoader())
-                .forEach(this::register);
-        return this;
+    private final Map<MediaType, List<Parser>> mimeTypesMap;
+
+    private final Map<String, List<Parser>> extensionsMap;
+
+    private final SortedMap<String, ParserFactory> parserFactories;
+
+    public ExtractorManager() {
+        parserLoaders = Collections.synchronizedList(new ArrayList<>());
+        mimeTypesMap = new ConcurrentHashMap<>();
+        extensionsMap = new ConcurrentHashMap<>();
+        parserFactories = Collections.synchronizedSortedMap(new TreeMap<>());
+        service = new ExtractorServiceImpl(this);
     }
 
     public ExtractorServiceInterface getService() {
         return service;
     }
 
-    private synchronized void register(final ParserInterface parser) {
-        volatileParserMap = parserMap.register(parser);
+    public Set<String> getParserNames() {
+        return parserFactories.keySet();
     }
 
-    final public void register(Class<? extends ParserInterface> parserClass) {
-        try {
-            register(parserClass.getDeclaredConstructor().newInstance());
-        }
-        catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-            throw new InternalServerErrorException("Cannot create an instance of " + parserClass, e);
-        }
+    public ExtractorManager registerServices() {
+        ServiceLoader
+                .load(ParserFactory.class, Thread.currentThread().getContextClassLoader())
+                .forEach(factory -> register(factory, new Parser(factory)));
+        return this;
     }
 
-    final public void register(String className) throws ClassNotFoundException {
-        if (className == null)
-            throw new NotAcceptableException("The classname is missing");
-        register(ClassLoaderUtils.findClass(className));
+    public ExtractorManager registerExternalServices(final Path classesPath, final Path libPath) throws IOException {
+        final ParserLoader loader = new ParserLoader(classesPath, libPath);
+        parserLoaders.add(loader);
+        loader.apply(classLoader -> {
+            ServiceLoader.
+                    load(ParserFactory.class, classLoader)
+                    .forEach(factory -> register(factory, new ParserWithClassloader(loader, factory)));
+            return null;
+        });
+        return this;
     }
 
-    final public ParserInterface findParserClass(final Class<? extends ParserInterface> parserClass) {
-        if (parserClass == null)
-            throw new NotAcceptableException("The parserClass is missing");
-        return volatileParserMap.classesMap.get(parserClass);
-    }
-
-    final public ParserInterface findParserClassByName(String parserName) {
-        if (parserName == null)
-            throw new NotAcceptableException("The parserName is missing");
-        return volatileParserMap.namesMap.get(parserName);
-    }
-
-    final public ParserInterface findParserClassByMimeTypeFirst(String mimeType) {
-        if (mimeType == null)
-            throw new NotAcceptableException("The mimeType is missing");
-        return volatileParserMap.mimeTypesMap.getFirst(mimeType);
-    }
-
-    final public ParserInterface findParserClassByExtensionFirst(String extension) {
-        if (extension == null)
-            throw new NotAcceptableException("The extension is missing");
-        return volatileParserMap.extensionsMap.getFirst(extension);
-    }
-
-    final public Set<String> getList() {
-        return volatileParserMap.namesMap.keySet();
-    }
-
-    private static class ParserMap {
-
-        private final Map<Class<? extends ParserInterface>, ParserInterface> classesMap;
-
-        private final Map<String, ParserInterface> namesMap;
-
-        private final MultivaluedHashMap<String, ParserInterface> mimeTypesMap;
-
-        private final MultivaluedHashMap<String, ParserInterface> extensionsMap;
-
-        private ParserMap() {
-            classesMap = new HashMap<>();
-            namesMap = new LinkedHashMap<>();
-            mimeTypesMap = new MultivaluedHashMap<>();
-            extensionsMap = new MultivaluedHashMap<>();
-        }
-
-        private ParserMap(final ParserMap parserMap) {
-            this.classesMap = Map.copyOf(parserMap.classesMap);
-            this.namesMap = Map.copyOf(parserMap.namesMap);
-            this.mimeTypesMap = new MultivaluedHashMap<>(parserMap.mimeTypesMap);
-            this.extensionsMap = new MultivaluedHashMap<>(parserMap.extensionsMap);
-        }
-
-        private synchronized ParserMap register(final ParserInterface parser) {
-            final Class<? extends ParserInterface> parserClass = parser.getClass();
-            final String parserName = parser.getName().intern();
-            LOGGER.info(() -> "Registering " + parserName + " " + parserClass);
-            classesMap.put(parserClass, parser);
-            namesMap.put(parserName, parser);
-            final String[] extensions = parser.getDefaultExtensions();
+    private void register(final ParserFactory parserFactory, final Parser parser) {
+        synchronized (parserFactories) {
+            final Collection<String> extensions = parserFactory.getSupportedFileExtensions();
             if (extensions != null)
-                for (String extension : extensions)
-                    extensionsMap.add(extension.intern(), parser);
-            final String[] mimeTypes = parser.getDefaultMimeTypes();
+                for (final String extension : extensions)
+                    extensionsMap.computeIfAbsent(extension,
+                            e -> Collections.synchronizedList(new ArrayList<>()))
+                            .add(parser);
+            final Collection<MediaType> mimeTypes = parserFactory.getSupportedMimeTypes();
             if (mimeTypes != null)
-                for (String mimeType : mimeTypes)
-                    mimeTypesMap.add(mimeType.intern(), parser);
-            return new ParserMap(this);
+                for (final MediaType mimeType : mimeTypes)
+                    mimeTypesMap.computeIfAbsent(mimeType,
+                            t -> Collections.synchronizedList(new ArrayList<>()))
+                            .add(parser);
+            parserFactories.put(parserFactory.getName(), parserFactory);
         }
     }
 
+    public ParserDefinition getParserDefinition(String parserName) {
+        final ParserFactory factory = parserFactories.get(parserName);
+        return factory == null ? null : new ParserDefinition(factory);
+    }
+
+    @Override
+    public synchronized void close() throws Exception {
+        mimeTypesMap.clear();
+        extensionsMap.clear();
+        for (final ParserLoader parserLoader : parserLoaders)
+            parserLoader.close();
+        parserLoaders.clear();
+    }
+
+    private ParserResult tryParsers(final String info,
+                                    final Collection<Parser> parsers,
+                                    final FunctionEx<Parser, ParserResult, IOException> parserFunction) throws IOException {
+        if (parsers == null || parsers.isEmpty())
+            throw new NotAcceptableException("No parser found: " + info);
+        List<Exception> exceptions = null;
+        for (final Parser parser : parsers) {
+            try {
+                return parserFunction.apply(parser);
+            } catch (Exception e) {
+                if (exceptions == null)
+                    exceptions = new ArrayList<>();
+                exceptions.add(e);
+            }
+        }
+        if (exceptions.size() == 1) {
+            final Exception exception = exceptions.get(0);
+            if (exception instanceof IOException)
+                throw (IOException) exception;
+        }
+        for (final Exception exception : exceptions) {
+            LOGGER.log(Level.WARNING, exception.getMessage(), exception);
+        }
+        throw new InternalServerErrorException("Every parser failed on '" + info + "'. See the emitted warning logs for details.");
+    }
+
+    private void checkPathIsRegularFile(final Path filePath) throws ServerException {
+        if (filePath == null)
+            throw new NotAcceptableException("The file path is missing");
+        if (!Files.exists(filePath))
+            throw new NotFoundException("File not found: " + filePath.toAbsolutePath());
+        if (!Files.isRegularFile(filePath))
+            throw new NotAcceptableException("The path is not a regular file: " + filePath.toAbsolutePath());
+    }
+
+    @Override
+    public ParserResult extract(final MultivaluedMap<String, String> parameters,
+                                final InputStream inputStream,
+                                final MediaType mimeType) throws IOException {
+        return tryParsers(mimeType.toString(), mimeTypesMap.get(mimeType),
+                parser -> parser.extract(parameters, inputStream, mimeType));
+    }
+
+    @Override
+    public ParserResult extract(final MultivaluedMap<String, String> parameters,
+                                final Path filePath) throws IOException {
+        checkPathIsRegularFile(filePath);
+        final String extension = ParserUtils.getExtension(filePath);
+        return tryParsers(extension, extensionsMap.get(extension),
+                parser -> parser.extract(parameters, filePath));
+    }
+
+    private static class Parser implements ParserInterface {
+
+        private final ParserFactory factory;
+
+        private Parser(final ParserFactory factory) {
+            this.factory = factory;
+        }
+
+        @Override
+        public ParserResult extract(final MultivaluedMap<String, String> parameters,
+                                    final InputStream inputStream,
+                                    final MediaType mimeType) throws IOException {
+            return factory.createParser().extract(parameters, inputStream, mimeType);
+        }
+
+        @Override
+        public ParserResult extract(final MultivaluedMap<String, String> parameters,
+                                    final Path filePath) throws IOException {
+            return factory.createParser().extract(parameters, filePath);
+        }
+    }
+
+    private static class ParserWithClassloader extends Parser {
+
+        private final ParserLoader loader;
+
+        private ParserWithClassloader(final ParserLoader loader,
+                                      final ParserFactory factory) {
+            super(factory);
+            this.loader = loader;
+        }
+
+        @Override
+        public ParserResult extract(final MultivaluedMap<String, String> parameters,
+                                    final InputStream inputStream,
+                                    final MediaType mimeType) throws IOException {
+            return loader.apply(classLoader -> super.extract(parameters, inputStream, mimeType));
+        }
+
+        @Override
+        public ParserResult extract(final MultivaluedMap<String, String> parameters,
+                                    final Path filePath) throws IOException {
+            return loader.apply(classLoader -> super.extract(parameters, filePath));
+        }
+    }
 }

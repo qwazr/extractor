@@ -20,8 +20,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.io.Serializable;
+import com.qwazr.utils.Equalizer;
 import java.util.Objects;
 
 @JsonInclude(Include.NON_EMPTY)
@@ -30,7 +29,7 @@ import java.util.Objects;
         isGetterVisibility = JsonAutoDetect.Visibility.NONE,
         fieldVisibility = JsonAutoDetect.Visibility.PUBLIC_ONLY,
         creatorVisibility = JsonAutoDetect.Visibility.NONE)
-public class ParserField implements Serializable {
+public class ParserField extends Equalizer.Immutable<ParserField> {
 
     /**
      * The internal name of the field.
@@ -48,25 +47,22 @@ public class ParserField implements Serializable {
     public final String description;
 
     @JsonCreator
-    ParserField(@JsonProperty("name") final String name, @JsonProperty("type") final Type type,
+    ParserField(@JsonProperty("name") final String name,
+                @JsonProperty("type") final Type type,
                 @JsonProperty("description") final String description) {
+        super(ParserField.class);
         this.name = name;
         this.type = type;
         this.description = description;
     }
 
     @Override
-    public int hashCode() {
+    protected int computeHashCode() {
         return Objects.hash(name, type, description);
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (!(o instanceof ParserField))
-            return false;
-        if (o == this)
-            return true;
-        final ParserField f = (ParserField) o;
+    protected boolean isEqual(final ParserField f) {
         return Objects.equals(name, f.name) && Objects.equals(type, f.type) &&
                 Objects.equals(description, f.description);
     }

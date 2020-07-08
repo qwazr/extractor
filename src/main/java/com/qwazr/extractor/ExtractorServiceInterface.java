@@ -16,67 +16,47 @@
 package com.qwazr.extractor;
 
 import com.qwazr.server.ServiceInterface;
-
+import java.io.InputStream;
+import java.util.Set;
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.UriInfo;
-import java.io.InputStream;
-import java.util.Set;
 
 @RolesAllowed(ExtractorServiceInterface.SERVICE_NAME)
 @Path("/" + ExtractorServiceInterface.SERVICE_NAME)
-public interface ExtractorServiceInterface extends ServiceInterface {
+public interface ExtractorServiceInterface extends ServiceInterface, ParserInterface {
 
     String SERVICE_NAME = "extractor";
 
     @GET
     @Path("/")
     @Produces(ServiceInterface.APPLICATION_JSON_UTF8)
-    Set<String> list();
+    Set<String> getParserNames();
 
     @GET
     @Path("/{name}")
     @Produces(ServiceInterface.APPLICATION_JSON_UTF8)
-    Object get(@Context UriInfo uriInfo,
-               @PathParam("name") String parserName,
-               @QueryParam("path") String path);
+    ParserDefinition getParserDefinition(final @PathParam("name") String parserName);
 
-    @PUT
-    @Path("/{name}")
+    @POST
+    @Path("/")
     @Produces(ServiceInterface.APPLICATION_JSON_UTF8)
-    ParserResult put(@Context UriInfo uriInfo,
-                     @PathParam("name") String parserName,
-                     @QueryParam("path") String filePath,
-                     InputStream inputStream);
-
-    ParserResult extract(Class<? extends ParserInterface> parser,
-                         MultivaluedMap<String, String> parameters,
-                         InputStream inputStream);
-
-    ParserResult extract(Class<? extends ParserInterface> parser,
-                         MultivaluedMap<String, String> parameters,
-                         java.nio.file.Path path);
+    ParserResult extractFile(final @Context UriInfo uriInfo,
+                             final String filePath);
 
     @PUT
     @Path("/")
     @Produces(ServiceInterface.APPLICATION_JSON_UTF8)
-    ParserResult putMagic(@Context UriInfo uriInfo,
-                          @QueryParam("name") String fileName,
-                          @QueryParam("path") String filePath,
-                          @QueryParam("type") String mimeType,
-                          InputStream inputStream);
+    ParserResult extractStream(final @Context UriInfo uriInfo,
+                               final @Context HttpHeaders headers,
+                               final InputStream inputStream);
 
-    ParserResult extractMagic(MultivaluedMap<String, String> parameters,
-                              String fileName,
-                              String filePath,
-                              String mimeType,
-                              InputStream inputStream);
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017 Emmanuel Keller
+ * Copyright 2015-2020 Emmanuel Keller
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,12 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.util.Arrays;
+import com.qwazr.utils.CollectionsUtils;
+import com.qwazr.utils.Equalizer;
+import java.util.Collection;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import javax.ws.rs.core.MediaType;
 
 @JsonInclude(Include.NON_EMPTY)
 @JsonAutoDetect(setterVisibility = JsonAutoDetect.Visibility.NONE,
@@ -30,50 +33,40 @@ import java.util.Objects;
         isGetterVisibility = JsonAutoDetect.Visibility.NONE,
         fieldVisibility = JsonAutoDetect.Visibility.PUBLIC_ONLY,
         creatorVisibility = JsonAutoDetect.Visibility.NONE)
-public class ParserDefinition {
+public class ParserDefinition extends Equalizer.Immutable<ParserDefinition> {
 
-    public final ParserField[] returnedFields;
+    public final Collection<ParserField> returnedFields;
 
-    public final String[] fileExtensions;
+    public final Collection<String> fileExtensions;
 
-    public final String[] mimeTypes;
+    public final Collection<String> mimeTypes;
 
     @JsonCreator
-    ParserDefinition(@JsonProperty("returned_fields") final ParserField[] returnedFields,
-                     @JsonProperty("file_extensions") final String[] fileExtensions,
-                     @JsonProperty("mime_types") final String[] mimeTypes) {
+    ParserDefinition(final @JsonProperty("returned_fields") Collection<ParserField> returnedFields,
+                     final @JsonProperty("file_extensions") Collection<String> fileExtensions,
+                     final @JsonProperty("mime_types") Collection<String> mimeTypes) {
+        super(ParserDefinition.class);
         this.returnedFields = returnedFields;
         this.fileExtensions = fileExtensions;
         this.mimeTypes = mimeTypes;
     }
 
-    ParserDefinition(final ParserInterface parser) {
-        final ParserField[] parameters = parser.getParameters();
-        final ParserField[] getParserFields = new ParserField[parameters == null ? 1 : 1 + parameters.length];
-        getParserFields[0] = ParserField.newString("path", "path to the local file");
-        if (parameters != null)
-            System.arraycopy(parameters, 0, getParserFields, 1, parameters.length);
-        returnedFields = parser.getFields();
-        fileExtensions = parser.getDefaultExtensions();
-        mimeTypes = parser.getDefaultMimeTypes();
+    ParserDefinition(final ParserFactory parserFactory) {
+        super(ParserDefinition.class);
+        returnedFields = parserFactory.getFields();
+        fileExtensions = parserFactory.getSupportedFileExtensions();
+        mimeTypes = parserFactory.getSupportedMimeTypes().stream().map(MediaType::toString).collect(Collectors.toUnmodifiableList());
     }
 
     @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 31 * hash + Arrays.hashCode(returnedFields);
-        hash = 31 * hash + Arrays.hashCode(fileExtensions);
-        return 31 * hash + Arrays.hashCode(mimeTypes);
+    protected int computeHashCode() {
+        return Objects.hash(returnedFields, fileExtensions, mimeTypes);
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (!(o instanceof ParserDefinition))
-            return false;
-        if (o == this)
-            return true;
-        final ParserDefinition p = (ParserDefinition) o;
-        return Objects.deepEquals(returnedFields, p.returnedFields) &&
-                Objects.deepEquals(fileExtensions, p.fileExtensions) && Objects.deepEquals(mimeTypes, p.mimeTypes);
+    protected boolean isEqual(final ParserDefinition p) {
+        return CollectionsUtils.equals(returnedFields, p.returnedFields)
+                && CollectionsUtils.equals(fileExtensions, p.fileExtensions)
+                && CollectionsUtils.equals(mimeTypes, p.mimeTypes);
     }
 }

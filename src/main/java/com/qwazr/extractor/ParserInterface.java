@@ -15,17 +15,11 @@
  */
 package com.qwazr.extractor;
 
-import org.apache.commons.io.FilenameUtils;
-
-import javax.ws.rs.InternalServerErrorException;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MultivaluedMap;
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.function.Supplier;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 
 public interface ParserInterface {
 
@@ -38,83 +32,27 @@ public interface ParserInterface {
     ParserField MIME_TYPE = ParserField.newString("mime_type", "The mime type of the file");
 
     /**
-     * @return the parser name
-     */
-    String getName();
-
-    /**
-     * @return the parameters of the parser
-     */
-    default ParserField[] getParameters() {
-        return null;
-    }
-
-    /**
-     * @return the fields returned by this parser
-     */
-    default ParserField[] getFields() {
-        return null;
-    }
-
-    /**
-     * @return the list of supported extensions
-     */
-    default String[] getDefaultExtensions() {
-        return null;
-    }
-
-    /**
-     * @return the list of supported mime types
-     */
-    default String[] getDefaultMimeTypes() {
-        return null;
-    }
-
-    /**
-     * Read a document and fill the resultBuilder.
+     * Extract data from a stream and return the ParserResult.
      *
-     * @param parameters    The optional parameters of the parser
-     * @param inputStream   a stream of the content to analyze
-     * @param extension     the optional extension of the file
-     * @param mimeType      the option mime type of the file
-     * @param resultBuilder the result builder to fill
+     * @param parameters The optional parameters of the parser
+     * @param mimeType   an optional mime type of the file
+     * @return ParserResult the parser result
+     * @throws IOException if any I/O error occurs
      */
-    void parseContent(final MultivaluedMap<String, String> parameters, final InputStream inputStream,
-                      final String extension, final String mimeType, final ParserResultBuilder resultBuilder);
+    ParserResult extract(final MultivaluedMap<String, String> parameters,
+                         final InputStream inputStream,
+                         final MediaType mimeType) throws IOException;
+
 
     /**
-     * Read a document and fill the resultBuilder.
+     * Read a file and extract the data.
      *
-     * @param parameters    The optional parameters of the parser
-     * @param filePath      the path of the file instance of the document to parse
-     * @param extension     an optional extension of the file
-     * @param mimeType      an optional mime type of the file
-     * @param resultBuilder the result builder to fill
+     * @param parameters The optional parameters of the parser
+     * @param filePath   the path of the file instance of the document to parse
+     * @return ParserResult the parser result
+     * @throws IOException if any I/O error occurs
      */
-    default void parseContent(final MultivaluedMap<String, String> parameters, final Path filePath, String extension,
-                              final String mimeType, final ParserResultBuilder resultBuilder) {
-        if (extension == null)
-            extension = FilenameUtils.getExtension(filePath.getFileName().toString());
-        try (final InputStream in = Files.newInputStream(filePath);
-             final BufferedInputStream bIn = new BufferedInputStream(in)) {
-            parseContent(parameters, bIn, extension, mimeType, resultBuilder);
-        }
-        catch (IOException e) {
-            throw convertIOException(() -> "Error with " + filePath.toAbsolutePath(), e);
-        }
-    }
-
-    default WebApplicationException convertException(final Supplier<String> message, final Exception cause) {
-        if (cause instanceof IOException)
-            return convertIOException(message, ((IOException) cause));
-        else if (cause instanceof WebApplicationException)
-            return (WebApplicationException) cause;
-        else
-            return new InternalServerErrorException(message.get(), cause);
-    }
-
-    default WebApplicationException convertIOException(final Supplier<String> message, final IOException cause) {
-        return new InternalServerErrorException(message.get(), cause);
-    }
+    ParserResult extract(final MultivaluedMap<String, String> parameters,
+                         final Path filePath) throws IOException;
 
 }
