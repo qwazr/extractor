@@ -15,6 +15,7 @@
 package com.qwazr.extractor;
 
 import com.qwazr.server.ServerException;
+import com.qwazr.utils.IOUtils;
 import com.qwazr.utils.LoggerUtils;
 import com.qwazr.utils.concurrent.FunctionEx;
 import java.io.IOException;
@@ -33,6 +34,7 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotAcceptableException;
 import javax.ws.rs.NotFoundException;
@@ -76,15 +78,35 @@ public class ExtractorManager implements ParserInterface, AutoCloseable {
         return this;
     }
 
-    public ExtractorManager registerExternalServices(final Path classesPath, final Path libPath) throws IOException {
-        final ParserLoader loader = new ParserLoader(classesPath, libPath);
-        parserLoaders.add(loader);
-        loader.apply(classLoader -> {
-            ServiceLoader.
-                    load(ParserFactory.class, classLoader)
-                    .forEach(factory -> register(factory, new ParserWithClassloader(loader, factory)));
-            return null;
-        });
+    public ExtractorManager registerShadedJar(final Path shadedJarPath) {
+        try {
+            final ParserLoader loader = new ParserLoader(shadedJarPath);
+            parserLoaders.add(loader);
+            loader.apply(classLoader -> {
+                ServiceLoader.
+                        load(ParserFactory.class, classLoader)
+                        .forEach(factory -> register(factory, new ParserWithClassloader(loader, factory)));
+                return null;
+            });
+            return this;
+        } catch (IOException e) {
+            throw new InternalServerErrorException(
+                    "An error occurs while loading the shaded jar: " + shadedJarPath.toAbsolutePath(), e);
+        }
+    }
+
+    public ExtractorManager registerShadedJars(final Path shadedJarsPath) {
+        try (final Stream<Path> files = Files.list(shadedJarsPath)) {
+            files.forEach(file -> {
+                if (Files.isDirectory(file))
+                    registerShadedJars(file);
+                else if (Files.isRegularFile(file))
+                    registerShadedJar(file);
+            });
+        } catch (IOException e) {
+            throw new InternalServerErrorException(
+                    "An error occurs while loading the shaded jars: " + shadedJarsPath.toAbsolutePath(), e);
+        }
         return this;
     }
 
@@ -112,11 +134,11 @@ public class ExtractorManager implements ParserInterface, AutoCloseable {
     }
 
     @Override
-    public synchronized void close() throws Exception {
+    public synchronized void close() {
         mimeTypesMap.clear();
         extensionsMap.clear();
         for (final ParserLoader parserLoader : parserLoaders)
-            parserLoader.close();
+            IOUtils.closeQuietly(parserLoader);
         parserLoaders.clear();
     }
 

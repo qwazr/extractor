@@ -22,31 +22,22 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
 import javax.ws.rs.InternalServerErrorException;
 
 class ParserLoader implements AutoCloseable {
 
     private final URLClassLoader classLoader;
 
-    ParserLoader(final Path classesPath, final Path libPath) throws IOException {
-
-        final List<URL> urls = new ArrayList<>();
-        if (classesPath != null)
-            urls.add(toUrl(classesPath));
-        if (libPath != null) {
-            try (final Stream<Path> files = Files.list(libPath)) {
-                files.filter(p -> Files.isRegularFile(p) && p.endsWith(".jar")).forEach(p -> urls.add(toUrl(p)));
-            }
-        }
-
-        // feed your URLs to a URLClassLoader!
+    ParserLoader(final Path shadedJarPath) throws IOException {
+        if (!Files.exists(shadedJarPath))
+            throw new IOException("The file does not exists: " + shadedJarPath.toAbsolutePath());
+        if (!Files.isRegularFile(shadedJarPath))
+            throw new IOException("The file is not a regular file: " + shadedJarPath.toAbsolutePath());
+        if (!shadedJarPath.getFileName().toString().endsWith("-shaded.jar"))
+            throw new IOException("The library file should ends with shaded.jar: " + shadedJarPath.toAbsolutePath());
         classLoader = new URLClassLoader(
-                urls.toArray(new URL[0]),
-                ClassLoader.getSystemClassLoader().getParent());
-
+                new URL[]{toUrl(shadedJarPath)},
+                Thread.currentThread().getContextClassLoader());
     }
 
     <T> T apply(final FunctionEx<ClassLoader, T, IOException> classLoaderFunction) throws IOException {

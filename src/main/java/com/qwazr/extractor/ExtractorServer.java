@@ -51,6 +51,7 @@ public class ExtractorServer implements BaseServer {
         webServices.singletons(clusterManager.getService());
 
         final ExtractorManager extractorManager = new ExtractorManager().registerServices();
+        builder.shutdownListener(server->extractorManager.close());
         webServices.singletons(extractorManager.getService());
 
         builder.getWebServiceContext().jaxrs(webServices);
