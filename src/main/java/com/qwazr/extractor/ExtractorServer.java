@@ -51,7 +51,7 @@ public class ExtractorServer implements BaseServer {
         webServices.singletons(clusterManager.getService());
 
         final ExtractorManager extractorManager = new ExtractorManager().registerServices();
-        builder.shutdownListener(server->extractorManager.close());
+        builder.shutdownListener(server -> extractorManager.close());
         webServices.singletons(extractorManager.getService());
 
         builder.getWebServiceContext().jaxrs(webServices);
@@ -78,7 +78,12 @@ public class ExtractorServer implements BaseServer {
 
     public synchronized static void main(final String... args) throws Exception {
         shutdown();
-        INSTANCE = new ExtractorServer(new ServerConfiguration(args));
+        INSTANCE = new ExtractorServer(
+                ServerConfiguration.of()
+                        .applyEnvironmentVariables()
+                        .applySystemProperties()
+                        .applyCommandLineArgs(args)
+                        .build());
         INSTANCE.start();
     }
 

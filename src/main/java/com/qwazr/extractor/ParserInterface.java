@@ -34,8 +34,9 @@ public interface ParserInterface {
     /**
      * Extract data from a stream and return the ParserResult.
      *
-     * @param parameters The optional parameters of the parser
-     * @param mimeType   an optional mime type of the file
+     * @param parameters  The optional parameters of the parser
+     * @param inputStream the stream of the file
+     * @param mimeType    an optional mime type of the file
      * @return ParserResult the parser result
      * @throws IOException if any I/O error occurs
      */

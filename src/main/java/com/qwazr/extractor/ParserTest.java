@@ -21,23 +21,16 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Logger;
-import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import org.apache.commons.io.FilenameUtils;
@@ -142,21 +135,22 @@ public class ParserTest {
      * Test inputstream and file parsing
      *
      * @param factoryClassName the class to test
+     * @param fileName         the filename of the file to extract
      * @param expectedMimeType the expected Mime type to find
      * @param expectedField    the expected field to find
      * @param expectedText     the expected text to find
-     * @param fileName         the filename of the file to extract
      * @param keyValueParams   the parameters to apply
      * @return the ParserResult
-     * @throws URISyntaxException if any URL syntax error occurs
-     * @throws IOException        if any I/O error occurs
+     * @throws URISyntaxException           if any URL syntax error occurs
+     * @throws IOException                  if any I/O error occurs
+     * @throws ReflectiveOperationException if any reflection error occurs
      */
     protected ParserResult doTest(Class<? extends ParserFactory> factoryClassName,
                                   String fileName,
                                   MediaType expectedMimeType,
                                   String expectedField,
                                   String expectedText,
-                                  String... keyValueParams) throws URISyntaxException, IOException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+                                  String... keyValueParams) throws URISyntaxException, IOException, ReflectiveOperationException {
         LOGGER.info("Testing " + factoryClassName);
 
         UriBuilder uriBuilder = new JerseyUriBuilder().uri("http://localhost:9090");
